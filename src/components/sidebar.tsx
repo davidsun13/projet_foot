@@ -11,21 +11,21 @@ function Sidebar() {
   className="flex items-center gap-2 px-2 py-1 rounded hover:bg-gray-700"
 >
   <img src={player} alt="Logo" className="w-15 h-15" />
-  <span className='text-white'>Entraînements</span>
+  <span className='text-white font-[Arsenal]'>Entraînements</span>
         </a>
         <a 
   href="#" 
   className="flex items-center gap-2 px-2 py-1 rounded hover:bg-gray-700"
 >
   <img src={ball} alt="Logo" className="w-15 h-15" />
-  <span className='text-white'>Matchs</span>
+  <span className='text-white font-[Arsenal]'>Matchs</span>
         </a> 
         <a 
   href="#" 
   className="flex items-center gap-2 px-2 py-1 rounded hover:bg-gray-700"
 >
   <img src={money} alt="Logo" className="w-15 h-15" />
-  <span className='text-white'>Cotisations</span>
+  <span className='text-white font-[Arsenal]'>Cotisations</span>
         </a> 
       </nav>
     </aside>
