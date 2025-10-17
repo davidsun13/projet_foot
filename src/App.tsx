@@ -5,6 +5,7 @@ import Inscription from './components/inscription'
 import './App.css'
 import DashboardContent from './components/dashboardcontent'
 import Sidebar from './components/sidebar'
+import CreationEntrainement from './components/creationentrainement'
 
 function App() {
   return (
@@ -15,6 +16,9 @@ function App() {
           <Sidebar />
           <div className="flex-1 flex items-center justify-center">
             <DashboardContent />
+            {/* <Connexion /> */}
+            {/* <Inscription /> */}
+            {/* <CreationEntrainement /> */}
           </div>
         </main>
         <Footer />
