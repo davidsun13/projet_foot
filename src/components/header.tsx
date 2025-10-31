@@ -1,11 +1,14 @@
 import canon from '../assets/télécharger.jpg';
 import user from '../assets/profil.png' ;
+import {Link} from 'react-router-dom';
 
 function Header() {
   return (
     <header className="relative w-full bg-red-600 text-white sticky top-0 z-50 h-20 md:h-24">
       <div className="absolute left-4 top-1/2 transform -translate-y-1/2">
-        <img src={canon} alt="Logo" className="w-16 h-16 md:w-20 md:h-20 object-contain" />
+        <Link to="/">
+          <img src={canon} alt="Logo" className="w-16 h-16 md:w-20 md:h-20 object-contain" />
+        </Link>
       </div>
 
       <div className="absolute right-4 top-1/2 transform -translate-y-1/2 flex items-center space-x-3">
