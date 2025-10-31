@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-
+import Button from './button';
 function Inscription() {
   const [form, setForm] = useState({
     nom: '',
@@ -69,9 +69,10 @@ function Inscription() {
             </div>
           </div>
 
-          <button type="submit" className="w-full bg-red-600 text-black py-2 px-4 rounded-md hover:bg-red-700 transition-colors">
+          <Button size="sm"
+              variant="secondary" type="submit" className="w-full bg-red-600 text-black py-2 px-4 rounded-md hover:bg-red-700 transition-colors">
             S'inscrire
-          </button>
+          </Button>
         </form>
 
         <p className="text-sm text-gray-500 mt-4 text-center">

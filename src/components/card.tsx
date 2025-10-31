@@ -1,4 +1,5 @@
 import React from 'react';
+import Button from './button';
 
 export type CardField = { label: string; value: React.ReactNode };
 
@@ -7,7 +8,7 @@ export type CardProps<T = any> = {
   title?: string;
   subtitle?: string;
   image?: string;
-  icon?: string;             
+  icon?: string;
   fields?: CardField[];
   tags?: string[];
   data?: T;
@@ -79,23 +80,23 @@ export default function Card<T = any>({
       <footer className="flex items-center justify-between">
         <div className="flex items-center space-x-2">
           {onEdit && (
-            <button
-              type="button"
+            <Button
+              size="sm"
+              variant="secondary"
               onClick={() => onEdit(data)}
-              className="text-sm px-3 py-1 rounded bg-yellow-100 text-yellow-800 hover:bg-yellow-200"
             >
               Éditer
-            </button>
+            </Button>
           )}
 
           {onDelete && (
-            <button
-              type="button"
+            <Button
+              size="sm"
+              variant="danger"
               onClick={() => onDelete(id)}
-              className="text-sm px-3 py-1 rounded bg-red-100 text-red-800 hover:bg-red-200"
             >
               Supprimer
-            </button>
+            </Button>
           )}
         </div>
 

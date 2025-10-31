@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-
+import Button from './button';
 type FormState = {
   date: string;
   time: string;
@@ -98,12 +98,14 @@ export default function CreationEntrainement() {
         </div>
 
         <div className="flex justify-end">
-          <button
+          <Button
+            size="sm"
+            variant="ghost"
             type="submit"
             className="bg-red-600 text-black px-4 py-2 rounded-md hover:bg-red-700 transition-colors"
           >
             Créer l'entraînement
-          </button>
+          </Button>
         </div>
       </form>
     </div>
