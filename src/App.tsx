@@ -8,6 +8,7 @@ import CreationEntrainement from './components/creationentrainement'
 import GestionCotisations from './components/GestionCotisations'
 import ListeEntrainements from './components/ListeEntrainements'
 import ListeMatchs from './components/ListeMatchs'
+import CreationMatch from './components/CreationMatch'
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import './App.css'
 
@@ -26,6 +27,7 @@ function App() {
               <Route path="/connexion" element={<Connexion />} />
               <Route path="/inscription" element={<Inscription />} />
               <Route path="/entrainements" element={<ListeEntrainements />} />
+              <Route path="/matchs/creer" element={<CreationMatch />} />
               <Route path="/matchs" element={<ListeMatchs />} />
               <Route path="/entrainements/creer" element={<CreationEntrainement />} />
               <Route path="/cotisations" element={<GestionCotisations />} />
