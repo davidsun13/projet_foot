@@ -1,0 +1,11 @@
+[core]
+	repositoryformatversion = 0
+	filemode = false
+	bare = true
+	symlinks = false
+	ignorecase = true
+[remote "origin"]
+	url = https://github.com/davidsun13/projet_foot.git
+	fetch = +refs/*:refs/*
+	mirror = true
+	pushurl = https://git.ecole-89.com/david.sun/projet_cda.git

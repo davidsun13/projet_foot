@@ -1,0 +1,19 @@
+services:
+  db:
+    image: postgres:16
+    container_name: projet_club_db
+    restart: always
+    shm_size: 128mb
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./Back/initdb.d/:/docker-entrypoint-initdb.d
+      - pg_data:/var/lib/postgresql/data
+    environment:
+      POSTGRES_USER: toto
+      POSTGRES_PASSWORD: example
+      POSTGRES_DB: projet_club_db
+
+volumes:
+  pg_data:
+    name: "projet_club_db_pg_data"

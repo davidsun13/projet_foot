@@ -37,17 +37,138 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 var fastify_1 = require("fastify");
+var db_cjs_1 = require("./db.cjs");
+var helmet_1 = require("@fastify/helmet");
+var cookie_1 = require("@fastify/cookie");
+var jwt_1 = require("@fastify/jwt");
 function start_web_server() {
     var _this = this;
     var web_server = (0, fastify_1.default)({ logger: true });
-    web_server.get("/", function () { return __awaiter(_this, void 0, void 0, function () {
+    var repo = new db_cjs_1.Repository();
+    var JWT_SECRET = process.env.JWT_SECRET || "dev_jwt_secret_change_me";
+    var COOKIE_SECRET = process.env.COOKIE_SECRET || "dev_cookie_secret_change_me";
+    web_server.register(helmet_1.default, {
+        contentSecurityPolicy: {
+            directives: {
+                defaultSrc: ["'self'"],
+                scriptSrc: ["'self'"],
+                objectSrc: ["'none'"],
+            },
+        },
+    });
+    web_server.register(cookie_1.default, {
+        secret: COOKIE_SECRET,
+        hook: "onRequest",
+    });
+    web_server.register(jwt_1.default, {
+        secret: JWT_SECRET,
+        cookie: {
+            cookieName: "refresh_token",
+            signed: false,
+        },
+        sign: { expiresIn: "15m" },
+    });
+    web_server.post("/register", function (request, reply) { return __awaiter(_this, void 0, void 0, function () {
+        var _a, surname, name, mail, phone, password, user, accessToken, refreshToken, error_1;
+        return __generator(this, function (_b) {
+            switch (_b.label) {
+                case 0:
+                    _a = request.body, surname = _a.surname, name = _a.name, mail = _a.mail, phone = _a.phone, password = _a.password;
+                    _b.label = 1;
+                case 1:
+                    _b.trys.push([1, 3, , 4]);
+                    return [4 /*yield*/, repo.registerPlayer({ surname: surname, name: name, mail: mail, phone: phone, password: password })];
+                case 2:
+                    user = _b.sent();
+                    accessToken = web_server.jwt.sign({ id: user.id_player }, { expiresIn: "15m" });
+                    refreshToken = web_server.jwt.sign({ id: user.id_player }, { expiresIn: "7d" });
+                    reply.setCookie("refresh_token", refreshToken, {
+                        httpOnly: true,
+                        secure: true,
+                        sameSite: "strict",
+                        path: "/",
+                        maxAge: 7 * 24 * 60 * 60,
+                    });
+                    reply.send({ accessToken: accessToken, user: user });
+                    return [3 /*break*/, 4];
+                case 3:
+                    error_1 = _b.sent();
+                    reply.status(400).send({ error: error_1.message });
+                    return [3 /*break*/, 4];
+                case 4: return [2 /*return*/];
+            }
+        });
+    }); });
+    web_server.post("/login", function (request, reply) { return __awaiter(_this, void 0, void 0, function () {
+        var _a, mail, password, user, accessToken, refreshToken, error_2;
+        return __generator(this, function (_b) {
+            switch (_b.label) {
+                case 0:
+                    _a = request.body, mail = _a.mail, password = _a.password;
+                    _b.label = 1;
+                case 1:
+                    _b.trys.push([1, 3, , 4]);
+                    return [4 /*yield*/, repo.loginPlayer(mail, password)];
+                case 2:
+                    user = _b.sent();
+                    accessToken = web_server.jwt.sign({ id: user.id_player }, { expiresIn: "15m" });
+                    refreshToken = web_server.jwt.sign({ id: user.id_player }, { expiresIn: "7d" });
+                    reply.setCookie("refresh_token", refreshToken, {
+                        httpOnly: true,
+                        secure: true,
+                        sameSite: "strict",
+                        path: "/",
+                    });
+                    reply.send({ accessToken: accessToken, user: user });
+                    return [3 /*break*/, 4];
+                case 3:
+                    error_2 = _b.sent();
+                    reply.status(401).send({ error: error_2.message });
+                    return [3 /*break*/, 4];
+                case 4: return [2 /*return*/];
+            }
+        });
+    }); });
+    web_server.post("/refresh", function (request, reply) { return __awaiter(_this, void 0, void 0, function () {
+        var refresh, payload, newAccess;
         return __generator(this, function (_a) {
-            return [2 /*return*/, { message: "hello world" }];
+            refresh = request.cookies.refresh_token;
+            if (!refresh)
+                return [2 /*return*/, reply.status(401).send({ error: "No refresh token" })];
+            try {
+                payload = web_server.jwt.verify(refresh);
+                newAccess = web_server.jwt.sign({ id: payload.id }, { expiresIn: "15m" });
+                reply.send({ accessToken: newAccess });
+            }
+            catch (_b) {
+                reply.status(401).send({ error: "Invalid refresh token" });
+            }
+            return [2 /*return*/];
+        });
+    }); });
+    web_server.get("/protected", function (request, reply) { return __awaiter(_this, void 0, void 0, function () {
+        var _a;
+        return __generator(this, function (_b) {
+            switch (_b.label) {
+                case 0:
+                    _b.trys.push([0, 2, , 3]);
+                    return [4 /*yield*/, request.jwtVerify()];
+                case 1:
+                    _b.sent(); // vérifie le token access
+                    reply.send({ message: "Route protégée OK", user: request.user });
+                    return [3 /*break*/, 3];
+                case 2:
+                    _a = _b.sent();
+                    reply.status(401).send({ error: "Token invalide" });
+                    return [3 /*break*/, 3];
+                case 3: return [2 /*return*/];
+            }
         });
     }); });
     web_server.listen({ port: 1234, host: "0.0.0.0" }, function (err, address) {
         if (err) {
             console.error(err);
+            process.exit(1);
         }
         else {
             console.log("listening on ".concat(address));
