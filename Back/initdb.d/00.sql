@@ -1,29 +1,29 @@
 CREATE TABLE coach (
     id_coach SERIAL PRIMARY KEY,
-    surname VARCHAR(100),
-    name VARCHAR(100),
-    mail VARCHAR(150) UNIQUE NOT NULL,
-    password VARCHAR(255) NOT NULL
+    surname TEXT,
+    name TEXT,
+    mail TEXT UNIQUE NOT NULL,
+    password TEXT NOT NULL
 );
 CREATE TYPE player_status AS ENUM ('Actif', 'Blessé', 'Suspendu', 'Absent');
 CREATE TABLE player (
     id_player SERIAL PRIMARY KEY,
-    surname VARCHAR(100),
-    name VARCHAR(100),
-    position VARCHAR(50),
+    surname TEXT,
+    name TEXT,
+    position TEXT,
     number INT,
-    mail VARCHAR(150) UNIQUE NOT NULL,
-    phone VARCHAR(20),
-    password VARCHAR(255) NOT NULL,
+    mail TEXT UNIQUE NOT NULL,
+    phone TEXT,
+    password TEXT NOT NULL,
     status player_status DEFAULT 'Actif'
 );
 CREATE TABLE training (
     id_training SERIAL PRIMARY KEY,
     date DATE NOT NULL,
     hour TIME NOT NULL,
-    type VARCHAR(50),
-    location VARCHAR(150),
-    team VARCHAR(50),
+    type TEXT,
+    location TEXT,
+    team TEXT,
     id_coach INT,
     FOREIGN KEY (id_coach) REFERENCES coach(id_coach)
 );
@@ -33,10 +33,10 @@ CREATE TABLE match (
     id_match SERIAL PRIMARY KEY,
     date DATE NOT NULL,
     hour TIME NOT NULL,
-    opponent VARCHAR(150) NOT NULL,
+    opponent TEXT NOT NULL,
     location match_location NOT NULL,
     type match_type NOT NULL,
-    team VARCHAR(50),
+    team TEXT,
     score_home INT DEFAULT NULL,
     score_outside INT DEFAULT NULL,
     id_coach INT,
@@ -90,3 +90,11 @@ CREATE TABLE statistics (
     FOREIGN KEY (id_match) REFERENCES match (id_match)
 );
 
+CREATE TABLE refresh_tokens (
+  id SERIAL PRIMARY KEY,
+  user_id INT NOT NULL,
+  token TEXT NOT NULL,
+  expires_at TIMESTAMP NOT NULL,
+  revoked BOOLEAN DEFAULT FALSE,
+  created_at TIMESTAMP DEFAULT NOW()
+);
