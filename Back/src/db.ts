@@ -83,29 +83,45 @@ export class Repository {
     `;
     return user[0] || null;
   }
-   async saveRefreshToken({ userId, token, expiresAt }: { userId: number; token: string; expiresAt: Date }) {
-    await this.sql`
-      INSERT INTO refresh_tokens (user_id, token, expires_at)
-      VALUES (${userId}, ${token}, ${expiresAt})
-    `;
-  }
+   async saveRefreshToken({
+  userId,
+  token,
+  expiresAt,
+}: {
+  userId: number;
+  token: string;
+  expiresAt: Date;
+}) {
+  return await this.sql`
+    INSERT INTO refresh_tokens (user_id, token, expires_at)
+    VALUES (${userId}, ${token}, ${expiresAt})
+    RETURNING id, user_id, token, expires_at
+  `;
+}
 
   async findRefreshToken(token: string) {
-    const res = await this.sql`
-      SELECT * FROM refresh_tokens
-      WHERE token = ${token}
-      AND revoked = false
-    `;
-    return res[0] || null;
-  }
+  const result = await this.sql`
+    SELECT * FROM refresh_tokens
+    WHERE token = ${token}
+    LIMIT 1
+  `;
+  return result[0] || null;
+}
 
   async revokeRefreshToken(token: string) {
-    await this.sql`
-      UPDATE refresh_tokens
-      SET revoked = true
-      WHERE token = ${token}
-    `;
-  }
+  return await this.sql`
+    UPDATE refresh_tokens
+    SET revoked = TRUE
+    WHERE token = ${token}
+  `;
+}
+async revokeAllUserTokens(userId: number) {
+  return await this.sql`
+    UPDATE refresh_tokens
+    SET revoked = TRUE
+    WHERE user_id = ${userId}
+  `;
+}
   async createTrainingSession({
   date,
   hour,

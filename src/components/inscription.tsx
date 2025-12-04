@@ -1,12 +1,16 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import Button from './button';
+
 function Inscription() {
+  const navigate = useNavigate();
   const [form, setForm] = useState({
     nom: '',
     prenom: '',
     email: '',
     password: '',
     confirmPassword: '',
+    phone: '',
   });
   const [error, setError] = useState<string | null>(null);
 
@@ -15,15 +19,52 @@ function Inscription() {
     setError(null);
   }
 
-  function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (!form.nom || !form.prenom || !form.email || !form.password || !form.confirmPassword) {
+    setError(null);
+
+    if (!form.nom || !form.prenom || !form.email || !form.password || !form.confirmPassword || !form.phone) {
       setError('Tous les champs sont requis.');
       return;
     }
+
     if (form.password !== form.confirmPassword) {
       setError('Les mots de passe ne correspondent pas.');
       return;
+    }
+
+    try {
+      const res = await fetch("http://localhost:1234/register", {
+        method: "POST",
+        credentials: "include",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          surname: form.nom,
+          name: form.prenom,
+          mail: form.email,
+          phone: form.phone,
+          password: form.password,
+        }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        setError(data.error || data.errors?.join(", ") || "Erreur inconnue");
+        return;
+      }
+
+      // stocker access token (si renvoyé) et rediriger vers la page connexion
+      if (data.accessToken) {
+        localStorage.setItem("access_token", data.accessToken);
+      }
+
+      // navigation vers la page de connexion après inscription réussie
+      navigate('/connexion');
+    } catch (err) {
+      setError("Erreur réseau : " + (err as Error).message);
     }
   }
 
@@ -54,6 +95,11 @@ function Inscription() {
             <input id="email" type="email" value={form.email} onChange={handleChange} placeholder="exemple@email.com"
               className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-red-500 focus:border-red-500" />
           </div>
+          <div>
+            <label htmlFor="phone" className="block text-sm font-[Arsenal] text-gray-700">Téléphone</label>
+            <input id="phone" type="tel" value={form.phone} onChange={handleChange} placeholder="0123456789"
+              className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-red-500 focus:border-red-500" />
+          </div>
 
           <div className="grid grid-cols-2 gap-4">
             <div>
@@ -76,7 +122,7 @@ function Inscription() {
         </form>
 
         <p className="text-sm text-gray-500 mt-4 text-center">
-          Déjà inscrit? <a href="#" className="text-red-600 hover:underline">Se connecter</a>
+          Déjà inscrit? <a href="/connexion" className="text-red-600 hover:underline">Se connecter</a>
         </p>
       </div>
     </div>

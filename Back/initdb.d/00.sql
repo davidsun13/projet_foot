@@ -91,10 +91,11 @@ CREATE TABLE statistics (
 );
 
 CREATE TABLE refresh_tokens (
-  id SERIAL PRIMARY KEY,
-  user_id INT NOT NULL,
-  token TEXT NOT NULL,
-  expires_at TIMESTAMP NOT NULL,
-  revoked BOOLEAN DEFAULT FALSE,
-  created_at TIMESTAMP DEFAULT NOW()
+    id SERIAL PRIMARY KEY,
+    user_id INTEGER NOT NULL REFERENCES player(id_player) ON DELETE CASCADE,
+    token TEXT NOT NULL UNIQUE,
+    revoked BOOLEAN NOT NULL DEFAULT FALSE,
+    expires_at TIMESTAMP NOT NULL,
+    created_at TIMESTAMP DEFAULT NOW()
 );
+

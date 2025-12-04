@@ -39,12 +39,15 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.start_web_server = start_web_server;
 var fastify_1 = require("fastify");
 var jwt_1 = require("@fastify/jwt");
-var helmet_1 = require("@fastify/helmet");
 var cookie_1 = require("@fastify/cookie");
 var connexion_cjs_1 = require("./models/connexion.cjs");
 var training_cjs_1 = require("./models/training.cjs");
 var zod_1 = require("zod");
 var db_cjs_1 = require("./db.cjs");
+var crypto = require("node:crypto");
+function generateRefreshToken() {
+    return crypto.randomBytes(48).toString("hex");
+}
 function start_web_server() {
     return __awaiter(this, void 0, void 0, function () {
         function formatZodError(err) {
@@ -67,21 +70,11 @@ function start_web_server() {
                         origin: "http://localhost:5173",
                         credentials: true
                     });
-                    return [4 /*yield*/, web_server.register(helmet_1.default, {
-                            contentSecurityPolicy: {
-                                directives: {
-                                    defaultSrc: ["'self'"],
-                                    scriptSrc: ["'self'"]
-                                }
-                            }
-                        })];
-                case 1:
-                    _a.sent();
                     return [4 /*yield*/, web_server.register(cookie_1.default, {
                             secret: COOKIE_SECRET,
                             hook: "onRequest",
                         })];
-                case 2:
+                case 1:
                     _a.sent();
                     return [4 /*yield*/, web_server.register(jwt_1.default, {
                             secret: JWT_SECRET,
@@ -91,7 +84,7 @@ function start_web_server() {
                             },
                             sign: { expiresIn: "15m" },
                         })];
-                case 3:
+                case 2:
                     _a.sent();
                     web_server.post("/register", function (request, reply) { return __awaiter(_this, void 0, void 0, function () {
                         var parsed, user, accessToken, refreshToken, err_1;
@@ -111,11 +104,12 @@ function start_web_server() {
                                 case 1:
                                     user = _b.sent();
                                     accessToken = web_server.jwt.sign({ id: user.id_player }, { expiresIn: "15m" });
-                                    refreshToken = web_server.jwt.sign({ id: user.id_player }, { expiresIn: "7d" });
+                                    refreshToken = generateRefreshToken();
                                     return [4 /*yield*/, repo.saveRefreshToken({
                                             userId: user.id_player,
                                             token: refreshToken,
                                             expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+                                            revoked: false,
                                         })];
                                 case 2:
                                     _b.sent();
@@ -129,9 +123,6 @@ function start_web_server() {
                                     return [2 /*return*/, reply.send({ accessToken: accessToken, user: user })];
                                 case 3:
                                     err_1 = _b.sent();
-                                    if (err_1 instanceof zod_1.ZodError) {
-                                        return [2 /*return*/, reply.status(400).send({ errors: formatZodError(err_1) })];
-                                    }
                                     return [2 /*return*/, reply.status(400).send({ error: err_1.message })];
                                 case 4: return [2 /*return*/];
                             }
@@ -149,7 +140,7 @@ function start_web_server() {
                                 case 1:
                                     user = _a.sent();
                                     accessToken = web_server.jwt.sign({ id: user.id_player }, { expiresIn: "15m" });
-                                    refreshToken = web_server.jwt.sign({ id: user.id_player }, { expiresIn: "7d" });
+                                    refreshToken = generateRefreshToken();
                                     return [4 /*yield*/, repo.saveRefreshToken({
                                             userId: user.id_player,
                                             token: refreshToken,
@@ -175,8 +166,25 @@ function start_web_server() {
                             }
                         });
                     }); });
+                    web_server.get("/protected", function (request, reply) { return __awaiter(_this, void 0, void 0, function () {
+                        var _a;
+                        return __generator(this, function (_b) {
+                            switch (_b.label) {
+                                case 0:
+                                    _b.trys.push([0, 2, , 3]);
+                                    return [4 /*yield*/, request.jwtVerify()];
+                                case 1:
+                                    _b.sent();
+                                    return [2 /*return*/, reply.send({ message: "Route protégée OK", user: request.user })];
+                                case 2:
+                                    _a = _b.sent();
+                                    return [2 /*return*/, reply.status(401).send({ error: "Token invalide" })];
+                                case 3: return [2 /*return*/];
+                            }
+                        });
+                    }); });
                     web_server.post("/refresh", function (request, reply) { return __awaiter(_this, void 0, void 0, function () {
-                        var oldRefresh, payload, stored, newRefresh, newAccess, err_3, _1;
+                        var oldRefresh, stored, newRefresh, newAccess;
                         var _a;
                         return __generator(this, function (_b) {
                             switch (_b.label) {
@@ -184,54 +192,36 @@ function start_web_server() {
                                     oldRefresh = (_a = request.cookies) === null || _a === void 0 ? void 0 : _a.refresh_token;
                                     if (!oldRefresh)
                                         return [2 /*return*/, reply.status(401).send({ error: "No refresh token" })];
-                                    _b.label = 1;
-                                case 1:
-                                    _b.trys.push([1, 7, , 12]);
-                                    payload = web_server.jwt.verify(oldRefresh);
                                     return [4 /*yield*/, repo.findRefreshToken(oldRefresh)];
-                                case 2:
+                                case 1:
                                     stored = _b.sent();
-                                    if (!stored)
-                                        return [2 /*return*/, reply.status(401).send({ error: "Refresh token not found or revoked" })];
-                                    if (!(new Date(stored.expires_at) < new Date())) return [3 /*break*/, 4];
+                                    if (!stored || stored.revoked)
+                                        return [2 /*return*/, reply.status(401).send({ error: "Refresh token invalid" })];
+                                    if (!(new Date(stored.expires_at) < new Date())) return [3 /*break*/, 3];
                                     return [4 /*yield*/, repo.revokeRefreshToken(oldRefresh)];
-                                case 3:
+                                case 2:
                                     _b.sent();
-                                    return [2 /*return*/, reply.status(401).send({ error: "Refresh token expired" })];
-                                case 4: return [4 /*yield*/, repo.revokeRefreshToken(oldRefresh)];
-                                case 5:
+                                    return [2 /*return*/, reply.status(401).send({ error: "Expired refresh token" })];
+                                case 3: return [4 /*yield*/, repo.revokeRefreshToken(oldRefresh)];
+                                case 4:
                                     _b.sent();
-                                    newRefresh = web_server.jwt.sign({ id: payload.id }, { expiresIn: "7d" });
-                                    newAccess = web_server.jwt.sign({ id: payload.id }, { expiresIn: "15m" });
+                                    newRefresh = generateRefreshToken();
+                                    newAccess = web_server.jwt.sign({ id: stored.user_id }, { expiresIn: "15m" });
                                     return [4 /*yield*/, repo.saveRefreshToken({
-                                            userId: payload.id,
                                             token: newRefresh,
+                                            userId: stored.user_id,
+                                            revoked: false,
                                             expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
                                         })];
-                                case 6:
+                                case 5:
                                     _b.sent();
                                     reply.setCookie("refresh_token", newRefresh, {
                                         httpOnly: true,
                                         secure: isProduction,
                                         sameSite: "strict",
                                         path: "/",
-                                        maxAge: 7 * 24 * 60 * 60,
                                     });
                                     return [2 /*return*/, reply.send({ accessToken: newAccess })];
-                                case 7:
-                                    err_3 = _b.sent();
-                                    _b.label = 8;
-                                case 8:
-                                    _b.trys.push([8, 10, , 11]);
-                                    return [4 /*yield*/, repo.revokeRefreshToken(oldRefresh)];
-                                case 9:
-                                    _b.sent();
-                                    return [3 /*break*/, 11];
-                                case 10:
-                                    _1 = _b.sent();
-                                    return [3 /*break*/, 11];
-                                case 11: return [2 /*return*/, reply.status(401).send({ error: "Invalid refresh token" })];
-                                case 12: return [2 /*return*/];
                             }
                         });
                     }); });
@@ -252,7 +242,7 @@ function start_web_server() {
                             }
                         });
                     }); });
-                    web_server.get("/protected", function (request, reply) { return __awaiter(_this, void 0, void 0, function () {
+                    web_server.get("/secret-data", function (request, reply) { return __awaiter(_this, void 0, void 0, function () {
                         var _a;
                         return __generator(this, function (_b) {
                             switch (_b.label) {
@@ -261,16 +251,19 @@ function start_web_server() {
                                     return [4 /*yield*/, request.jwtVerify()];
                                 case 1:
                                     _b.sent();
-                                    return [2 /*return*/, reply.send({ message: "Route protégée OK", user: request.user })];
+                                    return [2 /*return*/, reply.send({
+                                            message: "Accès autorisé",
+                                            data: "Voici la fausse donnée secrète"
+                                        })];
                                 case 2:
                                     _a = _b.sent();
-                                    return [2 /*return*/, reply.status(401).send({ error: "Token invalide" })];
+                                    return [2 /*return*/, reply.status(401).send({ error: "Token invalide ou expiré" })];
                                 case 3: return [2 /*return*/];
                             }
                         });
                     }); });
                     web_server.post("/createtraining", function (request, reply) { return __awaiter(_this, void 0, void 0, function () {
-                        var parsed, training, err_4;
+                        var parsed, training, err_3;
                         return __generator(this, function (_a) {
                             switch (_a.label) {
                                 case 0:
@@ -281,17 +274,17 @@ function start_web_server() {
                                     training = _a.sent();
                                     return [2 /*return*/, reply.send(training)];
                                 case 2:
-                                    err_4 = _a.sent();
-                                    if (err_4 instanceof zod_1.ZodError) {
-                                        return [2 /*return*/, reply.status(400).send({ errors: formatZodError(err_4) })];
+                                    err_3 = _a.sent();
+                                    if (err_3 instanceof zod_1.ZodError) {
+                                        return [2 /*return*/, reply.status(400).send({ errors: formatZodError(err_3) })];
                                     }
-                                    return [2 /*return*/, reply.status(500).send({ error: err_4.message })];
+                                    return [2 /*return*/, reply.status(500).send({ error: err_3.message })];
                                 case 3: return [2 /*return*/];
                             }
                         });
                     }); });
                     web_server.put("/modifytraining", function (request, reply) { return __awaiter(_this, void 0, void 0, function () {
-                        var body, training, err_5;
+                        var body, training, err_4;
                         return __generator(this, function (_a) {
                             switch (_a.label) {
                                 case 0:
@@ -302,14 +295,14 @@ function start_web_server() {
                                     training = _a.sent();
                                     return [2 /*return*/, reply.send(training)];
                                 case 2:
-                                    err_5 = _a.sent();
-                                    return [2 /*return*/, reply.status(500).send({ error: err_5.message })];
+                                    err_4 = _a.sent();
+                                    return [2 /*return*/, reply.status(500).send({ error: err_4.message })];
                                 case 3: return [2 /*return*/];
                             }
                         });
                     }); });
                     web_server.delete("/deletetraining/:id_training", function (request, reply) { return __awaiter(_this, void 0, void 0, function () {
-                        var id_training, training, err_6;
+                        var id_training, training, err_5;
                         return __generator(this, function (_a) {
                             switch (_a.label) {
                                 case 0:
@@ -320,14 +313,14 @@ function start_web_server() {
                                     training = _a.sent();
                                     return [2 /*return*/, reply.send(training)];
                                 case 2:
-                                    err_6 = _a.sent();
-                                    return [2 /*return*/, reply.status(500).send({ error: err_6.message })];
+                                    err_5 = _a.sent();
+                                    return [2 /*return*/, reply.status(500).send({ error: err_5.message })];
                                 case 3: return [2 /*return*/];
                             }
                         });
                     }); });
                     web_server.get("/trainings", function (request, reply) { return __awaiter(_this, void 0, void 0, function () {
-                        var trainings, err_7;
+                        var trainings, err_6;
                         return __generator(this, function (_a) {
                             switch (_a.label) {
                                 case 0:
@@ -337,14 +330,14 @@ function start_web_server() {
                                     trainings = _a.sent();
                                     return [2 /*return*/, reply.send(trainings)];
                                 case 2:
-                                    err_7 = _a.sent();
-                                    return [2 /*return*/, reply.status(500).send({ error: err_7.message })];
+                                    err_6 = _a.sent();
+                                    return [2 /*return*/, reply.status(500).send({ error: err_6.message })];
                                 case 3: return [2 /*return*/];
                             }
                         });
                     }); });
                     web_server.post("/creatematch", function (request, reply) { return __awaiter(_this, void 0, void 0, function () {
-                        var body, match, err_8;
+                        var body, match, err_7;
                         return __generator(this, function (_a) {
                             switch (_a.label) {
                                 case 0:
@@ -355,14 +348,14 @@ function start_web_server() {
                                     match = _a.sent();
                                     return [2 /*return*/, reply.send(match)];
                                 case 2:
-                                    err_8 = _a.sent();
-                                    return [2 /*return*/, reply.status(500).send({ error: err_8.message })];
+                                    err_7 = _a.sent();
+                                    return [2 /*return*/, reply.status(500).send({ error: err_7.message })];
                                 case 3: return [2 /*return*/];
                             }
                         });
                     }); });
                     web_server.put("/modifymatch", function (request, reply) { return __awaiter(_this, void 0, void 0, function () {
-                        var body, match, err_9;
+                        var body, match, err_8;
                         return __generator(this, function (_a) {
                             switch (_a.label) {
                                 case 0:
@@ -373,14 +366,14 @@ function start_web_server() {
                                     match = _a.sent();
                                     return [2 /*return*/, reply.send(match)];
                                 case 2:
-                                    err_9 = _a.sent();
-                                    return [2 /*return*/, reply.status(500).send({ error: err_9.message })];
+                                    err_8 = _a.sent();
+                                    return [2 /*return*/, reply.status(500).send({ error: err_8.message })];
                                 case 3: return [2 /*return*/];
                             }
                         });
                     }); });
                     web_server.delete("/deletematch/:id_match", function (request, reply) { return __awaiter(_this, void 0, void 0, function () {
-                        var id_match, match, err_10;
+                        var id_match, match, err_9;
                         return __generator(this, function (_a) {
                             switch (_a.label) {
                                 case 0:
@@ -391,14 +384,14 @@ function start_web_server() {
                                     match = _a.sent();
                                     return [2 /*return*/, reply.send(match)];
                                 case 2:
-                                    err_10 = _a.sent();
-                                    return [2 /*return*/, reply.status(500).send({ error: err_10.message })];
+                                    err_9 = _a.sent();
+                                    return [2 /*return*/, reply.status(500).send({ error: err_9.message })];
                                 case 3: return [2 /*return*/];
                             }
                         });
                     }); });
                     web_server.get("/matchs", function (request, reply) { return __awaiter(_this, void 0, void 0, function () {
-                        var matches, err_11;
+                        var matches, err_10;
                         return __generator(this, function (_a) {
                             switch (_a.label) {
                                 case 0:
@@ -408,15 +401,15 @@ function start_web_server() {
                                     matches = _a.sent();
                                     return [2 /*return*/, reply.send(matches)];
                                 case 2:
-                                    err_11 = _a.sent();
-                                    return [2 /*return*/, reply.status(500).send({ error: err_11.message })];
+                                    err_10 = _a.sent();
+                                    return [2 /*return*/, reply.status(500).send({ error: err_10.message })];
                                 case 3: return [2 /*return*/];
                             }
                         });
                     }); });
                     port = Number(process.env.PORT) || 1234;
                     return [4 /*yield*/, web_server.listen({ port: port, host: "0.0.0.0" })];
-                case 4:
+                case 3:
                     _a.sent();
                     web_server.log.info("listening on http://0.0.0.0:".concat(port));
                     return [2 /*return*/];
