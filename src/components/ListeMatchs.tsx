@@ -107,6 +107,7 @@ const ListeMatchs = () => {
             <th className="p-3 text-left">Lieu</th>
             <th className="p-3 text-left">Type</th>
             <th className="p-3 text-left">Equipe</th>
+            <th className="p-3 text-left">Score</th>
           </tr>
         </thead>
 
@@ -118,7 +119,8 @@ const ListeMatchs = () => {
               <td className="p-3">{m.opponent}</td>
               <td className="p-3">{m.location}</td>
               <td className="p-3">{m.type}</td>
-              <td className="p-3">{m.team}</td>
+              <td className="p-3">{m.name}</td>
+              <td className="p-3">{m.score_home} - {m.score_outside}</td>
             </tr>
           ))}
         </tbody>

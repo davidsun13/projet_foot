@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
+import { useNavigate } from "react-router-dom";
 import Button from './button';
 type FormState = {
   date: string;
   time: string;
   equipe: string;
   type: string;
+  lieu: string;
 };
 
 export default function CreationEntrainement() {
@@ -12,10 +14,13 @@ export default function CreationEntrainement() {
     date: '',
     time: '',
     equipe: '',
-    type: 'Technique',
+    type: '',
+    lieu: '',
   });
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
+  const navigate = useNavigate();
+
 
   function handleChange(e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) {
     const { id, value } = e.target;
@@ -24,11 +29,42 @@ export default function CreationEntrainement() {
     setSuccess(null);
   }
 
-  function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (!form.date || !form.time || !form.equipe || !form.type) {
+    if (!form.date || !form.time || !form.equipe || !form.type || !form.lieu) {
       setError('Veuillez remplir tous les champs.');
       return;
+    }
+
+    try {
+      setError(null);
+      const res = await fetch("http://localhost:1234/createtraining", {
+        method: "POST",
+        credentials: "include",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${localStorage.getItem("access_token") || ""}`,
+        },
+        body: JSON.stringify({
+          date: form.date,
+          hour: form.time,
+          team: form.equipe,
+          type: form.type,
+          location: form.lieu,
+        }),
+      });
+
+      const data = await res.json();
+      if (!res.ok) {
+        setError(data.error || "Erreur lors de la création");
+        return;
+      }
+
+      setSuccess("Entraînement créé avec succès.");
+      setForm({ date: "", time: "", equipe: "", type: "Technique", lieu: "" });
+      navigate("/entrainements");
+    } catch (err) {
+      setError("Erreur réseau : " + (err as Error).message);
     }
   }
 
@@ -75,7 +111,7 @@ export default function CreationEntrainement() {
             <option value="">Sélectionner une équipe</option>
             <option value="U10">U10</option>
             <option value="U12">U12</option>
-            <option value="U14">U14</option>
+            <option value="U16">U16</option>
             <option value="Seniors">Seniors</option>
             <option value="Réserve">Réserve</option>
           </select>
@@ -94,6 +130,20 @@ export default function CreationEntrainement() {
             <option value="Physique">Physique</option>
             <option value="Révision">Révision</option>
             <option value="Match">Match</option>
+          </select>
+        </div>
+        <div>
+          <label htmlFor="lieu" className="block text-sm font-[Arsenal] text-gray-700">Lieu</label>
+          <select 
+            id="lieu"
+            value={form.lieu}
+            onChange={handleChange}
+            className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md bg-white focus:outline-none focus:ring-red-500 focus:border-red-500"
+          >
+            <option value="">Sélectionner un lieu</option>
+            <option value="Stade Municipal">Stade Municipal</option>
+            <option value="Centre d'Entraînement">Centre d'Entraînement</option>
+            <option value="Terrain Annexe">Terrain Annexe</option>
           </select>
         </div>
 

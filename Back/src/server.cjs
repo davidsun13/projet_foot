@@ -1,4 +1,15 @@
 "use strict";
+var __assign = (this && this.__assign) || function () {
+    __assign = Object.assign || function(t) {
+        for (var s, i = 1, n = arguments.length; i < n; i++) {
+            s = arguments[i];
+            for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p))
+                t[p] = s[p];
+        }
+        return t;
+    };
+    return __assign.apply(this, arguments);
+};
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -42,6 +53,7 @@ var jwt_1 = require("@fastify/jwt");
 var cookie_1 = require("@fastify/cookie");
 var connexion_cjs_1 = require("./models/connexion.cjs");
 var training_cjs_1 = require("./models/training.cjs");
+var match_cjs_1 = require("./models/match.cjs");
 var zod_1 = require("zod");
 var db_cjs_1 = require("./db.cjs");
 var crypto = require("node:crypto");
@@ -141,7 +153,7 @@ function start_web_server() {
                                             name: parsed.name,
                                             mail: parsed.mail,
                                             phone: (_a = parsed.phone) !== null && _a !== void 0 ? _a : null,
-                                            password: parsed.password,
+                                            password: parsed.password
                                         })];
                                 case 1:
                                     user = _b.sent();
@@ -407,13 +419,13 @@ function start_web_server() {
                         });
                     }); });
                     web_server.post("/creatematch", function (request, reply) { return __awaiter(_this, void 0, void 0, function () {
-                        var body, match, err_9;
+                        var parsed, match, err_9;
                         return __generator(this, function (_a) {
                             switch (_a.label) {
                                 case 0:
                                     _a.trys.push([0, 2, , 3]);
-                                    body = request.body;
-                                    return [4 /*yield*/, repo.createMatchSession(body)];
+                                    parsed = match_cjs_1.createMatchSchema.parse(request.body);
+                                    return [4 /*yield*/, repo.createMatchSession(parsed)];
                                 case 1:
                                     match = _a.sent();
                                     return [2 /*return*/, reply.send(match)];
@@ -460,8 +472,30 @@ function start_web_server() {
                             }
                         });
                     }); });
+                    web_server.patch("/matchs/:id/score", function (request, reply) { return __awaiter(_this, void 0, void 0, function () {
+                        var id_match, parsed, result, err_12;
+                        return __generator(this, function (_a) {
+                            switch (_a.label) {
+                                case 0:
+                                    _a.trys.push([0, 2, , 3]);
+                                    id_match = Number(request.params.id);
+                                    parsed = match_cjs_1.updateScoreSchema.parse(request.body);
+                                    return [4 /*yield*/, repo.updateMatchScore(__assign({ id_match: id_match }, parsed))];
+                                case 1:
+                                    result = _a.sent();
+                                    return [2 /*return*/, reply.send(result)];
+                                case 2:
+                                    err_12 = _a.sent();
+                                    if (err_12 instanceof zod_1.ZodError) {
+                                        return [2 /*return*/, reply.status(400).send({ errors: err_12.errors })];
+                                    }
+                                    return [2 /*return*/, reply.status(500).send({ error: err_12.message })];
+                                case 3: return [2 /*return*/];
+                            }
+                        });
+                    }); });
                     web_server.get("/matchs", function (request, reply) { return __awaiter(_this, void 0, void 0, function () {
-                        var matches, err_12;
+                        var matches, err_13;
                         return __generator(this, function (_a) {
                             switch (_a.label) {
                                 case 0:
@@ -471,14 +505,14 @@ function start_web_server() {
                                     matches = _a.sent();
                                     return [2 /*return*/, reply.send(matches)];
                                 case 2:
-                                    err_12 = _a.sent();
-                                    return [2 /*return*/, reply.status(500).send({ error: err_12.message })];
+                                    err_13 = _a.sent();
+                                    return [2 /*return*/, reply.status(500).send({ error: err_13.message })];
                                 case 3: return [2 /*return*/];
                             }
                         });
                     }); });
                     web_server.get("/me", function (request, reply) { return __awaiter(_this, void 0, void 0, function () {
-                        var _a, id, userType, user, err_13;
+                        var _a, id, userType, user, err_14;
                         return __generator(this, function (_b) {
                             switch (_b.label) {
                                 case 0:
@@ -502,14 +536,14 @@ function start_web_server() {
                                         user: user,
                                     })];
                                 case 6:
-                                    err_13 = _b.sent();
+                                    err_14 = _b.sent();
                                     return [2 /*return*/, reply.status(401).send({ error: "Unauthorized" })];
                                 case 7: return [2 /*return*/];
                             }
                         });
                     }); });
                     web_server.get("/subscriptions", function (request, reply) { return __awaiter(_this, void 0, void 0, function () {
-                        var subscriptions, err_14;
+                        var subscriptions, err_15;
                         return __generator(this, function (_a) {
                             switch (_a.label) {
                                 case 0:
@@ -519,8 +553,8 @@ function start_web_server() {
                                     subscriptions = _a.sent();
                                     return [2 /*return*/, reply.send(subscriptions)];
                                 case 2:
-                                    err_14 = _a.sent();
-                                    return [2 /*return*/, reply.status(500).send({ error: err_14.message })];
+                                    err_15 = _a.sent();
+                                    return [2 /*return*/, reply.status(500).send({ error: err_15.message })];
                                 case 3: return [2 /*return*/];
                             }
                         });

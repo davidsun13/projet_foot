@@ -11,7 +11,6 @@ function Inscription() {
     password: '',
     confirmPassword: '',
     phone: '',
-    team : '',
   });
   const [error, setError] = useState<string | null>(null);
 
@@ -24,11 +23,10 @@ function Inscription() {
     e.preventDefault();
     setError(null);
 
-    if (!form.nom || !form.prenom || !form.email || !form.password || !form.confirmPassword || !form.phone || !form.team) {
+    if (!form.nom || !form.prenom || !form.email || !form.password || !form.confirmPassword) {
       setError('Tous les champs sont requis.');
       return;
     }
-
     if (form.password !== form.confirmPassword) {
       setError('Les mots de passe ne correspondent pas.');
       return;
@@ -42,29 +40,27 @@ function Inscription() {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          surname: form.nom,
-          name: form.prenom,
-          mail: form.email,
-          phone: form.phone,
-          password: form.password,
-          team: form.team,
+          surname: form.nom || '',          
+          name: form.prenom || '',
+          mail: form.email || '',
+          phone: form.phone || null,         
+          password: form.password || '',         
         }),
       });
 
       const data = await res.json();
 
       if (!res.ok) {
-        setError(data.error || data.errors?.join(", ") || "Erreur inconnue");
+        setError(data.error || data.errors?.map((e: any) => e.message).join(", ") || "Erreur inconnue");
         return;
       }
 
-      // stocker access token (si renvoyé) et rediriger vers la page connexion
+      // Stocker le token et rediriger
       if (data.accessToken) {
         localStorage.setItem("access_token", data.accessToken);
       }
-
-      // navigation vers la page de connexion après inscription réussie
       navigate('/connexion');
+
     } catch (err) {
       setError("Erreur réseau : " + (err as Error).message);
     }
@@ -84,7 +80,6 @@ function Inscription() {
               <input id="nom" type="text" value={form.nom} onChange={handleChange}
                 className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-red-500 focus:border-red-500" />
             </div>
-
             <div>
               <label htmlFor="prenom" className="block text-sm font-[Arsenal] text-gray-700">Prénom</label>
               <input id="prenom" type="text" value={form.prenom} onChange={handleChange}
@@ -97,6 +92,7 @@ function Inscription() {
             <input id="email" type="email" value={form.email} onChange={handleChange} placeholder="exemple@email.com"
               className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-red-500 focus:border-red-500" />
           </div>
+
           <div>
             <label htmlFor="phone" className="block text-sm font-[Arsenal] text-gray-700">Téléphone</label>
             <input id="phone" type="tel" value={form.phone} onChange={handleChange} placeholder="0123456789"
@@ -109,21 +105,17 @@ function Inscription() {
               <input id="password" type="password" value={form.password} onChange={handleChange} placeholder="••••••••"
                 className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-red-500 focus:border-red-500" />
             </div>
-
             <div>
               <label htmlFor="confirmPassword" className="block text-sm font-[Arsenal] text-gray-700">Confirmer</label>
               <input id="confirmPassword" type="password" value={form.confirmPassword} onChange={handleChange} placeholder="••••••••"
                 className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-red-500 focus:border-red-500" />
             </div>
           </div>
-          <div>
-            <label htmlFor="team" className="block text-sm font-[Arsenal] text-gray-700">Équipe</label>
-            <input id="team" type="text" value={form.team} onChange={handleChange} placeholder="Nom de l'équipe"
-              className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-red-500 focus:border-red-500" />
-          </div>
 
           <Button size="sm"
-              variant="secondary" type="submit" className="w-full bg-red-600 text-black py-2 px-4 rounded-md hover:bg-red-700 transition-colors">
+            variant="secondary"
+            type="submit"
+            className="w-full bg-red-600 text-black py-2 px-4 rounded-md hover:bg-red-700 transition-colors">
             S'inscrire
           </Button>
         </form>

@@ -62,11 +62,13 @@ const ListeEntrainements = () => {
 
       if (!res.ok) {
         const err = await res.json().catch(() => null);
-        throw new Error(err?.error || "Impossible de charger les entraînements");
+        throw new Error(
+          err?.error || "Impossible de charger les entraînements",
+        );
       }
 
       const data = await res.json();
-      setTrainings(data);
+      setTrainings(Array.isArray(data) ? data : data.trainings || data);
     } catch (err) {
       setError((err as Error).message);
     } finally {
@@ -78,17 +80,80 @@ const ListeEntrainements = () => {
     fetchTrainings();
   }, []);
 
+  async function handleDelete(id?: number) {
+    if (!id) return;
+    if (!confirm("Confirmer la suppression de cet entraînement ?")) return;
+
+    try {
+      const res = await fetch(`http://localhost:1234/deletetraining/${id}`, {
+        method: "DELETE",
+        credentials: "include",
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("access_token") || ""}`,
+        },
+      });
+      if (!res.ok) {
+        const err = await res.json().catch(() => null);
+        throw new Error(err?.error || "Erreur lors de la suppression");
+      }
+      fetchTrainings();
+    } catch (err) {
+      alert("Erreur: " + (err as Error).message);
+    }
+  }
+
+  async function handleModify(t: Training) {
+    if (!t.id_training) return;
+    const date = prompt("Date (YYYY-MM-DD)", t.date ?? "");
+    if (date === null) return;
+    const hour = prompt("Heure (HH:MM)", t.hour ?? "");
+    if (hour === null) return;
+    const location = prompt("Lieu", t.location ?? "");
+    if (location === null) return;
+    const team = prompt("Équipe", t.team ?? "");
+    if (team === null) return;
+    const type = prompt("Type", t.type ?? "");
+    if (type === null) return;
+
+    try {
+      const res = await fetch("http://localhost:1234/modifytraining", {
+        method: "PUT",
+        credentials: "include",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${localStorage.getItem("access_token") || ""}`,
+        },
+        body: JSON.stringify({
+          id_training: t.id_training,
+          date,
+          hour,
+          location,
+          team,
+          type,
+        }),
+      });
+
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.error || "Erreur lors de la modification");
+      }
+      fetchTrainings();
+    } catch (err) {
+      alert("Erreur: " + (err as Error).message);
+    }
+  }
+
   return (
     <div className="w-full max-w-5xl">
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-2xl font-[Arsenal] font-bold">Entraînements</h2>
-        {currentUser?.userType === "coach" &&(
-        <Link 
-          to="/entrainements/creer"
-          className="bg-white text-red-600 px-4 py-2 rounded hover:bg-red-600 hover:text-white font-[Arsenal]"
-        >
-          + Créer un entraînement
-        </Link>
+        {currentUser?.userType === "coach" && (
+          <Link
+            to="/entrainements/creer"
+            className="bg-white text-red-600 px-4 py-2 rounded hover:bg-red-600 hover:text-white font-[Arsenal]"
+          >
+            + Créer un entraînement
+          </Link>
         )}
       </div>
 
@@ -105,24 +170,45 @@ const ListeEntrainements = () => {
             <th className="p-3 text-left">Lieu</th>
             <th className="p-3 text-left">Équipe</th>
             <th className="p-3 text-left">Type</th>
+            <th className="p-3 text-left">Actions</th>
           </tr>
         </thead>
 
         <tbody>
           {trainings.length === 0 && !loading ? (
             <tr>
-              <td colSpan={5} className="p-4 text-center text-gray-600">
+              <td colSpan={6} className="p-4 text-center text-gray-600">
                 Aucune session d'entraînement.
               </td>
             </tr>
           ) : (
             trainings.map((t) => (
               <tr key={t.id_training} className="border-b">
-                <td className="p-3">{t.date ? new Date(t.date).toLocaleDateString("fr-FR") : "-"}</td>
+                <td className="p-3">
+                  {t.date ? new Date(t.date).toLocaleDateString("fr-FR") : "-"}
+                </td>
                 <td className="p-3">{t.hour ?? "-"}</td>
                 <td className="p-3">{t.location ?? "-"}</td>
-                <td className="p-3">{t.team ?? "-"}</td>
+                <td className="p-3">{t.name ?? "-"}</td>
                 <td className="p-3">{t.type ?? "-"}</td>
+                <td className="p-3 flex gap-2">
+                  {currentUser?.userType === "coach" && (
+                    <>
+                      <button
+                        onClick={() => handleModify(t)}
+                        className="px-2 py-1 bg-yellow-200 rounded hover:bg-yellow-300"
+                      >
+                        Modifier
+                      </button>
+                      <button
+                        onClick={() => handleDelete(t.id_training)}
+                        className="px-2 py-1 bg-red-200 text-red-800 rounded hover:bg-red-300"
+                      >
+                        Supprimer
+                      </button>
+                    </>
+                  )}
+                </td>
               </tr>
             ))
           )}

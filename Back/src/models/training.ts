@@ -1,11 +1,11 @@
 import {z} from "zod";
 
 const createTrainingSchema = z.object({
-  date: z.string().refine((s) => !Number.isNaN(Date.parse(s)), { message: "Date invalide (YYYY-MM-DD)" }),
-  heure: z.string().regex(/^\d{2}:\d{2}(:\d{2})?$/, "Heure invalide (HH:MM ou HH:MM:SS)"),
+  date: z.string().min(1),
+  hour: z.string().min(1),
+  location: z.string().min(1),
   type: z.string().min(1),
-  lieu: z.string().min(1),
-  equipe: z.string().min(1),
-  id_coach: z.number().int().positive().optional(),
+  team: z.string().min(1),
 });
+
 export { createTrainingSchema };

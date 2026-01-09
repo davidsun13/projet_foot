@@ -46,7 +46,7 @@ CREATE TABLE player (
     phone TEXT,
     password TEXT NOT NULL,
     status player_status DEFAULT 'Actif',
-    id_team INT NOT NULL,
+    id_team INT,
 
     FOREIGN KEY (id_team) REFERENCES team(id_team)
 );
@@ -62,7 +62,7 @@ CREATE TABLE training (
     type TEXT,
     location TEXT,
     id_team INT NOT NULL,
-    id_coach INT NOT NULL,
+    id_coach INT,
 
     FOREIGN KEY (id_team) REFERENCES team(id_team),
     FOREIGN KEY (id_coach) REFERENCES coach(id_coach)
@@ -82,7 +82,7 @@ CREATE TABLE match (
     score_home INT DEFAULT NULL,
     score_outside INT DEFAULT NULL,
     id_team INT NOT NULL,
-    id_coach INT NOT NULL,
+    id_coach INT,
 
     FOREIGN KEY (id_team) REFERENCES team(id_team),
     FOREIGN KEY (id_coach) REFERENCES coach(id_coach)
