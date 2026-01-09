@@ -30,6 +30,7 @@ export class Repository {
     mail: string;
     phone: string | null;
     password: string;
+    team: string;
   }) {
     const existing = await this.sql`
       SELECT * FROM player WHERE mail = ${mail}
@@ -41,9 +42,9 @@ export class Repository {
     const hash = await argon2.hash(password);
     const phoneValue = phone ?? null;
     const result = await this.sql`
-      INSERT INTO player (surname, name, mail, phone, password, status)
+      INSERT INTO player (surname, name, mail, phone, password, status,team)
       VALUES (${surname}, ${name}, ${mail}, ${phoneValue}, ${hash}, 'Actif')
-      RETURNING id_player, surname, name, mail
+      RETURNING id_player, surname, name, mail,team
     `;
 
     return result[0];
@@ -323,5 +324,32 @@ export class Repository {
     `;
     return result;
   }
+  async getallSubscriptions() {
+    const result = await this.sql`
+      SELECT
+        s.id_subscription AS id,
+        s.id_player,
+        s.total,
+        s.status,
+        s.payment_date,
+        p.name AS player_name,
+        p.surname AS player_surname
+      FROM subscription s
+      JOIN player p ON p.id_player = s.id_player
+      ORDER BY s.id_subscription DESC
+    `;
+    return result.map((r: any) => ({
+      id: r.id,
+      id_player: r.id_player,
+      total_amount: r.total !== null ? Number(r.total) : 0,
+      status: r.status,
+      payment_date: r.payment_date,
+      player: {
+        name: r.player_name,
+        surname: r.player_surname,
+      },
+    }));
+  }
 }
+
 

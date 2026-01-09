@@ -11,6 +11,7 @@ function Inscription() {
     password: '',
     confirmPassword: '',
     phone: '',
+    team : '',
   });
   const [error, setError] = useState<string | null>(null);
 
@@ -23,7 +24,7 @@ function Inscription() {
     e.preventDefault();
     setError(null);
 
-    if (!form.nom || !form.prenom || !form.email || !form.password || !form.confirmPassword || !form.phone) {
+    if (!form.nom || !form.prenom || !form.email || !form.password || !form.confirmPassword || !form.phone || !form.team) {
       setError('Tous les champs sont requis.');
       return;
     }
@@ -46,6 +47,7 @@ function Inscription() {
           mail: form.email,
           phone: form.phone,
           password: form.password,
+          team: form.team,
         }),
       });
 
@@ -113,6 +115,11 @@ function Inscription() {
               <input id="confirmPassword" type="password" value={form.confirmPassword} onChange={handleChange} placeholder="••••••••"
                 className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-red-500 focus:border-red-500" />
             </div>
+          </div>
+          <div>
+            <label htmlFor="team" className="block text-sm font-[Arsenal] text-gray-700">Équipe</label>
+            <input id="team" type="text" value={form.team} onChange={handleChange} placeholder="Nom de l'équipe"
+              className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-red-500 focus:border-red-500" />
           </div>
 
           <Button size="sm"

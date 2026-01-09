@@ -98,6 +98,7 @@ web_server.post("/register", async (request, reply) => {
       mail: parsed.mail,
       phone: parsed.phone ?? null,
       password: parsed.password,
+      team: parsed.team,
     });
 
     const accessToken = web_server.jwt.sign(
@@ -360,7 +361,14 @@ web_server.get("/secret-data", async (request, reply) => {
     return reply.status(401).send({ error: "Unauthorized" });
   }
 });
-
+web_server.get("/subscriptions", async (request: FastifyRequest, reply: FastifyReply) => {
+  try {
+    const subscriptions = await repo.getallSubscriptions();
+    return reply.send(subscriptions);
+  } catch (err) {
+    return reply.status(500).send({ error: (err as Error).message });
+  }
+}); 
 
   const port = Number(process.env.PORT) || 1234;
   await web_server.listen({ port, host: "0.0.0.0" });

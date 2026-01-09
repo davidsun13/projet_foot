@@ -508,6 +508,23 @@ function start_web_server() {
                             }
                         });
                     }); });
+                    web_server.get("/subscriptions", function (request, reply) { return __awaiter(_this, void 0, void 0, function () {
+                        var subscriptions, err_14;
+                        return __generator(this, function (_a) {
+                            switch (_a.label) {
+                                case 0:
+                                    _a.trys.push([0, 2, , 3]);
+                                    return [4 /*yield*/, repo.getallSubscriptions()];
+                                case 1:
+                                    subscriptions = _a.sent();
+                                    return [2 /*return*/, reply.send(subscriptions)];
+                                case 2:
+                                    err_14 = _a.sent();
+                                    return [2 /*return*/, reply.status(500).send({ error: err_14.message })];
+                                case 3: return [2 /*return*/];
+                            }
+                        });
+                    }); });
                     port = Number(process.env.PORT) || 1234;
                     return [4 /*yield*/, web_server.listen({ port: port, host: "0.0.0.0" })];
                 case 3:

@@ -1,36 +1,44 @@
 -- ================================
 -- COACHS
 -- ================================
-INSERT INTO coach (surname, name, mail,phone, password)
+INSERT INTO coach (surname, name, mail, phone, password)
 VALUES
 ('Dupont', 'Jean', 'jean.dupont@club.com', '0601020304', 'mdp123'),
 ('Martin', 'Lucas', 'lucas.martin@club.com', '0611223344', 'coachpass');
 
 -- ================================
--- JOUEURS
+-- TEAMS
 -- ================================
-INSERT INTO player (surname, name, position, number, mail, phone, password, status)
+INSERT INTO team (name, category, season)
 VALUES
-('Durand', 'Paul', 'Attaquant', 9, 'paul.durand@mail.com', '0601020304', 'pass1', 'Actif'),
-('Morel', 'Antoine', 'Milieu', 8, 'antoine.morel@mail.com', '0611223344', 'pass2', 'Actif'),
-('Leroy', 'Hugo', 'Défenseur', 4, 'hugo.leroy@mail.com', '0622334455', 'pass3', 'Blessé'),
-('Bernard', 'Julien', 'Gardien', 1, 'julien.bernard@mail.com', '0633445566', 'pass4', 'Actif');
+('Seniors A', 'Senior', '2024-2025'),
+('U16', 'Youth', '2024-2025');
 
 -- ================================
--- ENTRAINEMENTS
+-- PLAYERS
 -- ================================
-INSERT INTO training (date, hour, type, location, team, id_coach)
+INSERT INTO player (surname, name, position, number, mail, phone, password, status, id_team)
 VALUES
-('2025-01-12', '18:00:00', 'Physique', 'Stade Municipal', 'Seniors A', 1),
-('2025-01-15', '19:00:00', 'Tactique', 'Terrain Synthétique', 'Seniors A', 1);
+('Durand', 'Paul', 'Attaquant', 9, 'paul.durand@mail.com', '0601020304', 'pass1', 'Actif', 1),
+('Morel', 'Antoine', 'Milieu', 8, 'antoine.morel@mail.com', '0611223344', 'pass2', 'Actif', 1),
+('Leroy', 'Hugo', 'Défenseur', 4, 'hugo.leroy@mail.com', '0622334455', 'pass3', 'Blessé', 1),
+('Bernard', 'Julien', 'Gardien', 1, 'julien.bernard@mail.com', '0633445566', 'pass4', 'Actif', 1);
 
 -- ================================
--- MATCHS
+-- TRAININGS
 -- ================================
-INSERT INTO match (date, hour, opponent, location, type, team, score_home, score_outside, id_coach)
+INSERT INTO training (date, hour, type, location, id_team, id_coach)
 VALUES
-('2025-01-20', '15:00:00', 'US Lyon', 'Home', 'Championship', 'Seniors A', 2, 1, 1),
-('2025-01-27', '16:00:00', 'FC Nice', 'Outside', 'Friendly', 'Seniors A', NULL, NULL, 1);
+('2025-01-12', '18:00:00', 'Physique', 'Stade Municipal', 1, 1),
+('2025-01-15', '19:00:00', 'Tactique', 'Terrain Synthétique', 1, 1);
+
+-- ================================
+-- MATCHES
+-- ================================
+INSERT INTO match (date, hour, opponent, location, type, score_home, score_outside, id_team, id_coach)
+VALUES
+('2025-01-20', '15:00:00', 'US Lyon', 'Home', 'Championship', 2, 1, 1, 1),
+('2025-01-27', '16:00:00', 'FC Nice', 'Outside', 'Friendly', NULL, NULL, 1, 1);
 
 -- ================================
 -- CONVOCATIONS MATCHS
@@ -75,9 +83,9 @@ VALUES
 (4, 2, TRUE, 'En forme');
 
 -- ================================
--- COTISATIONS
+-- SUBSCRIPTIONS (COTISATIONS)
 -- ================================
-INSERT INTO Subscription (id_player, total, status, payment_date)
+INSERT INTO subscription (id_player, total, status, payment_date)
 VALUES
 (1, 200, 'Paid', '2025-01-01'),
 (2, 200, 'Not paid', NULL),
@@ -85,7 +93,7 @@ VALUES
 (4, 200, 'Paid', '2025-01-05');
 
 -- ================================
--- STATISTIQUES DE MATCH
+-- STATISTICS
 -- ================================
 INSERT INTO statistics (id_player, id_match, goals, passes, yellow_cards, red_cards, minutes_played)
 VALUES

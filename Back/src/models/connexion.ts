@@ -6,6 +6,7 @@ const registerSchema = z.object({
   mail: z.string().email("Email invalide"),
   phone: z.string().min(6).max(20).optional().nullable(),
   password: z.string().min(6, "Le mot de passe doit contenir au moins 6 caractères"),
+  team: z.string().min(1, "L'équipe est requise"),
 });
 
 const loginSchema = z.object({

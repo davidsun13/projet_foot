@@ -361,7 +361,30 @@ var Repository = /** @class */ (function () {
             });
         });
     };
+    Repository.prototype.getallSubscriptions = function () {
+        return __awaiter(this, void 0, void 0, function () {
+            var result;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0: return [4 /*yield*/, this.sql(templateObject_23 || (templateObject_23 = __makeTemplateObject(["\n      SELECT\n        s.id_subscription AS id,\n        s.id_player,\n        s.total,\n        s.status,\n        s.payment_date,\n        p.name AS player_name,\n        p.surname AS player_surname\n      FROM subscription s\n      JOIN player p ON p.id_player = s.id_player\n      ORDER BY s.id_subscription DESC\n    "], ["\n      SELECT\n        s.id_subscription AS id,\n        s.id_player,\n        s.total,\n        s.status,\n        s.payment_date,\n        p.name AS player_name,\n        p.surname AS player_surname\n      FROM subscription s\n      JOIN player p ON p.id_player = s.id_player\n      ORDER BY s.id_subscription DESC\n    "])))];
+                    case 1:
+                        result = _a.sent();
+                        return [2 /*return*/, result.map(function (r) { return ({
+                                id: r.id,
+                                id_player: r.id_player,
+                                total_amount: r.total !== null ? Number(r.total) : 0,
+                                status: r.status,
+                                payment_date: r.payment_date,
+                                player: {
+                                    name: r.player_name,
+                                    surname: r.player_surname,
+                                },
+                            }); })];
+                }
+            });
+        });
+    };
     return Repository;
 }());
 exports.Repository = Repository;
-var templateObject_1, templateObject_2, templateObject_3, templateObject_4, templateObject_5, templateObject_6, templateObject_7, templateObject_8, templateObject_9, templateObject_10, templateObject_11, templateObject_12, templateObject_13, templateObject_14, templateObject_15, templateObject_16, templateObject_17, templateObject_18, templateObject_19, templateObject_20, templateObject_21, templateObject_22;
+var templateObject_1, templateObject_2, templateObject_3, templateObject_4, templateObject_5, templateObject_6, templateObject_7, templateObject_8, templateObject_9, templateObject_10, templateObject_11, templateObject_12, templateObject_13, templateObject_14, templateObject_15, templateObject_16, templateObject_17, templateObject_18, templateObject_19, templateObject_20, templateObject_21, templateObject_22, templateObject_23;
