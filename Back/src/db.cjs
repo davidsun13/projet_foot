@@ -39,17 +39,6 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
 };
-var __rest = (this && this.__rest) || function (s, e) {
-    var t = {};
-    for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p) && e.indexOf(p) < 0)
-        t[p] = s[p];
-    if (s != null && typeof Object.getOwnPropertySymbols === "function")
-        for (var i = 0, p = Object.getOwnPropertySymbols(s); i < p.length; i++) {
-            if (e.indexOf(p[i]) < 0 && Object.prototype.propertyIsEnumerable.call(s, p[i]))
-                t[p[i]] = s[p[i]];
-        }
-    return t;
-};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Repository = void 0;
 var postgres = require("postgres");
@@ -90,12 +79,60 @@ var Repository = /** @class */ (function () {
             });
         });
     };
-    Repository.prototype.loginPlayer = function (mail, password) {
+    Repository.prototype.registerCoach = function (_a) {
+        return __awaiter(this, arguments, void 0, function (_b) {
+            var existing, hash, phoneValue, result;
+            var surname = _b.surname, name = _b.name, mail = _b.mail, phone = _b.phone, password = _b.password;
+            return __generator(this, function (_c) {
+                switch (_c.label) {
+                    case 0: return [4 /*yield*/, this.sql(templateObject_3 || (templateObject_3 = __makeTemplateObject(["\n      SELECT * FROM coach WHERE mail = ", "\n    "], ["\n      SELECT * FROM coach WHERE mail = ", "\n    "])), mail)];
+                    case 1:
+                        existing = _c.sent();
+                        if (existing.length > 0) {
+                            throw new Error("Un compte existe déjà avec cet email.");
+                        }
+                        return [4 /*yield*/, argon2.hash(password)];
+                    case 2:
+                        hash = _c.sent();
+                        phoneValue = phone !== null && phone !== void 0 ? phone : null;
+                        return [4 /*yield*/, this.sql(templateObject_4 || (templateObject_4 = __makeTemplateObject(["\n      INSERT INTO coach (surname, name, mail, phone, password)\n      VALUES (", ", ", ", ", ", ", ", ", ")\n      RETURNING id_coach, surname, name, mail, phone\n    "], ["\n      INSERT INTO coach (surname, name, mail, phone, password)\n      VALUES (", ", ", ", ", ", ", ", ", ")\n      RETURNING id_coach, surname, name, mail, phone\n    "])), surname, name, mail, phoneValue, hash)];
+                    case 3:
+                        result = _c.sent();
+                        return [2 /*return*/, result[0]];
+                }
+            });
+        });
+    };
+    Repository.prototype.loginCoach = function (mail, password) {
         return __awaiter(this, void 0, void 0, function () {
-            var user, player, isValid, _, safeUser;
+            var user, coach, isValid;
             return __generator(this, function (_a) {
                 switch (_a.label) {
-                    case 0: return [4 /*yield*/, this.sql(templateObject_3 || (templateObject_3 = __makeTemplateObject(["\n      SELECT * FROM player WHERE mail = ", "\n    "], ["\n      SELECT * FROM player WHERE mail = ", "\n    "])), mail)];
+                    case 0: return [4 /*yield*/, this.sql(templateObject_5 || (templateObject_5 = __makeTemplateObject(["\n    SELECT * FROM coach WHERE mail = ", "\n  "], ["\n    SELECT * FROM coach WHERE mail = ", "\n  "])), mail)];
+                    case 1:
+                        user = _a.sent();
+                        if (user.length === 0) {
+                            throw new Error("Email ou mot de passe incorrect.");
+                        }
+                        coach = user[0];
+                        return [4 /*yield*/, argon2.verify(coach.password, password)];
+                    case 2:
+                        isValid = _a.sent();
+                        if (!isValid) {
+                            throw new Error("Email ou mot de passe incorrect.");
+                        }
+                        delete coach.password;
+                        return [2 /*return*/, coach];
+                }
+            });
+        });
+    };
+    Repository.prototype.loginPlayer = function (mail, password) {
+        return __awaiter(this, void 0, void 0, function () {
+            var user, player, isValid;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0: return [4 /*yield*/, this.sql(templateObject_6 || (templateObject_6 = __makeTemplateObject(["\n    SELECT * FROM player WHERE mail = ", "\n  "], ["\n    SELECT * FROM player WHERE mail = ", "\n  "])), mail)];
                     case 1:
                         user = _a.sent();
                         if (user.length === 0) {
@@ -108,8 +145,8 @@ var Repository = /** @class */ (function () {
                         if (!isValid) {
                             throw new Error("Email ou mot de passe incorrect.");
                         }
-                        _ = player.mot_de_passe, safeUser = __rest(player, ["mot_de_passe"]);
-                        return [2 /*return*/, safeUser];
+                        delete player.password;
+                        return [2 /*return*/, player];
                 }
             });
         });
@@ -119,7 +156,7 @@ var Repository = /** @class */ (function () {
             var user;
             return __generator(this, function (_a) {
                 switch (_a.label) {
-                    case 0: return [4 /*yield*/, this.sql(templateObject_4 || (templateObject_4 = __makeTemplateObject(["\n      SELECT id_player, surname, name, mail, position, number, phone, status\n      FROM player WHERE mail = ", "\n    "], ["\n      SELECT id_player, surname, name, mail, position, number, phone, status\n      FROM player WHERE mail = ", "\n    "])), mail)];
+                    case 0: return [4 /*yield*/, this.sql(templateObject_7 || (templateObject_7 = __makeTemplateObject(["\n      SELECT id_player, surname, name, mail, position, number, phone, status\n      FROM player WHERE mail = ", "\n    "], ["\n      SELECT id_player, surname, name, mail, position, number, phone, status\n      FROM player WHERE mail = ", "\n    "])), mail)];
                     case 1:
                         user = _a.sent();
                         return [2 /*return*/, user[0] || null];
@@ -132,7 +169,33 @@ var Repository = /** @class */ (function () {
             var user;
             return __generator(this, function (_a) {
                 switch (_a.label) {
-                    case 0: return [4 /*yield*/, this.sql(templateObject_5 || (templateObject_5 = __makeTemplateObject(["\n      SELECT id_player, surname, name, mail, position, number, phone, status\n      FROM player WHERE id_player = ", "\n    "], ["\n      SELECT id_player, surname, name, mail, position, number, phone, status\n      FROM player WHERE id_player = ", "\n    "])), id_player)];
+                    case 0: return [4 /*yield*/, this.sql(templateObject_8 || (templateObject_8 = __makeTemplateObject(["\n      SELECT id_player, surname, name, mail, position, number, phone, status\n      FROM player WHERE id_player = ", "\n    "], ["\n      SELECT id_player, surname, name, mail, position, number, phone, status\n      FROM player WHERE id_player = ", "\n    "])), id_player)];
+                    case 1:
+                        user = _a.sent();
+                        return [2 /*return*/, user[0] || null];
+                }
+            });
+        });
+    };
+    Repository.prototype.getCoachbyEmail = function (mail) {
+        return __awaiter(this, void 0, void 0, function () {
+            var user;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0: return [4 /*yield*/, this.sql(templateObject_9 || (templateObject_9 = __makeTemplateObject(["\n      SELECT id_coach, surname, name, mail, phone\n      FROM coach WHERE mail = ", "\n    "], ["\n      SELECT id_coach, surname, name, mail, phone\n      FROM coach WHERE mail = ", "\n    "])), mail)];
+                    case 1:
+                        user = _a.sent();
+                        return [2 /*return*/, user[0] || null];
+                }
+            });
+        });
+    };
+    Repository.prototype.getCoachById = function (id_coach) {
+        return __awaiter(this, void 0, void 0, function () {
+            var user;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0: return [4 /*yield*/, this.sql(templateObject_10 || (templateObject_10 = __makeTemplateObject(["\n      SELECT id_coach, surname, name, mail, phone\n      FROM coach WHERE id_coach = ", "\n    "], ["\n      SELECT id_coach, surname, name, mail, phone\n      FROM coach WHERE id_coach = ", "\n    "])), id_coach)];
                     case 1:
                         user = _a.sent();
                         return [2 /*return*/, user[0] || null];
@@ -142,11 +205,16 @@ var Repository = /** @class */ (function () {
     };
     Repository.prototype.saveRefreshToken = function (_a) {
         return __awaiter(this, arguments, void 0, function (_b) {
-            var userId = _b.userId, token = _b.token, expiresAt = _b.expiresAt;
+            var column, result;
+            var userId = _b.userId, userType = _b.userType, token = _b.token, expiresAt = _b.expiresAt;
             return __generator(this, function (_c) {
                 switch (_c.label) {
-                    case 0: return [4 /*yield*/, this.sql(templateObject_6 || (templateObject_6 = __makeTemplateObject(["\n    INSERT INTO refresh_tokens (user_id, token, expires_at)\n    VALUES (", ", ", ", ", ")\n    RETURNING id, user_id, token, expires_at\n  "], ["\n    INSERT INTO refresh_tokens (user_id, token, expires_at)\n    VALUES (", ", ", ", ", ")\n    RETURNING id, user_id, token, expires_at\n  "])), userId, token, expiresAt)];
-                    case 1: return [2 /*return*/, _c.sent()];
+                    case 0:
+                        column = userType === 'player' ? 'player_id' : 'coach_id';
+                        return [4 /*yield*/, this.sql(templateObject_11 || (templateObject_11 = __makeTemplateObject(["\n    INSERT INTO refresh_tokens (", ", token, expires_at)\n    VALUES (", ", ", ", ", ")\n    RETURNING id, player_id, coach_id, token, expires_at\n  "], ["\n    INSERT INTO refresh_tokens (", ", token, expires_at)\n    VALUES (", ", ", ", ", ")\n    RETURNING id, player_id, coach_id, token, expires_at\n  "])), this.sql(column), userId, token, expiresAt)];
+                    case 1:
+                        result = _c.sent();
+                        return [2 /*return*/, result[0]];
                 }
             });
         });
@@ -156,7 +224,7 @@ var Repository = /** @class */ (function () {
             var result;
             return __generator(this, function (_a) {
                 switch (_a.label) {
-                    case 0: return [4 /*yield*/, this.sql(templateObject_7 || (templateObject_7 = __makeTemplateObject(["\n    SELECT * FROM refresh_tokens\n    WHERE token = ", "\n    LIMIT 1\n  "], ["\n    SELECT * FROM refresh_tokens\n    WHERE token = ", "\n    LIMIT 1\n  "])), token)];
+                    case 0: return [4 /*yield*/, this.sql(templateObject_12 || (templateObject_12 = __makeTemplateObject(["\n    SELECT * FROM refresh_tokens\n    WHERE token = ", "\n    LIMIT 1\n  "], ["\n    SELECT * FROM refresh_tokens\n    WHERE token = ", "\n    LIMIT 1\n  "])), token)];
                     case 1:
                         result = _a.sent();
                         return [2 /*return*/, result[0] || null];
@@ -168,17 +236,20 @@ var Repository = /** @class */ (function () {
         return __awaiter(this, void 0, void 0, function () {
             return __generator(this, function (_a) {
                 switch (_a.label) {
-                    case 0: return [4 /*yield*/, this.sql(templateObject_8 || (templateObject_8 = __makeTemplateObject(["\n    UPDATE refresh_tokens\n    SET revoked = TRUE\n    WHERE token = ", "\n  "], ["\n    UPDATE refresh_tokens\n    SET revoked = TRUE\n    WHERE token = ", "\n  "])), token)];
+                    case 0: return [4 /*yield*/, this.sql(templateObject_13 || (templateObject_13 = __makeTemplateObject(["\n    UPDATE refresh_tokens\n    SET revoked = TRUE\n    WHERE token = ", "\n  "], ["\n    UPDATE refresh_tokens\n    SET revoked = TRUE\n    WHERE token = ", "\n  "])), token)];
                     case 1: return [2 /*return*/, _a.sent()];
                 }
             });
         });
     };
-    Repository.prototype.revokeAllUserTokens = function (userId) {
+    Repository.prototype.revokeAllUserTokens = function (userId, userType) {
         return __awaiter(this, void 0, void 0, function () {
+            var column;
             return __generator(this, function (_a) {
                 switch (_a.label) {
-                    case 0: return [4 /*yield*/, this.sql(templateObject_9 || (templateObject_9 = __makeTemplateObject(["\n    UPDATE refresh_tokens\n    SET revoked = TRUE\n    WHERE user_id = ", "\n  "], ["\n    UPDATE refresh_tokens\n    SET revoked = TRUE\n    WHERE user_id = ", "\n  "])), userId)];
+                    case 0:
+                        column = userType === 'player' ? 'player_id' : 'coach_id';
+                        return [4 /*yield*/, this.sql(templateObject_14 || (templateObject_14 = __makeTemplateObject(["\n    UPDATE refresh_tokens\n    SET revoked = TRUE\n    WHERE ", " = ", "\n  "], ["\n    UPDATE refresh_tokens\n    SET revoked = TRUE\n    WHERE ", " = ", "\n  "])), this.sql(column), userId)];
                     case 1: return [2 /*return*/, _a.sent()];
                 }
             });
@@ -190,7 +261,7 @@ var Repository = /** @class */ (function () {
             var date = _b.date, hour = _b.hour, location = _b.location, type = _b.type, team = _b.team;
             return __generator(this, function (_c) {
                 switch (_c.label) {
-                    case 0: return [4 /*yield*/, this.sql(templateObject_10 || (templateObject_10 = __makeTemplateObject(["\n    INSERT INTO training (date, hour, type, location, team)\n    VALUES (", ", ", ", ", ", ", ", ", ")\n    RETURNING id_training\n  "], ["\n    INSERT INTO training (date, hour, type, location, team)\n    VALUES (", ", ", ", ", ", ", ", ", ")\n    RETURNING id_training\n  "])), date, hour, type, location, team)];
+                    case 0: return [4 /*yield*/, this.sql(templateObject_15 || (templateObject_15 = __makeTemplateObject(["\n    INSERT INTO training (date, hour, type, location, team)\n    VALUES (", ", ", ", ", ", ", ", ", ")\n    RETURNING id_training\n  "], ["\n    INSERT INTO training (date, hour, type, location, team)\n    VALUES (", ", ", ", ", ", ", ", ", ")\n    RETURNING id_training\n  "])), date, hour, type, location, team)];
                     case 1:
                         result = _c.sent();
                         return [2 /*return*/, result[0]];
@@ -204,7 +275,7 @@ var Repository = /** @class */ (function () {
             var id_training = _b.id_training, date = _b.date, hour = _b.hour, location = _b.location, type = _b.type, team = _b.team;
             return __generator(this, function (_c) {
                 switch (_c.label) {
-                    case 0: return [4 /*yield*/, this.sql(templateObject_11 || (templateObject_11 = __makeTemplateObject(["\n    UPDATE training\n    SET date = ", ", hour = ", ", type = ", ", location = ", ", team = ", "\n    WHERE id_training = ", "\n    RETURNING id_training\n  "], ["\n    UPDATE training\n    SET date = ", ", hour = ", ", type = ", ", location = ", ", team = ", "\n    WHERE id_training = ", "\n    RETURNING id_training\n  "])), date, hour, type, location, team, id_training)];
+                    case 0: return [4 /*yield*/, this.sql(templateObject_16 || (templateObject_16 = __makeTemplateObject(["\n    UPDATE training\n    SET date = ", ", hour = ", ", type = ", ", location = ", ", team = ", "\n    WHERE id_training = ", "\n    RETURNING id_training\n  "], ["\n    UPDATE training\n    SET date = ", ", hour = ", ", type = ", ", location = ", ", team = ", "\n    WHERE id_training = ", "\n    RETURNING id_training\n  "])), date, hour, type, location, team, id_training)];
                     case 1:
                         result = _c.sent();
                         return [2 /*return*/, result[0]];
@@ -216,7 +287,7 @@ var Repository = /** @class */ (function () {
         return __awaiter(this, void 0, void 0, function () {
             return __generator(this, function (_a) {
                 switch (_a.label) {
-                    case 0: return [4 /*yield*/, this.sql(templateObject_12 || (templateObject_12 = __makeTemplateObject(["\n      DELETE FROM training\n      WHERE id_training = ", "\n    "], ["\n      DELETE FROM training\n      WHERE id_training = ", "\n    "])), id_training)];
+                    case 0: return [4 /*yield*/, this.sql(templateObject_17 || (templateObject_17 = __makeTemplateObject(["\n      DELETE FROM training\n      WHERE id_training = ", "\n    "], ["\n      DELETE FROM training\n      WHERE id_training = ", "\n    "])), id_training)];
                     case 1:
                         _a.sent();
                         return [2 /*return*/];
@@ -229,7 +300,7 @@ var Repository = /** @class */ (function () {
             var result;
             return __generator(this, function (_a) {
                 switch (_a.label) {
-                    case 0: return [4 /*yield*/, this.sql(templateObject_13 || (templateObject_13 = __makeTemplateObject(["\n      SELECT * FROM training\n    "], ["\n      SELECT * FROM training\n    "])))];
+                    case 0: return [4 /*yield*/, this.sql(templateObject_18 || (templateObject_18 = __makeTemplateObject(["\n      SELECT * FROM training\n    "], ["\n      SELECT * FROM training\n    "])))];
                     case 1:
                         result = _a.sent();
                         return [2 /*return*/, result];
@@ -243,7 +314,7 @@ var Repository = /** @class */ (function () {
             var date = _b.date, hour = _b.hour, opponent = _b.opponent, location = _b.location, type = _b.type, team = _b.team, score_home = _b.score_home, score_outside = _b.score_outside;
             return __generator(this, function (_c) {
                 switch (_c.label) {
-                    case 0: return [4 /*yield*/, this.sql(templateObject_14 || (templateObject_14 = __makeTemplateObject(["\n    INSERT INTO match (date, hour, opponent, location, type, team, score_home, score_outside)\n    VALUES (", ", ", ", ", ", ", ", ", ", ", ", ", ", ", ")\n    RETURNING id_match\n  "], ["\n    INSERT INTO match (date, hour, opponent, location, type, team, score_home, score_outside)\n    VALUES (", ", ", ", ", ", ", ", ", ", ", ", ", ", ", ")\n    RETURNING id_match\n  "])), date, hour, opponent, location, type, team, score_home, score_outside)];
+                    case 0: return [4 /*yield*/, this.sql(templateObject_19 || (templateObject_19 = __makeTemplateObject(["\n    INSERT INTO match (date, hour, opponent, location, type, team, score_home, score_outside)\n    VALUES (", ", ", ", ", ", ", ", ", ", ", ", ", ", ", ")\n    RETURNING id_match\n  "], ["\n    INSERT INTO match (date, hour, opponent, location, type, team, score_home, score_outside)\n    VALUES (", ", ", ", ", ", ", ", ", ", ", ", ", ", ", ")\n    RETURNING id_match\n  "])), date, hour, opponent, location, type, team, score_home, score_outside)];
                     case 1:
                         result = _c.sent();
                         return [2 /*return*/, result[0]];
@@ -257,7 +328,7 @@ var Repository = /** @class */ (function () {
             var id_match = _b.id_match, date = _b.date, hour = _b.hour, opponent = _b.opponent, location = _b.location, type = _b.type, team = _b.team, score_home = _b.score_home, score_outside = _b.score_outside;
             return __generator(this, function (_c) {
                 switch (_c.label) {
-                    case 0: return [4 /*yield*/, this.sql(templateObject_15 || (templateObject_15 = __makeTemplateObject(["\n    UPDATE match\n    SET date = ", ", hour = ", ", opponent = ", ", location = ", ", type = ", ", team = ", ", score_home = ", ", score_outside = ", "\n    WHERE id_match = ", "\n    RETURNING id_match\n  "], ["\n    UPDATE match\n    SET date = ", ", hour = ", ", opponent = ", ", location = ", ", type = ", ", team = ", ", score_home = ", ", score_outside = ", "\n    WHERE id_match = ", "\n    RETURNING id_match\n  "])), date, hour, opponent, location, type, team, score_home, score_outside, id_match)];
+                    case 0: return [4 /*yield*/, this.sql(templateObject_20 || (templateObject_20 = __makeTemplateObject(["\n    UPDATE match\n    SET date = ", ", hour = ", ", opponent = ", ", location = ", ", type = ", ", team = ", ", score_home = ", ", score_outside = ", "\n    WHERE id_match = ", "\n    RETURNING id_match\n  "], ["\n    UPDATE match\n    SET date = ", ", hour = ", ", opponent = ", ", location = ", ", type = ", ", team = ", ", score_home = ", ", score_outside = ", "\n    WHERE id_match = ", "\n    RETURNING id_match\n  "])), date, hour, opponent, location, type, team, score_home, score_outside, id_match)];
                     case 1:
                         result = _c.sent();
                         return [2 /*return*/, result[0]];
@@ -269,7 +340,7 @@ var Repository = /** @class */ (function () {
         return __awaiter(this, void 0, void 0, function () {
             return __generator(this, function (_a) {
                 switch (_a.label) {
-                    case 0: return [4 /*yield*/, this.sql(templateObject_16 || (templateObject_16 = __makeTemplateObject(["\n      DELETE FROM match\n      WHERE id_match = ", "\n    "], ["\n      DELETE FROM match\n      WHERE id_match = ", "\n    "])), id_match)];
+                    case 0: return [4 /*yield*/, this.sql(templateObject_21 || (templateObject_21 = __makeTemplateObject(["\n      DELETE FROM match\n      WHERE id_match = ", "\n    "], ["\n      DELETE FROM match\n      WHERE id_match = ", "\n    "])), id_match)];
                     case 1:
                         _a.sent();
                         return [2 /*return*/];
@@ -282,7 +353,7 @@ var Repository = /** @class */ (function () {
             var result;
             return __generator(this, function (_a) {
                 switch (_a.label) {
-                    case 0: return [4 /*yield*/, this.sql(templateObject_17 || (templateObject_17 = __makeTemplateObject(["\n      SELECT * FROM match\n    "], ["\n      SELECT * FROM match\n    "])))];
+                    case 0: return [4 /*yield*/, this.sql(templateObject_22 || (templateObject_22 = __makeTemplateObject(["\n      SELECT * FROM match\n    "], ["\n      SELECT * FROM match\n    "])))];
                     case 1:
                         result = _a.sent();
                         return [2 /*return*/, result];
@@ -293,4 +364,4 @@ var Repository = /** @class */ (function () {
     return Repository;
 }());
 exports.Repository = Repository;
-var templateObject_1, templateObject_2, templateObject_3, templateObject_4, templateObject_5, templateObject_6, templateObject_7, templateObject_8, templateObject_9, templateObject_10, templateObject_11, templateObject_12, templateObject_13, templateObject_14, templateObject_15, templateObject_16, templateObject_17;
+var templateObject_1, templateObject_2, templateObject_3, templateObject_4, templateObject_5, templateObject_6, templateObject_7, templateObject_8, templateObject_9, templateObject_10, templateObject_11, templateObject_12, templateObject_13, templateObject_14, templateObject_15, templateObject_16, templateObject_17, templateObject_18, templateObject_19, templateObject_20, templateObject_21, templateObject_22;

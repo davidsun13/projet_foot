@@ -86,8 +86,50 @@ function start_web_server() {
                         })];
                 case 2:
                     _a.sent();
-                    web_server.post("/register", function (request, reply) { return __awaiter(_this, void 0, void 0, function () {
+                    web_server.post("/registercoach", function (request, reply) { return __awaiter(_this, void 0, void 0, function () {
                         var parsed, user, accessToken, refreshToken, err_1;
+                        var _a;
+                        return __generator(this, function (_b) {
+                            switch (_b.label) {
+                                case 0:
+                                    _b.trys.push([0, 3, , 4]);
+                                    parsed = connexion_cjs_1.registerSchema.parse(request.body);
+                                    return [4 /*yield*/, repo.registerCoach({
+                                            surname: parsed.surname,
+                                            name: parsed.name,
+                                            mail: parsed.mail,
+                                            phone: (_a = parsed.phone) !== null && _a !== void 0 ? _a : null,
+                                            password: parsed.password,
+                                        })];
+                                case 1:
+                                    user = _b.sent();
+                                    accessToken = web_server.jwt.sign({ id: user.id_coach }, { expiresIn: "15m" });
+                                    refreshToken = generateRefreshToken();
+                                    return [4 /*yield*/, repo.saveRefreshToken({
+                                            userId: user.id_coach,
+                                            userType: "coach",
+                                            token: refreshToken,
+                                            expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+                                        })];
+                                case 2:
+                                    _b.sent();
+                                    reply.setCookie("refresh_token", refreshToken, {
+                                        httpOnly: true,
+                                        secure: isProduction,
+                                        sameSite: "strict",
+                                        path: "/",
+                                        maxAge: 7 * 24 * 60 * 60,
+                                    });
+                                    return [2 /*return*/, reply.send({ accessToken: accessToken, user: user })];
+                                case 3:
+                                    err_1 = _b.sent();
+                                    return [2 /*return*/, reply.status(400).send({ error: err_1.message })];
+                                case 4: return [2 /*return*/];
+                            }
+                        });
+                    }); });
+                    web_server.post("/register", function (request, reply) { return __awaiter(_this, void 0, void 0, function () {
+                        var parsed, user, accessToken, refreshToken, err_2;
                         var _a;
                         return __generator(this, function (_b) {
                             switch (_b.label) {
@@ -107,9 +149,9 @@ function start_web_server() {
                                     refreshToken = generateRefreshToken();
                                     return [4 /*yield*/, repo.saveRefreshToken({
                                             userId: user.id_player,
+                                            userType: "player",
                                             token: refreshToken,
                                             expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
-                                            revoked: false,
                                         })];
                                 case 2:
                                     _b.sent();
@@ -122,14 +164,14 @@ function start_web_server() {
                                     });
                                     return [2 /*return*/, reply.send({ accessToken: accessToken, user: user })];
                                 case 3:
-                                    err_1 = _b.sent();
-                                    return [2 /*return*/, reply.status(400).send({ error: err_1.message })];
+                                    err_2 = _b.sent();
+                                    return [2 /*return*/, reply.status(400).send({ error: err_2.message })];
                                 case 4: return [2 /*return*/];
                             }
                         });
                     }); });
                     web_server.post("/login", function (request, reply) { return __awaiter(_this, void 0, void 0, function () {
-                        var parsed, mail, password, user, accessToken, refreshToken, err_2;
+                        var parsed, mail, password, user, accessToken, refreshToken, err_3;
                         return __generator(this, function (_a) {
                             switch (_a.label) {
                                 case 0:
@@ -139,10 +181,11 @@ function start_web_server() {
                                     return [4 /*yield*/, repo.loginPlayer(mail, password)];
                                 case 1:
                                     user = _a.sent();
-                                    accessToken = web_server.jwt.sign({ id: user.id_player }, { expiresIn: "15m" });
+                                    accessToken = web_server.jwt.sign({ id: user.id_player, userType: "player" }, { expiresIn: "15m" });
                                     refreshToken = generateRefreshToken();
                                     return [4 /*yield*/, repo.saveRefreshToken({
                                             userId: user.id_player,
+                                            userType: "player",
                                             token: refreshToken,
                                             expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
                                         })];
@@ -157,34 +200,56 @@ function start_web_server() {
                                     });
                                     return [2 /*return*/, reply.send({ accessToken: accessToken, user: user })];
                                 case 3:
-                                    err_2 = _a.sent();
-                                    if (err_2 instanceof zod_1.ZodError) {
-                                        return [2 /*return*/, reply.status(400).send({ errors: formatZodError(err_2) })];
+                                    err_3 = _a.sent();
+                                    if (err_3 instanceof zod_1.ZodError) {
+                                        return [2 /*return*/, reply.status(400).send({ errors: formatZodError(err_3) })];
                                     }
-                                    return [2 /*return*/, reply.status(401).send({ error: err_2.message })];
+                                    return [2 /*return*/, reply.status(401).send({ error: err_3.message })];
                                 case 4: return [2 /*return*/];
                             }
                         });
                     }); });
-                    web_server.get("/protected", function (request, reply) { return __awaiter(_this, void 0, void 0, function () {
-                        var _a;
-                        return __generator(this, function (_b) {
-                            switch (_b.label) {
+                    web_server.post("/logincoach", function (request, reply) { return __awaiter(_this, void 0, void 0, function () {
+                        var parsed, mail, password, user, accessToken, refreshToken, err_4;
+                        return __generator(this, function (_a) {
+                            switch (_a.label) {
                                 case 0:
-                                    _b.trys.push([0, 2, , 3]);
-                                    return [4 /*yield*/, request.jwtVerify()];
+                                    _a.trys.push([0, 3, , 4]);
+                                    parsed = connexion_cjs_1.loginSchema.parse(request.body);
+                                    mail = parsed.mail, password = parsed.password;
+                                    return [4 /*yield*/, repo.loginCoach(mail, password)];
                                 case 1:
-                                    _b.sent();
-                                    return [2 /*return*/, reply.send({ message: "Route protégée OK", user: request.user })];
+                                    user = _a.sent();
+                                    accessToken = web_server.jwt.sign({ id: user.id_coach, userType: "coach" }, { expiresIn: "15m" });
+                                    refreshToken = generateRefreshToken();
+                                    return [4 /*yield*/, repo.saveRefreshToken({
+                                            userId: user.id_coach,
+                                            userType: "coach", // <--- ajouté
+                                            token: refreshToken,
+                                            expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+                                        })];
                                 case 2:
-                                    _a = _b.sent();
-                                    return [2 /*return*/, reply.status(401).send({ error: "Token invalide" })];
-                                case 3: return [2 /*return*/];
+                                    _a.sent();
+                                    reply.setCookie("refresh_token", refreshToken, {
+                                        httpOnly: true,
+                                        secure: isProduction,
+                                        sameSite: "strict",
+                                        path: "/",
+                                        maxAge: 7 * 24 * 60 * 60,
+                                    });
+                                    return [2 /*return*/, reply.send({ accessToken: accessToken, user: user })];
+                                case 3:
+                                    err_4 = _a.sent();
+                                    if (err_4 instanceof zod_1.ZodError) {
+                                        return [2 /*return*/, reply.status(400).send({ errors: formatZodError(err_4) })];
+                                    }
+                                    return [2 /*return*/, reply.status(400).send({ error: err_4.message })];
+                                case 4: return [2 /*return*/];
                             }
                         });
                     }); });
                     web_server.post("/refresh", function (request, reply) { return __awaiter(_this, void 0, void 0, function () {
-                        var oldRefresh, stored, newRefresh, newAccess;
+                        var oldRefresh, stored, userId, newRefresh, newAccess;
                         var _a;
                         return __generator(this, function (_b) {
                             switch (_b.label) {
@@ -202,14 +267,19 @@ function start_web_server() {
                                 case 2:
                                     _b.sent();
                                     return [2 /*return*/, reply.status(401).send({ error: "Expired refresh token" })];
-                                case 3: return [4 /*yield*/, repo.revokeRefreshToken(oldRefresh)];
+                                case 3: 
+                                // Révoque l'ancien token
+                                return [4 /*yield*/, repo.revokeRefreshToken(oldRefresh)];
                                 case 4:
+                                    // Révoque l'ancien token
                                     _b.sent();
+                                    userId = stored.userType === "player" ? stored.player_id : stored.coach_id;
                                     newRefresh = generateRefreshToken();
-                                    newAccess = web_server.jwt.sign({ id: stored.user_id }, { expiresIn: "15m" });
+                                    newAccess = web_server.jwt.sign({ id: userId, userType: stored.userType }, { expiresIn: "15m" });
                                     return [4 /*yield*/, repo.saveRefreshToken({
                                             token: newRefresh,
-                                            userId: stored.user_id,
+                                            userId: userId,
+                                            userType: stored.userType,
                                             revoked: false,
                                             expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
                                         })];
@@ -253,7 +323,7 @@ function start_web_server() {
                                     _b.sent();
                                     return [2 /*return*/, reply.send({
                                             message: "Accès autorisé",
-                                            data: "Voici la fausse donnée secrète"
+                                            data: "Voici la fausse donnée secrète",
                                         })];
                                 case 2:
                                     _a = _b.sent();
@@ -263,7 +333,7 @@ function start_web_server() {
                         });
                     }); });
                     web_server.post("/createtraining", function (request, reply) { return __awaiter(_this, void 0, void 0, function () {
-                        var parsed, training, err_3;
+                        var parsed, training, err_5;
                         return __generator(this, function (_a) {
                             switch (_a.label) {
                                 case 0:
@@ -274,17 +344,17 @@ function start_web_server() {
                                     training = _a.sent();
                                     return [2 /*return*/, reply.send(training)];
                                 case 2:
-                                    err_3 = _a.sent();
-                                    if (err_3 instanceof zod_1.ZodError) {
-                                        return [2 /*return*/, reply.status(400).send({ errors: formatZodError(err_3) })];
+                                    err_5 = _a.sent();
+                                    if (err_5 instanceof zod_1.ZodError) {
+                                        return [2 /*return*/, reply.status(400).send({ errors: formatZodError(err_5) })];
                                     }
-                                    return [2 /*return*/, reply.status(500).send({ error: err_3.message })];
+                                    return [2 /*return*/, reply.status(500).send({ error: err_5.message })];
                                 case 3: return [2 /*return*/];
                             }
                         });
                     }); });
                     web_server.put("/modifytraining", function (request, reply) { return __awaiter(_this, void 0, void 0, function () {
-                        var body, training, err_4;
+                        var body, training, err_6;
                         return __generator(this, function (_a) {
                             switch (_a.label) {
                                 case 0:
@@ -295,14 +365,14 @@ function start_web_server() {
                                     training = _a.sent();
                                     return [2 /*return*/, reply.send(training)];
                                 case 2:
-                                    err_4 = _a.sent();
-                                    return [2 /*return*/, reply.status(500).send({ error: err_4.message })];
+                                    err_6 = _a.sent();
+                                    return [2 /*return*/, reply.status(500).send({ error: err_6.message })];
                                 case 3: return [2 /*return*/];
                             }
                         });
                     }); });
                     web_server.delete("/deletetraining/:id_training", function (request, reply) { return __awaiter(_this, void 0, void 0, function () {
-                        var id_training, training, err_5;
+                        var id_training, training, err_7;
                         return __generator(this, function (_a) {
                             switch (_a.label) {
                                 case 0:
@@ -313,14 +383,14 @@ function start_web_server() {
                                     training = _a.sent();
                                     return [2 /*return*/, reply.send(training)];
                                 case 2:
-                                    err_5 = _a.sent();
-                                    return [2 /*return*/, reply.status(500).send({ error: err_5.message })];
+                                    err_7 = _a.sent();
+                                    return [2 /*return*/, reply.status(500).send({ error: err_7.message })];
                                 case 3: return [2 /*return*/];
                             }
                         });
                     }); });
                     web_server.get("/trainings", function (request, reply) { return __awaiter(_this, void 0, void 0, function () {
-                        var trainings, err_6;
+                        var trainings, err_8;
                         return __generator(this, function (_a) {
                             switch (_a.label) {
                                 case 0:
@@ -330,14 +400,14 @@ function start_web_server() {
                                     trainings = _a.sent();
                                     return [2 /*return*/, reply.send(trainings)];
                                 case 2:
-                                    err_6 = _a.sent();
-                                    return [2 /*return*/, reply.status(500).send({ error: err_6.message })];
+                                    err_8 = _a.sent();
+                                    return [2 /*return*/, reply.status(500).send({ error: err_8.message })];
                                 case 3: return [2 /*return*/];
                             }
                         });
                     }); });
                     web_server.post("/creatematch", function (request, reply) { return __awaiter(_this, void 0, void 0, function () {
-                        var body, match, err_7;
+                        var body, match, err_9;
                         return __generator(this, function (_a) {
                             switch (_a.label) {
                                 case 0:
@@ -348,14 +418,14 @@ function start_web_server() {
                                     match = _a.sent();
                                     return [2 /*return*/, reply.send(match)];
                                 case 2:
-                                    err_7 = _a.sent();
-                                    return [2 /*return*/, reply.status(500).send({ error: err_7.message })];
+                                    err_9 = _a.sent();
+                                    return [2 /*return*/, reply.status(500).send({ error: err_9.message })];
                                 case 3: return [2 /*return*/];
                             }
                         });
                     }); });
                     web_server.put("/modifymatch", function (request, reply) { return __awaiter(_this, void 0, void 0, function () {
-                        var body, match, err_8;
+                        var body, match, err_10;
                         return __generator(this, function (_a) {
                             switch (_a.label) {
                                 case 0:
@@ -366,14 +436,14 @@ function start_web_server() {
                                     match = _a.sent();
                                     return [2 /*return*/, reply.send(match)];
                                 case 2:
-                                    err_8 = _a.sent();
-                                    return [2 /*return*/, reply.status(500).send({ error: err_8.message })];
+                                    err_10 = _a.sent();
+                                    return [2 /*return*/, reply.status(500).send({ error: err_10.message })];
                                 case 3: return [2 /*return*/];
                             }
                         });
                     }); });
                     web_server.delete("/deletematch/:id_match", function (request, reply) { return __awaiter(_this, void 0, void 0, function () {
-                        var id_match, match, err_9;
+                        var id_match, match, err_11;
                         return __generator(this, function (_a) {
                             switch (_a.label) {
                                 case 0:
@@ -384,14 +454,14 @@ function start_web_server() {
                                     match = _a.sent();
                                     return [2 /*return*/, reply.send(match)];
                                 case 2:
-                                    err_9 = _a.sent();
-                                    return [2 /*return*/, reply.status(500).send({ error: err_9.message })];
+                                    err_11 = _a.sent();
+                                    return [2 /*return*/, reply.status(500).send({ error: err_11.message })];
                                 case 3: return [2 /*return*/];
                             }
                         });
                     }); });
                     web_server.get("/matchs", function (request, reply) { return __awaiter(_this, void 0, void 0, function () {
-                        var matches, err_10;
+                        var matches, err_12;
                         return __generator(this, function (_a) {
                             switch (_a.label) {
                                 case 0:
@@ -401,9 +471,40 @@ function start_web_server() {
                                     matches = _a.sent();
                                     return [2 /*return*/, reply.send(matches)];
                                 case 2:
-                                    err_10 = _a.sent();
-                                    return [2 /*return*/, reply.status(500).send({ error: err_10.message })];
+                                    err_12 = _a.sent();
+                                    return [2 /*return*/, reply.status(500).send({ error: err_12.message })];
                                 case 3: return [2 /*return*/];
+                            }
+                        });
+                    }); });
+                    web_server.get("/me", function (request, reply) { return __awaiter(_this, void 0, void 0, function () {
+                        var _a, id, userType, user, err_13;
+                        return __generator(this, function (_b) {
+                            switch (_b.label) {
+                                case 0:
+                                    _b.trys.push([0, 6, , 7]);
+                                    return [4 /*yield*/, request.jwtVerify()];
+                                case 1:
+                                    _b.sent();
+                                    _a = request.user, id = _a.id, userType = _a.userType;
+                                    user = void 0;
+                                    if (!(userType === "player")) return [3 /*break*/, 3];
+                                    return [4 /*yield*/, repo.getPlayerById(id)];
+                                case 2:
+                                    user = _b.sent();
+                                    return [3 /*break*/, 5];
+                                case 3: return [4 /*yield*/, repo.getCoachById(id)];
+                                case 4:
+                                    user = _b.sent();
+                                    _b.label = 5;
+                                case 5: return [2 /*return*/, reply.send({
+                                        userType: userType,
+                                        user: user,
+                                    })];
+                                case 6:
+                                    err_13 = _b.sent();
+                                    return [2 /*return*/, reply.status(401).send({ error: "Unauthorized" })];
+                                case 7: return [2 /*return*/];
                             }
                         });
                     }); });

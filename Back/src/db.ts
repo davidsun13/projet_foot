@@ -19,18 +19,18 @@ export class Repository {
   }
 
   async registerPlayer({
-  surname,
-  name,
-  mail,
-  phone,
-  password,
-}: {
-  surname: string;
-  name: string;
-  mail: string;
-  phone: string | null;
-  password: string;
-}) {
+    surname,
+    name,
+    mail,
+    phone,
+    password,
+  }: {
+    surname: string;
+    name: string;
+    mail: string;
+    phone: string | null;
+    password: string;
+  }) {
     const existing = await this.sql`
       SELECT * FROM player WHERE mail = ${mail}
     `;
@@ -48,26 +48,80 @@ export class Repository {
 
     return result[0];
   }
-  async loginPlayer(mail: string, password: string) {
-    const user = await this.sql`
-      SELECT * FROM player WHERE mail = ${mail}
+  async registerCoach({
+    surname,
+    name,
+    mail,
+    phone,
+    password,
+  }: {
+    surname: string;
+    name: string;
+    mail: string;
+    phone: string | null;
+    password: string;
+  }) {
+    const existing = await this.sql`
+      SELECT * FROM coach WHERE mail = ${mail}
     `;
 
-    if (user.length === 0) {
-      throw new Error("Email ou mot de passe incorrect.");
+    if (existing.length > 0) {
+      throw new Error("Un compte existe déjà avec cet email.");
     }
+    const hash = await argon2.hash(password);
+    const phoneValue = phone ?? null;
+    const result = await this.sql`
+      INSERT INTO coach (surname, name, mail, phone, password)
+      VALUES (${surname}, ${name}, ${mail}, ${phoneValue}, ${hash})
+      RETURNING id_coach, surname, name, mail, phone
+    `;
 
-    const player = user[0];
-
-    const isValid = await argon2.verify(player.password, password);
-
-    if (!isValid) {
-      throw new Error("Email ou mot de passe incorrect.");
-    }
-
-    const { mot_de_passe: _, ...safeUser } = player;
-    return safeUser;
+    return result[0];
   }
+  async loginCoach(mail: string, password: string) {
+  const user = await this.sql`
+    SELECT * FROM coach WHERE mail = ${mail}
+  `;
+
+  if (user.length === 0) {
+    throw new Error("Email ou mot de passe incorrect.");
+  }
+
+  const coach = user[0];
+
+  const isValid = await argon2.verify(coach.password, password);
+
+  if (!isValid) {
+    throw new Error("Email ou mot de passe incorrect.");
+  }
+
+  delete coach.password;
+
+  return coach;
+}
+
+  async loginPlayer(mail: string, password: string) {
+  const user = await this.sql`
+    SELECT * FROM player WHERE mail = ${mail}
+  `;
+
+  if (user.length === 0) {
+    throw new Error("Email ou mot de passe incorrect.");
+  }
+
+  const player = user[0];
+
+  const isValid = await argon2.verify(player.password, password);
+
+  if (!isValid) {
+    throw new Error("Email ou mot de passe incorrect.");
+  }
+
+  delete player.password;
+
+  return player;
+}
+
   async getPlayerByEmail(mail: string) {
     const user = await this.sql`
       SELECT id_player, surname, name, mail, position, number, phone, status
@@ -83,89 +137,112 @@ export class Repository {
     `;
     return user[0] || null;
   }
-   async saveRefreshToken({
-  userId,
-  token,
-  expiresAt,
-}: {
-  userId: number;
-  token: string;
-  expiresAt: Date;
-}) {
-  return await this.sql`
-    INSERT INTO refresh_tokens (user_id, token, expires_at)
+  async getCoachbyEmail(mail: string) {
+    const user = await this.sql`
+      SELECT id_coach, surname, name, mail, phone
+      FROM coach WHERE mail = ${mail}
+    `;
+    return user[0] || null;
+  }
+  async getCoachById(id_coach: number) {
+    const user = await this.sql`
+      SELECT id_coach, surname, name, mail, phone
+      FROM coach WHERE id_coach = ${id_coach}
+    `;
+    return user[0] || null;
+  }
+  async saveRefreshToken({
+    userId,
+    userType, 
+    token,
+    expiresAt,
+  }: {
+    userId: number;
+    userType: 'player' | 'coach';
+    token: string;
+    expiresAt: Date;
+  }) {
+    const column = userType === 'player' ? 'player_id' : 'coach_id';
+
+    const result = await this.sql`
+    INSERT INTO refresh_tokens (${this.sql(column)}, token, expires_at)
     VALUES (${userId}, ${token}, ${expiresAt})
-    RETURNING id, user_id, token, expires_at
+    RETURNING id, player_id, coach_id, token, expires_at
   `;
-}
+
+    return result[0];
+  }
 
   async findRefreshToken(token: string) {
-  const result = await this.sql`
+    const result = await this.sql`
     SELECT * FROM refresh_tokens
     WHERE token = ${token}
     LIMIT 1
   `;
-  return result[0] || null;
-}
+    return result[0] || null;
+  }
 
   async revokeRefreshToken(token: string) {
-  return await this.sql`
+    return await this.sql`
     UPDATE refresh_tokens
     SET revoked = TRUE
     WHERE token = ${token}
   `;
-}
-async revokeAllUserTokens(userId: number) {
-  return await this.sql`
+  }
+
+  async revokeAllUserTokens(userId: number, userType: 'player' | 'coach') {
+    const column = userType === 'player' ? 'player_id' : 'coach_id';
+
+    return await this.sql`
     UPDATE refresh_tokens
     SET revoked = TRUE
-    WHERE user_id = ${userId}
+    WHERE ${this.sql(column)} = ${userId}
   `;
-}
+  }
   async createTrainingSession({
-  date,
-  hour,
-  location,
-  type,
-  team,
-}: {
-  date: Date;
-  hour: string;
-  location: string;
-  type: string;
-  team: string;
-}) {
-  const result = await this.sql`
+    date,
+    hour,
+    location,
+    type,
+    team,
+  }: {
+    date: Date;
+    hour: string;
+    location: string;
+    type: string;
+    team: string;
+  }) {
+    const result = await this.sql`
     INSERT INTO training (date, hour, type, location, team)
     VALUES (${date}, ${hour}, ${type}, ${location}, ${team})
     RETURNING id_training
   `;
-  return result[0];
-}
+    return result[0];
+  }
 
   async modifyTrainingSession({
-  id_training,
-  date,
-  hour,
-  location,
-  type,
-  team,
-}: {
-  id_training: number;
-  date: Date;
-  hour: string;
-  location: string;
-  type: string;
-  team: string;
-}) {
-  const result = await this.sql`
+    id_training,
+    date,
+    hour,
+    location,
+    type,
+    team,
+  }: {
+    id_training: number;
+    date: Date;
+    hour: string;
+    location: string;
+    type: string;
+    team: string;
+  }) {
+    const result = await this.sql`
     UPDATE training
     SET date = ${date}, hour = ${hour}, type = ${type}, location = ${location}, team = ${team}
     WHERE id_training = ${id_training}
     RETURNING id_training
   `;
-  return result[0];
-}
+    return result[0];
+  }
 
   async deleteTrainingSession(id_training: number) {
     await this.sql`
@@ -176,75 +253,75 @@ async revokeAllUserTokens(userId: number) {
   async listTrainingSessions() {
     const result = await this.sql`
       SELECT * FROM training
-    `;    
+    `;
     return result;
   }
   async createMatchSession({
-  date,
-  hour,
-  opponent,
-  location,
-  type,
-  team,
-  score_home,
-  score_outside,
-}: {
-  date: Date;
-  hour: string;
-  opponent: string;
-  location: string;
-  type: string;
-  team: string;
-  score_home: number;
-  score_outside: number;
-}) {
-  const result = await this.sql`
+    date,
+    hour,
+    opponent,
+    location,
+    type,
+    team,
+    score_home,
+    score_outside,
+  }: {
+    date: Date;
+    hour: string;
+    opponent: string;
+    location: string;
+    type: string;
+    team: string;
+    score_home: number;
+    score_outside: number;
+  }) {
+    const result = await this.sql`
     INSERT INTO match (date, hour, opponent, location, type, team, score_home, score_outside)
     VALUES (${date}, ${hour}, ${opponent}, ${location}, ${type}, ${team}, ${score_home}, ${score_outside})
     RETURNING id_match
   `;
-  return result[0];
-}
-async modifyMatchSession({
-  id_match,
-  date,
-  hour,
-  opponent,
-  location,
-  type,
-  team,
-  score_home,
-  score_outside,
-}: {
-  id_match: number;
-  date: Date;
-  hour: string;
-  opponent: string;
-  location: string;
-  type: string;
-  team: string;
-  score_home: number;
-  score_outside: number;
-}) {
-  const result = await this.sql`
+    return result[0];
+  }
+  async modifyMatchSession({
+    id_match,
+    date,
+    hour,
+    opponent,
+    location,
+    type,
+    team,
+    score_home,
+    score_outside,
+  }: {
+    id_match: number;
+    date: Date;
+    hour: string;
+    opponent: string;
+    location: string;
+    type: string;
+    team: string;
+    score_home: number;
+    score_outside: number;
+  }) {
+    const result = await this.sql`
     UPDATE match
     SET date = ${date}, hour = ${hour}, opponent = ${opponent}, location = ${location}, type = ${type}, team = ${team}, score_home = ${score_home}, score_outside = ${score_outside}
     WHERE id_match = ${id_match}
     RETURNING id_match
   `;
-  return result[0]; 
-}
-async deleteMatchSession(id_match: number) {
+    return result[0];
+  }
+  async deleteMatchSession(id_match: number) {
     await this.sql`
       DELETE FROM match
       WHERE id_match = ${id_match}
     `;
   }
-async listMatchSessions() {
+  async listMatchSessions() {
     const result = await this.sql`
       SELECT * FROM match
-    `;    
+    `;
     return result;
-}
+  }
 }
 

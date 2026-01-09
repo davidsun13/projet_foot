@@ -1,12 +1,12 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Button from "./button";
-import { fetchAuth } from "../utils/fetchAuth";
 
 function Connexion() {
   const navigate = useNavigate();
   const [form, setForm] = useState({ email: "", password: "" });
   const [error, setError] = useState<string | null>(null);
+  const [userType, setUserType] = useState<"player" | "coach">("player"); // default = joueur
 
   function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
     setForm({ ...form, [e.target.id]: e.target.value });
@@ -18,7 +18,9 @@ function Connexion() {
     setError(null);
 
     try {
-      const res = await fetch("http://localhost:1234/login", {
+      const endpoint = userType === "player" ? "/login" : "/logincoach";
+
+      const res = await fetch(`http://localhost:1234${endpoint}`, {
         method: "POST",
         credentials: "include",
         headers: { "Content-Type": "application/json" },
@@ -38,9 +40,9 @@ function Connexion() {
       if (data.accessToken) {
         localStorage.setItem("access_token", data.accessToken);
       }
-
-      // Redirect to dashboard after successful login
+      localStorage.setItem("userType", userType);
       navigate("/");
+      window.location.reload();
     } catch (err) {
       setError("Erreur réseau : " + (err as Error).message);
     }
@@ -54,6 +56,24 @@ function Connexion() {
         </h2>
 
         {error && <p className="text-center text-red-600 mb-4">{error}</p>}
+
+        {/* Optionnel : bouton pour choisir joueur ou coach */}
+        <div className="mb-4 text-center">
+          <button
+            type="button"
+            onClick={() => setUserType("player")}
+            className={`px-4 py-2 mr-2 rounded ${userType === "player" ? "bg-red-600 text-black" : "bg-gray-200"}`}
+          >
+            Joueur
+          </button>
+          <button
+            type="button"
+            onClick={() => setUserType("coach")}
+            className={`px-4 py-2 rounded ${userType === "coach" ? "bg-red-600 text-black" : "bg-gray-200"}`}
+          >
+            Coach
+          </button>
+        </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>

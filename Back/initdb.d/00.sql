@@ -2,6 +2,7 @@ CREATE TABLE coach (
     id_coach SERIAL PRIMARY KEY,
     surname TEXT,
     name TEXT,
+    phone TEXT,
     mail TEXT UNIQUE NOT NULL,
     password TEXT NOT NULL
 );
@@ -92,10 +93,15 @@ CREATE TABLE statistics (
 
 CREATE TABLE refresh_tokens (
     id SERIAL PRIMARY KEY,
-    user_id INTEGER NOT NULL REFERENCES player(id_player) ON DELETE CASCADE,
+    player_id INTEGER REFERENCES player(id_player) ON DELETE CASCADE,
+    coach_id INTEGER REFERENCES coach(id_coach) ON DELETE CASCADE,
     token TEXT NOT NULL UNIQUE,
     revoked BOOLEAN NOT NULL DEFAULT FALSE,
     expires_at TIMESTAMP NOT NULL,
-    created_at TIMESTAMP DEFAULT NOW()
+    created_at TIMESTAMP DEFAULT NOW(),
+    CHECK (
+        (player_id IS NOT NULL AND coach_id IS NULL) OR 
+        (player_id IS NULL AND coach_id IS NOT NULL)
+    )
 );
 

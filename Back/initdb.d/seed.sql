@@ -1,10 +1,10 @@
 -- ================================
 -- COACHS
 -- ================================
-INSERT INTO coach (surname, name, mail, password)
+INSERT INTO coach (surname, name, mail,phone, password)
 VALUES
-('Dupont', 'Jean', 'jean.dupont@club.com', 'mdp123'),
-('Martin', 'Lucas', 'lucas.martin@club.com', 'coachpass');
+('Dupont', 'Jean', 'jean.dupont@club.com', '0601020304', 'mdp123'),
+('Martin', 'Lucas', 'lucas.martin@club.com', '0611223344', 'coachpass');
 
 -- ================================
 -- JOUEURS

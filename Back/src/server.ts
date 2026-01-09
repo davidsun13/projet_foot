@@ -15,6 +15,7 @@ declare module "@fastify/jwt" {
   interface FastifyJWT {
     payload: { id: number };
     user: { id: number };
+    userType: 'player' | 'coach';
   }
 }
 
@@ -49,11 +50,11 @@ export async function start_web_server() {
       message: issue.message
     }));
   }
-  web_server.post("/register", async (request, reply) => {
+web_server.post("/registercoach", async (request, reply) => {
   try {
     const parsed = registerSchema.parse(request.body);
 
-    const user = await repo.registerPlayer({
+    const user = await repo.registerCoach({
       surname: parsed.surname,
       name: parsed.name,
       mail: parsed.mail,
@@ -62,17 +63,17 @@ export async function start_web_server() {
     });
 
     const accessToken = web_server.jwt.sign(
-      { id: user.id_player },
+      { id: user.id_coach },
       { expiresIn: "15m" }
     );
 
     const refreshToken = generateRefreshToken();
 
     await repo.saveRefreshToken({
-      userId: user.id_player,
+      userId: user.id_coach,
+      userType: "coach",
       token: refreshToken,
       expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
-      revoked: false,
     });
 
     reply.setCookie("refresh_token", refreshToken, {
@@ -88,49 +89,111 @@ export async function start_web_server() {
     return reply.status(400).send({ error: (err as Error).message });
   }
 });
+web_server.post("/register", async (request, reply) => {
+  try {
+    const parsed = registerSchema.parse(request.body);
+    const user = await repo.registerPlayer({
+      surname: parsed.surname,
+      name: parsed.name,
+      mail: parsed.mail,
+      phone: parsed.phone ?? null,
+      password: parsed.password,
+    });
 
+    const accessToken = web_server.jwt.sign(
+      { id: user.id_player },
+      { expiresIn: "15m" }
+    );
 
-  web_server.post("/login", async (request: FastifyRequest, reply: FastifyReply) => {
-    try {
-      const parsed = loginSchema.parse(request.body);
-      const { mail, password } = parsed;  
+    const refreshToken = generateRefreshToken();
+    await repo.saveRefreshToken({
+      userId: user.id_player,
+      userType: "player",
+      token: refreshToken,
+      expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+    });
+    reply.setCookie("refresh_token", refreshToken, {
+      httpOnly: true,
+      secure: isProduction,
+      sameSite: "strict",
+      path: "/",
+      maxAge: 7 * 24 * 60 * 60,
+    });
 
-      const user = await repo.loginPlayer(mail, password);
+    return reply.send({ accessToken, user });
+  } catch (err) {
+    return reply.status(400).send({ error: (err as Error).message });
+  }
+});
 
-      const accessToken = web_server.jwt.sign({ id: user.id_player }, { expiresIn: "15m" });
-      const refreshToken = generateRefreshToken();
-      
-      await repo.saveRefreshToken({
-        userId: user.id_player,
-        token: refreshToken,
-        expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
-      });
+web_server.post("/login", async (request: FastifyRequest, reply: FastifyReply) => {
+  try {
+    const parsed = loginSchema.parse(request.body);
+    const { mail, password } = parsed;
 
-      reply.setCookie("refresh_token", refreshToken, {
-        httpOnly: true,
-        secure: isProduction,
-        sameSite: "strict",
-        path: "/",
-        maxAge: 7 * 24 * 60 * 60,
-      });
+    const user = await repo.loginPlayer(mail, password);
 
-      return reply.send({ accessToken, user });
-    } catch (err) {
-      if (err instanceof ZodError) {
-        return reply.status(400).send({ errors: formatZodError(err) });
-      }
-      return reply.status(401).send({ error: (err as Error).message });
+    const accessToken = web_server.jwt.sign({ id: user.id_player, userType: "player" }, { expiresIn: "15m" });
+    const refreshToken = generateRefreshToken();
+
+    await repo.saveRefreshToken({
+      userId: user.id_player,
+      userType: "player",
+      token: refreshToken,
+      expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+    });
+
+    reply.setCookie("refresh_token", refreshToken, {
+      httpOnly: true,
+      secure: isProduction,
+      sameSite: "strict",
+      path: "/",
+      maxAge: 7 * 24 * 60 * 60,
+    });
+
+    return reply.send({ accessToken, user });
+  } catch (err) {
+    if (err instanceof ZodError) {
+      return reply.status(400).send({ errors: formatZodError(err) });
     }
-  });
-  web_server.get("/protected", async (request: FastifyRequest, reply: FastifyReply) => {
-    try {
-      await request.jwtVerify();
-      return reply.send({ message: "Route protégée OK", user: (request as any).user });
-    } catch {
-      return reply.status(401).send({ error: "Token invalide" });
+    return reply.status(401).send({ error: (err as Error).message });
+  }
+});
+
+web_server.post("/logincoach", async (request: FastifyRequest, reply: FastifyReply) => {
+  try {
+    const parsed = loginSchema.parse(request.body);
+    const { mail, password } = parsed;
+
+    const user = await repo.loginCoach(mail, password);
+
+    const accessToken = web_server.jwt.sign({ id: user.id_coach, userType: "coach" }, { expiresIn: "15m" });
+    const refreshToken = generateRefreshToken();
+
+    await repo.saveRefreshToken({
+      userId: user.id_coach,
+      userType: "coach", // <--- ajouté
+      token: refreshToken,
+      expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+    });
+
+    reply.setCookie("refresh_token", refreshToken, {
+      httpOnly: true,
+      secure: isProduction,
+      sameSite: "strict",
+      path: "/",
+      maxAge: 7 * 24 * 60 * 60,
+    });
+
+    return reply.send({ accessToken, user});
+  } catch (err) {
+    if (err instanceof ZodError) {
+      return reply.status(400).send({ errors: formatZodError(err) });
     }
-  });
-  web_server.post("/refresh", async (request, reply) => {
+    return reply.status(400).send({ error: (err as Error).message });
+  }
+});
+ web_server.post("/refresh", async (request, reply) => {
   const oldRefresh = request.cookies?.refresh_token;
   if (!oldRefresh) return reply.status(401).send({ error: "No refresh token" });
 
@@ -144,14 +207,20 @@ export async function start_web_server() {
     return reply.status(401).send({ error: "Expired refresh token" });
   }
 
+  // Révoque l'ancien token
   await repo.revokeRefreshToken(oldRefresh);
 
+  // Détermine l'ID utilisateur pour le JWT
+  const userId = stored.userType === "player" ? stored.player_id : stored.coach_id;
+
+  // Génère un nouvel access token et refresh token
   const newRefresh = generateRefreshToken();
-  const newAccess = web_server.jwt.sign({ id: stored.user_id }, { expiresIn: "15m" });
+  const newAccess = web_server.jwt.sign({ id: userId ,userType: stored.userType}, { expiresIn: "15m" });
 
   await repo.saveRefreshToken({
     token: newRefresh,
-    userId: stored.user_id,
+    userId,
+    userType: stored.userType,
     revoked: false,
     expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
   });
@@ -167,28 +236,27 @@ export async function start_web_server() {
 });
 
 
+web_server.post("/logout", async (request, reply) => {
+  const token = request.cookies?.refresh_token;
+  if (token) {
+    await repo.revokeRefreshToken(token);
+    reply.clearCookie("refresh_token");
+  }
+  return reply.send({ message: "Logged out" });
+});
 
-  web_server.post("/logout", async (request: FastifyRequest, reply: FastifyReply) => {
-    const token = (request.cookies as any)?.refresh_token;
-    if (token) {
-      await repo.revokeRefreshToken(token);
-      reply.clearCookie("refresh_token");
-    }
-    return reply.send({ message: "Logged out" });
-  });
 
 web_server.get("/secret-data", async (request, reply) => {
   try {
     await request.jwtVerify();
     return reply.send({
       message: "Accès autorisé",
-      data: "Voici la fausse donnée secrète"
+      data: "Voici la fausse donnée secrète",
     });
   } catch {
     return reply.status(401).send({ error: "Token invalide ou expiré" });
   }
 });
-
 
   web_server.post("/createtraining", async (request: FastifyRequest, reply: FastifyReply) => {
     try {
@@ -269,6 +337,30 @@ web_server.get("/secret-data", async (request, reply) => {
     }
   }
   );
+  web_server.get("/me", async (request, reply) => {
+  try {
+    await request.jwtVerify();
+
+    const { id, userType } = request.user;
+
+    let user;
+
+    if (userType === "player") {
+      user = await repo.getPlayerById(id);
+    } else {
+      user = await repo.getCoachById(id);
+    }
+
+    return reply.send({
+      userType,
+      user,
+    });
+
+  } catch (err) {
+    return reply.status(401).send({ error: "Unauthorized" });
+  }
+});
+
 
   const port = Number(process.env.PORT) || 1234;
   await web_server.listen({ port, host: "0.0.0.0" });
