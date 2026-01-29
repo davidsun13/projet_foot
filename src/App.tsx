@@ -7,8 +7,11 @@ import Sidebar from './components/sidebar'
 import CreationEntrainement from './components/creationentrainement'
 import GestionCotisations from './components/GestionCotisations'
 import ListeEntrainements from './components/ListeEntrainements'
+import ListeJoueurs from './components/ListeJoueurs'
 import ListeMatchs from './components/ListeMatchs'
 import CreationMatch from './components/CreationMatch'
+import ModifPlayer from './components/ModifPlayer'
+import ModifEntrainement from './components/Modifentrainement'
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import './App.css'
 
@@ -31,6 +34,9 @@ function App() {
               <Route path="/matchs" element={<ListeMatchs />} />
               <Route path="/entrainements/creer" element={<CreationEntrainement />} />
               <Route path="/cotisations" element={<GestionCotisations />} />
+              <Route path="/players" element={<ListeJoueurs />} />
+              <Route path="/joueurs/modifier/:id_player" element={<ModifPlayer />} />
+              <Route path="/entrainements/modifier/:id_entrainement" element={<ModifEntrainement />} />
             </Routes>
           </div>
         </main>

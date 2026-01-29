@@ -9,10 +9,10 @@ VALUES
 -- ================================
 -- TEAMS
 -- ================================
-INSERT INTO team (name, category, season)
+INSERT INTO team (name, category, season, id_coach)
 VALUES
-('Seniors A', 'Senior', '2024-2025'),
-('U16', 'Youth', '2024-2025');
+('Seniors A', 'Senior', '2024-2025', 1),
+('U16', 'Youth', '2024-2025', 2);
 
 -- ================================
 -- PLAYERS
@@ -35,7 +35,7 @@ VALUES
 -- ================================
 -- MATCHES
 -- ================================
-INSERT INTO match (date, hour, opponent, location, type, score_home, score_outside, id_team, id_coach)
+INSERT INTO matches (date, hour, opponent, location, type, score_home, score_outside, id_team, id_coach)
 VALUES
 ('2025-01-20', '15:00:00', 'US Lyon', 'Home', 'Championship', 2, 1, 1, 1),
 ('2025-01-27', '16:00:00', 'FC Nice', 'Outside', 'Friendly', NULL, NULL, 1, 1);

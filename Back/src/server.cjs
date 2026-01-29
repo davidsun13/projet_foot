@@ -80,7 +80,8 @@ function start_web_server() {
                     isProduction = process.env.NODE_ENV === "production";
                     web_server.register(require("@fastify/cors"), {
                         origin: "http://localhost:5173",
-                        credentials: true
+                        credentials: true,
+                        methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
                     });
                     return [4 /*yield*/, web_server.register(cookie_1.default, {
                             secret: COOKIE_SECRET,
@@ -354,6 +355,7 @@ function start_web_server() {
                                     return [4 /*yield*/, repo.createTrainingSession(parsed)];
                                 case 1:
                                     training = _a.sent();
+                                    console.log("Entraînement créé :", parsed);
                                     return [2 /*return*/, reply.send(training)];
                                 case 2:
                                     err_5 = _a.sent();
@@ -365,14 +367,14 @@ function start_web_server() {
                             }
                         });
                     }); });
-                    web_server.put("/modifytraining", function (request, reply) { return __awaiter(_this, void 0, void 0, function () {
-                        var body, training, err_6;
+                    web_server.get("/trainings/:id_training", function (request, reply) { return __awaiter(_this, void 0, void 0, function () {
+                        var id_training, training, err_6;
                         return __generator(this, function (_a) {
                             switch (_a.label) {
                                 case 0:
                                     _a.trys.push([0, 2, , 3]);
-                                    body = request.body;
-                                    return [4 /*yield*/, repo.modifyTrainingSession(body)];
+                                    id_training = Number(request.params.id_training);
+                                    return [4 /*yield*/, repo.getTrainingById(id_training)];
                                 case 1:
                                     training = _a.sent();
                                     return [2 /*return*/, reply.send(training)];
@@ -383,14 +385,14 @@ function start_web_server() {
                             }
                         });
                     }); });
-                    web_server.delete("/deletetraining/:id_training", function (request, reply) { return __awaiter(_this, void 0, void 0, function () {
-                        var id_training, training, err_7;
+                    web_server.put("/training/:id_training/modify", function (request, reply) { return __awaiter(_this, void 0, void 0, function () {
+                        var body, training, err_7;
                         return __generator(this, function (_a) {
                             switch (_a.label) {
                                 case 0:
                                     _a.trys.push([0, 2, , 3]);
-                                    id_training = Number(request.params.id_training);
-                                    return [4 /*yield*/, repo.deleteTrainingSession(id_training)];
+                                    body = request.body;
+                                    return [4 /*yield*/, repo.modifyTrainingSession(body)];
                                 case 1:
                                     training = _a.sent();
                                     return [2 /*return*/, reply.send(training)];
@@ -401,16 +403,17 @@ function start_web_server() {
                             }
                         });
                     }); });
-                    web_server.get("/trainings", function (request, reply) { return __awaiter(_this, void 0, void 0, function () {
-                        var trainings, err_8;
+                    web_server.delete("/deletetraining/:id_training", function (request, reply) { return __awaiter(_this, void 0, void 0, function () {
+                        var id_training, training, err_8;
                         return __generator(this, function (_a) {
                             switch (_a.label) {
                                 case 0:
                                     _a.trys.push([0, 2, , 3]);
-                                    return [4 /*yield*/, repo.listTrainingSessions()];
+                                    id_training = Number(request.params.id_training);
+                                    return [4 /*yield*/, repo.deleteTrainingSession(id_training)];
                                 case 1:
-                                    trainings = _a.sent();
-                                    return [2 /*return*/, reply.send(trainings)];
+                                    training = _a.sent();
+                                    return [2 /*return*/, reply.send(training)];
                                 case 2:
                                     err_8 = _a.sent();
                                     return [2 /*return*/, reply.status(500).send({ error: err_8.message })];
@@ -418,17 +421,16 @@ function start_web_server() {
                             }
                         });
                     }); });
-                    web_server.post("/creatematch", function (request, reply) { return __awaiter(_this, void 0, void 0, function () {
-                        var parsed, match, err_9;
+                    web_server.get("/trainings", function (request, reply) { return __awaiter(_this, void 0, void 0, function () {
+                        var trainings, err_9;
                         return __generator(this, function (_a) {
                             switch (_a.label) {
                                 case 0:
                                     _a.trys.push([0, 2, , 3]);
-                                    parsed = match_cjs_1.createMatchSchema.parse(request.body);
-                                    return [4 /*yield*/, repo.createMatchSession(parsed)];
+                                    return [4 /*yield*/, repo.getAllTrainings()];
                                 case 1:
-                                    match = _a.sent();
-                                    return [2 /*return*/, reply.send(match)];
+                                    trainings = _a.sent();
+                                    return [2 /*return*/, reply.send(trainings)];
                                 case 2:
                                     err_9 = _a.sent();
                                     return [2 /*return*/, reply.status(500).send({ error: err_9.message })];
@@ -436,8 +438,29 @@ function start_web_server() {
                             }
                         });
                     }); });
+                    web_server.post("/creatematch", function (request, reply) { return __awaiter(_this, void 0, void 0, function () {
+                        var body, parsed, match, err_10;
+                        return __generator(this, function (_a) {
+                            switch (_a.label) {
+                                case 0:
+                                    _a.trys.push([0, 2, , 3]);
+                                    body = request.body;
+                                    parsed = match_cjs_1.createMatchSchema.parse(body);
+                                    console.log("Match créé :", parsed);
+                                    return [4 /*yield*/, repo.createMatchSession(parsed)];
+                                case 1:
+                                    match = _a.sent();
+                                    // 🔹 Réponse
+                                    return [2 /*return*/, reply.send(match)];
+                                case 2:
+                                    err_10 = _a.sent();
+                                    return [2 /*return*/, reply.status(500).send({ error: err_10.message })];
+                                case 3: return [2 /*return*/];
+                            }
+                        });
+                    }); });
                     web_server.put("/modifymatch", function (request, reply) { return __awaiter(_this, void 0, void 0, function () {
-                        var body, match, err_10;
+                        var body, match, err_11;
                         return __generator(this, function (_a) {
                             switch (_a.label) {
                                 case 0:
@@ -448,14 +471,14 @@ function start_web_server() {
                                     match = _a.sent();
                                     return [2 /*return*/, reply.send(match)];
                                 case 2:
-                                    err_10 = _a.sent();
-                                    return [2 /*return*/, reply.status(500).send({ error: err_10.message })];
+                                    err_11 = _a.sent();
+                                    return [2 /*return*/, reply.status(500).send({ error: err_11.message })];
                                 case 3: return [2 /*return*/];
                             }
                         });
                     }); });
                     web_server.delete("/deletematch/:id_match", function (request, reply) { return __awaiter(_this, void 0, void 0, function () {
-                        var id_match, match, err_11;
+                        var id_match, match, err_12;
                         return __generator(this, function (_a) {
                             switch (_a.label) {
                                 case 0:
@@ -466,14 +489,14 @@ function start_web_server() {
                                     match = _a.sent();
                                     return [2 /*return*/, reply.send(match)];
                                 case 2:
-                                    err_11 = _a.sent();
-                                    return [2 /*return*/, reply.status(500).send({ error: err_11.message })];
+                                    err_12 = _a.sent();
+                                    return [2 /*return*/, reply.status(500).send({ error: err_12.message })];
                                 case 3: return [2 /*return*/];
                             }
                         });
                     }); });
                     web_server.patch("/matchs/:id/score", function (request, reply) { return __awaiter(_this, void 0, void 0, function () {
-                        var id_match, parsed, result, err_12;
+                        var id_match, parsed, result, err_13;
                         return __generator(this, function (_a) {
                             switch (_a.label) {
                                 case 0:
@@ -485,17 +508,17 @@ function start_web_server() {
                                     result = _a.sent();
                                     return [2 /*return*/, reply.send(result)];
                                 case 2:
-                                    err_12 = _a.sent();
-                                    if (err_12 instanceof zod_1.ZodError) {
-                                        return [2 /*return*/, reply.status(400).send({ errors: err_12.errors })];
+                                    err_13 = _a.sent();
+                                    if (err_13 instanceof zod_1.ZodError) {
+                                        return [2 /*return*/, reply.status(400).send({ errors: err_13.errors })];
                                     }
-                                    return [2 /*return*/, reply.status(500).send({ error: err_12.message })];
+                                    return [2 /*return*/, reply.status(500).send({ error: err_13.message })];
                                 case 3: return [2 /*return*/];
                             }
                         });
                     }); });
                     web_server.get("/matchs", function (request, reply) { return __awaiter(_this, void 0, void 0, function () {
-                        var matches, err_13;
+                        var matches, err_14;
                         return __generator(this, function (_a) {
                             switch (_a.label) {
                                 case 0:
@@ -505,14 +528,85 @@ function start_web_server() {
                                     matches = _a.sent();
                                     return [2 /*return*/, reply.send(matches)];
                                 case 2:
-                                    err_13 = _a.sent();
-                                    return [2 /*return*/, reply.status(500).send({ error: err_13.message })];
+                                    err_14 = _a.sent();
+                                    return [2 /*return*/, reply.status(500).send({ error: err_14.message })];
+                                case 3: return [2 /*return*/];
+                            }
+                        });
+                    }); });
+                    web_server.post("/createteam", function (request, reply) { return __awaiter(_this, void 0, void 0, function () {
+                        var body, team, err_15;
+                        return __generator(this, function (_a) {
+                            switch (_a.label) {
+                                case 0:
+                                    _a.trys.push([0, 2, , 3]);
+                                    body = request.body;
+                                    return [4 /*yield*/, repo.createTeam(body)];
+                                case 1:
+                                    team = _a.sent();
+                                    return [2 /*return*/, reply.send(team)];
+                                case 2:
+                                    err_15 = _a.sent();
+                                    return [2 /*return*/, reply.status(500).send({ error: err_15.message })];
+                                case 3: return [2 /*return*/];
+                            }
+                        });
+                    }); });
+                    web_server.get("/teams", function (request, reply) { return __awaiter(_this, void 0, void 0, function () {
+                        var teams, err_16;
+                        return __generator(this, function (_a) {
+                            switch (_a.label) {
+                                case 0:
+                                    _a.trys.push([0, 2, , 3]);
+                                    return [4 /*yield*/, repo.listTeams()];
+                                case 1:
+                                    teams = _a.sent();
+                                    return [2 /*return*/, reply.send(teams)];
+                                case 2:
+                                    err_16 = _a.sent();
+                                    return [2 /*return*/, reply.status(500).send({ error: err_16.message })];
+                                case 3: return [2 /*return*/];
+                            }
+                        });
+                    }); });
+                    web_server.put("/modifyteam", function (request, reply) { return __awaiter(_this, void 0, void 0, function () {
+                        var body, team, err_17;
+                        return __generator(this, function (_a) {
+                            switch (_a.label) {
+                                case 0:
+                                    _a.trys.push([0, 2, , 3]);
+                                    body = request.body;
+                                    return [4 /*yield*/, repo.modifyTeam(body)];
+                                case 1:
+                                    team = _a.sent();
+                                    return [2 /*return*/, reply.send(team)];
+                                case 2:
+                                    err_17 = _a.sent();
+                                    return [2 /*return*/, reply.status(500).send({ error: err_17.message })];
+                                case 3: return [2 /*return*/];
+                            }
+                        });
+                    }); });
+                    web_server.delete("/deleteteam/:id_team", function (request, reply) { return __awaiter(_this, void 0, void 0, function () {
+                        var id_team, team, err_18;
+                        return __generator(this, function (_a) {
+                            switch (_a.label) {
+                                case 0:
+                                    _a.trys.push([0, 2, , 3]);
+                                    id_team = Number(request.params.id_team);
+                                    return [4 /*yield*/, repo.deleteTeam(id_team)];
+                                case 1:
+                                    team = _a.sent();
+                                    return [2 /*return*/, reply.send(team)];
+                                case 2:
+                                    err_18 = _a.sent();
+                                    return [2 /*return*/, reply.status(500).send({ error: err_18.message })];
                                 case 3: return [2 /*return*/];
                             }
                         });
                     }); });
                     web_server.get("/me", function (request, reply) { return __awaiter(_this, void 0, void 0, function () {
-                        var _a, id, userType, user, err_14;
+                        var _a, id, userType, user, err_19;
                         return __generator(this, function (_b) {
                             switch (_b.label) {
                                 case 0:
@@ -536,14 +630,68 @@ function start_web_server() {
                                         user: user,
                                     })];
                                 case 6:
-                                    err_14 = _b.sent();
+                                    err_19 = _b.sent();
                                     return [2 /*return*/, reply.status(401).send({ error: "Unauthorized" })];
                                 case 7: return [2 /*return*/];
                             }
                         });
                     }); });
+                    web_server.get("/players", function (request, reply) { return __awaiter(_this, void 0, void 0, function () {
+                        var players, err_20;
+                        return __generator(this, function (_a) {
+                            switch (_a.label) {
+                                case 0:
+                                    _a.trys.push([0, 2, , 3]);
+                                    return [4 /*yield*/, repo.getallPlayers()];
+                                case 1:
+                                    players = _a.sent();
+                                    return [2 /*return*/, reply.send(players)];
+                                case 2:
+                                    err_20 = _a.sent();
+                                    return [2 /*return*/, reply.status(500).send({ error: err_20.message })];
+                                case 3: return [2 /*return*/];
+                            }
+                        });
+                    }); });
+                    web_server.put("/players/:id_player/modify", function (request, reply) { return __awaiter(_this, void 0, void 0, function () {
+                        var id_player, body, player, err_21;
+                        return __generator(this, function (_a) {
+                            switch (_a.label) {
+                                case 0:
+                                    _a.trys.push([0, 2, , 3]);
+                                    id_player = request.params.id_player;
+                                    body = request.body;
+                                    return [4 /*yield*/, repo.updatePlayer(__assign({ id_player: Number(id_player) }, body))];
+                                case 1:
+                                    player = _a.sent();
+                                    return [2 /*return*/, reply.send(player)];
+                                case 2:
+                                    err_21 = _a.sent();
+                                    return [2 /*return*/, reply.status(500).send({ error: err_21.message })];
+                                case 3: return [2 /*return*/];
+                            }
+                        });
+                    }); });
+                    web_server.get("/players/:id_player", function (request, reply) { return __awaiter(_this, void 0, void 0, function () {
+                        var id_player, player, err_22;
+                        return __generator(this, function (_a) {
+                            switch (_a.label) {
+                                case 0:
+                                    _a.trys.push([0, 2, , 3]);
+                                    id_player = request.params.id_player;
+                                    return [4 /*yield*/, repo.getplayerbyid(Number(id_player))];
+                                case 1:
+                                    player = _a.sent();
+                                    return [2 /*return*/, reply.send(player)];
+                                case 2:
+                                    err_22 = _a.sent();
+                                    return [2 /*return*/, reply.status(500).send({ error: err_22.message })];
+                                case 3: return [2 /*return*/];
+                            }
+                        });
+                    }); });
                     web_server.get("/subscriptions", function (request, reply) { return __awaiter(_this, void 0, void 0, function () {
-                        var subscriptions, err_15;
+                        var subscriptions, err_23;
                         return __generator(this, function (_a) {
                             switch (_a.label) {
                                 case 0:
@@ -553,8 +701,8 @@ function start_web_server() {
                                     subscriptions = _a.sent();
                                     return [2 /*return*/, reply.send(subscriptions)];
                                 case 2:
-                                    err_15 = _a.sent();
-                                    return [2 /*return*/, reply.status(500).send({ error: err_15.message })];
+                                    err_23 = _a.sent();
+                                    return [2 /*return*/, reply.status(500).send({ error: err_23.message })];
                                 case 3: return [2 /*return*/];
                             }
                         });

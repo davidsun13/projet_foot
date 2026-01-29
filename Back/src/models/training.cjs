@@ -7,6 +7,7 @@ var createTrainingSchema = zod_1.z.object({
     hour: zod_1.z.string().min(1),
     location: zod_1.z.string().min(1),
     type: zod_1.z.string().min(1),
-    team: zod_1.z.string().min(1),
+    id_team: zod_1.z.number().int().positive(),
+    id_coach: zod_1.z.number().int().optional(),
 });
 exports.createTrainingSchema = createTrainingSchema;

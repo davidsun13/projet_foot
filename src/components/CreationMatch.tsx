@@ -1,4 +1,9 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
+
+type Team = {
+  id_team: number;
+  name: string;
+};
 
 const CreationMatch = () => {
   const [formData, setFormData] = useState({
@@ -7,21 +12,102 @@ const CreationMatch = () => {
     adversaire: "",
     lieu: "",
     type: "",
-    equipe: "",
-    note: "",
+    equipe: "", // id_team en string
+    score_home: "",
+    score_outside: "",
+    id_coach: "",
   });
 
-  const handleChange = (e) => {
+  const [teams, setTeams] = useState<Team[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  // 🔹 Charger les équipes dynamiquement
+  useEffect(() => {
+    async function fetchTeams() {
+      try {
+        const res = await fetch("http://localhost:1234/teams", {
+          credentials: "include",
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("access_token") || ""}`,
+          },
+        });
+        if (!res.ok) throw new Error(`Erreur ${res.status}`);
+        const data = await res.json();
+        setTeams(data);
+      } catch (err) {
+        console.error("Impossible de charger les équipes:", err);
+      }
+    }
+    fetchTeams();
+  }, []);
+
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
+  ) => {
     setFormData({
       ...formData,
       [e.target.name]: e.target.value,
     });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("Match créé :", formData);
-    alert("Match créé avec succès ✅");
+    setLoading(true);
+    setError(null);
+
+    try {
+      // 🔹 Payload nettoyé : jamais undefined
+      const payload = {
+        date: formData.date || "",
+        hour: formData.heure || "",
+        opponent: formData.adversaire || "",
+        location: formData.lieu || "",
+        type: formData.type || "",
+        id_team: formData.equipe ? Number(formData.equipe) : null,
+        score_home: 0, // score par défaut
+        score_outside: 0, // score par défaut
+        id_coach: 1, // coach par défaut
+      };
+
+      console.log("Payload envoyé 👉", payload);
+
+      const res = await fetch("http://localhost:1234/creatematch", {
+        method: "POST",
+        credentials: "include",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${localStorage.getItem("access_token") || ""}`,
+        },
+        body: JSON.stringify(payload),
+      });
+
+      if (!res.ok) {
+        const errData = await res.json().catch(() => null);
+        throw new Error(errData?.error || `Erreur ${res.status}`);
+      }
+
+      const data = await res.json();
+      console.log("Match créé :", data);
+      alert("Match créé avec succès ✅");
+
+      // 🔹 Reset du formulaire
+      setFormData({
+        date: "",
+        heure: "",
+        adversaire: "",
+        lieu: "",
+        type: "",
+        equipe: "",
+        score_home: "",
+        score_outside: "",
+        id_coach: "",
+      });
+    } catch (err) {
+      setError((err as Error).message);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -30,8 +116,9 @@ const CreationMatch = () => {
         Création d'un match
       </h2>
 
+      {error && <p className="text-red-600 mb-3 break-words">{error}</p>}
+
       <form onSubmit={handleSubmit} className="space-y-4">
-        
         {/* Date */}
         <div>
           <label className="block mb-1 font-[Arsenal]">Date</label>
@@ -83,12 +170,12 @@ const CreationMatch = () => {
             className="w-full border p-2 rounded"
           >
             <option value="">Sélectionner...</option>
-            <option value="Domicile">🏟️ Domicile</option>
-            <option value="Exterieur">🚌 Extérieur</option>
+            <option value="Home">🏟️ Domicile</option>
+            <option value="Outside">🚌 Extérieur</option>
           </select>
         </div>
 
-        {/* Type de match */}
+        {/* Type */}
         <div>
           <label className="block mb-1 font-[Arsenal]">Type</label>
           <select
@@ -99,13 +186,13 @@ const CreationMatch = () => {
             className="w-full border p-2 rounded"
           >
             <option value="">Sélectionner...</option>
-            <option value="Championnat">Championnat</option>
-            <option value="Amical">Amical</option>
-            <option value="Coupe">Coupe</option>
+            <option value="Championship">Championnat</option>
+            <option value="Friendly">Amical</option>
+            <option value="Cup">Coupe</option>
           </select>
         </div>
 
-        {/* Équipe */}
+        {/* Équipe dynamique */}
         <div>
           <label className="block mb-1 font-[Arsenal]">Équipe</label>
           <select
@@ -116,34 +203,20 @@ const CreationMatch = () => {
             className="w-full border p-2 rounded"
           >
             <option value="">Sélectionner...</option>
-            <option value="Seniors A">Seniors A</option>
-            <option value="Seniors B">Seniors B</option>
-            <option value="U18">U18</option>
-            <option value="U16">U16</option>
+            {teams.map((team) => (
+              <option key={team.id_team} value={team.id_team}>
+                {team.name}
+              </option>
+            ))}
           </select>
         </div>
 
-        {/* Note */}
-        <div>
-          <label className="block mb-1 font-[Arsenal]">
-            Note (optionnel)
-          </label>
-          <textarea
-            name="note"
-            value={formData.note}
-            onChange={handleChange}
-            placeholder="Consignes, points de focus..."
-            className="w-full border p-2 rounded"
-            rows="3"
-          ></textarea>
-        </div>
-
-        {/* Submit */}
         <button
           type="submit"
+          disabled={loading}
           className="w-full bg-red-600 text-black py-2 rounded font-[Arsenal] hover:bg-red-700"
         >
-          ✅ Créer le match
+          {loading ? "Création..." : "✅ Créer le match"}
         </button>
       </form>
     </div>

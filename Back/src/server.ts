@@ -4,7 +4,7 @@ import fastifyJwt from "@fastify/jwt";
 import cookie from "@fastify/cookie";
 import { registerSchema, loginSchema } from "./models/connexion.cjs";
 import { createTrainingSchema } from "./models/training.cjs";
-import {createMatchSchema, updateScoreSchema} from "./models/match.cjs";
+import { createMatchSchema, updateScoreSchema } from "./models/match.cjs";
 import { ZodError } from "zod";
 import { Repository } from "./db.cjs";
 import * as crypto from "node:crypto";
@@ -30,7 +30,8 @@ export async function start_web_server() {
 
   web_server.register(require("@fastify/cors"), {
     origin: "http://localhost:5173",
-    credentials: true
+    credentials: true,
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
   });
   await web_server.register(cookie, {
     secret: COOKIE_SECRET,
@@ -262,19 +263,29 @@ export async function start_web_server() {
     }
   });
 
-    web_server.post("/createtraining", async (request: FastifyRequest, reply: FastifyReply) => {
-      try {
-        const parsed = createTrainingSchema.parse(request.body);
-        const training = await repo.createTrainingSession(parsed);
-        return reply.send(training);
-      } catch (err) {
-        if (err instanceof ZodError) {
-          return reply.status(400).send({ errors: formatZodError(err) });
-        }
-        return reply.status(500).send({ error: (err as Error).message });
+  web_server.post("/createtraining", async (request: FastifyRequest, reply: FastifyReply) => {
+    try {
+      const parsed = createTrainingSchema.parse(request.body);
+      const training = await repo.createTrainingSession(parsed);
+      console.log("Entraînement créé :", parsed);
+      return reply.send(training);
+    } catch (err) {
+      if (err instanceof ZodError) {
+        return reply.status(400).send({ errors: formatZodError(err) });
       }
-    });
-  web_server.put("/modifytraining", async (request: FastifyRequest, reply: FastifyReply) => {
+      return reply.status(500).send({ error: (err as Error).message });
+    }
+  });
+  web_server.get("/trainings/:id_training", async (request: FastifyRequest, reply: FastifyReply) => {
+    try {
+      const id_training = Number((request.params as any).id_training);
+      const training = await repo.getTrainingById(id_training);
+      return reply.send(training);
+    } catch (err) {
+      return reply.status(500).send({ error: (err as Error).message });
+    }
+  });
+  web_server.put("/training/:id_training/modify", async (request: FastifyRequest, reply: FastifyReply) => {
     try {
       const body = request.body as any;
       const training = await repo.modifyTrainingSession(body);
@@ -296,7 +307,7 @@ export async function start_web_server() {
   );
   web_server.get("/trainings", async (request: FastifyRequest, reply: FastifyReply) => {
     try {
-      const trainings = await repo.listTrainingSessions();
+      const trainings = await repo.getAllTrainings();
       return reply.send(trainings);
     } catch (err) {
       return reply.status(500).send({ error: (err as Error).message });
@@ -305,13 +316,15 @@ export async function start_web_server() {
   );
   web_server.post("/creatematch", async (request: FastifyRequest, reply: FastifyReply) => {
     try {
-      const parsed = createMatchSchema.parse(request.body);
+      const body = request.body as any;
+      const parsed = createMatchSchema.parse(body);
       const match = await repo.createMatchSession(parsed);
       return reply.send(match);
     } catch (err) {
       return reply.status(500).send({ error: (err as Error).message });
     }
   });
+
   web_server.put("/modifymatch", async (request: FastifyRequest, reply: FastifyReply) => {
     try {
       const body = request.body as any;
@@ -333,23 +346,23 @@ export async function start_web_server() {
   }
   );
   web_server.patch("/matchs/:id/score", async (request, reply) => {
-  try {
-    const id_match = Number((request.params as any).id);
-    const parsed = updateScoreSchema.parse(request.body);
+    try {
+      const id_match = Number((request.params as any).id);
+      const parsed = updateScoreSchema.parse(request.body);
 
-    const result = await repo.updateMatchScore({
-      id_match,
-      ...parsed,
-    });
+      const result = await repo.updateMatchScore({
+        id_match,
+        ...parsed,
+      });
 
-    return reply.send(result);
-  } catch (err) {
-    if (err instanceof ZodError) {
-      return reply.status(400).send({ errors: err.errors });
+      return reply.send(result);
+    } catch (err) {
+      if (err instanceof ZodError) {
+        return reply.status(400).send({ errors: err.errors });
+      }
+      return reply.status(500).send({ error: (err as Error).message });
     }
-    return reply.status(500).send({ error: (err as Error).message });
-  }
-});
+  });
 
   web_server.get("/matchs", async (request: FastifyRequest, reply: FastifyReply) => {
     try {
@@ -360,6 +373,41 @@ export async function start_web_server() {
     }
   }
   );
+  web_server.post("/createteam", async (request: FastifyRequest, reply: FastifyReply) => {
+    try {
+      const body = request.body as any;
+      const team = await repo.createTeam(body);
+      return reply.send(team);
+    } catch (err) {
+      return reply.status(500).send({ error: (err as Error).message });
+    }
+  });
+  web_server.get("/teams", async (request: FastifyRequest, reply: FastifyReply) => {
+    try {
+      const teams = await repo.listTeams();
+      return reply.send(teams);
+    } catch (err) {
+      return reply.status(500).send({ error: (err as Error).message });
+    }
+  });
+  web_server.put("/modifyteam", async (request: FastifyRequest, reply: FastifyReply) => {
+    try {
+      const body = request.body as any;
+      const team = await repo.modifyTeam(body);
+      return reply.send(team);
+    } catch (err) {
+      return reply.status(500).send({ error: (err as Error).message });
+    }
+  });
+  web_server.delete("/deleteteam/:id_team", async (request: FastifyRequest, reply: FastifyReply) => {
+    try {
+      const id_team = Number((request.params as any).id_team);
+      const team = await repo.deleteTeam(id_team);
+      return reply.send(team);
+    } catch (err) {
+      return reply.status(500).send({ error: (err as Error).message });
+    }
+  });
   web_server.get("/me", async (request, reply) => {
     try {
       await request.jwtVerify();
@@ -383,6 +431,50 @@ export async function start_web_server() {
       return reply.status(401).send({ error: "Unauthorized" });
     }
   });
+  web_server.get("/players", async (request: FastifyRequest, reply: FastifyReply) => {
+    try {
+      const players = await repo.getallPlayers();
+      return reply.send(players);
+    } catch (err) {
+      return reply.status(500).send({ error: (err as Error).message });
+    }
+  });
+  web_server.put(
+    "/players/:id_player/modify",
+    async (request: FastifyRequest, reply: FastifyReply) => {
+      try {
+        const { id_player } = request.params as { id_player: string };
+        const body = request.body as {
+          surname: string;
+          name: string;
+          position: string;
+          number: number;
+          status: string;
+          id_team: number;
+        };
+
+        const player = await repo.updatePlayer({
+          id_player: Number(id_player),
+          ...body,
+        });
+
+        return reply.send(player);
+      } catch (err) {
+        return reply.status(500).send({ error: (err as Error).message });
+      }
+    }
+  );
+  web_server.get("/players/:id_player", async (request: FastifyRequest, reply: FastifyReply) => {
+    try {
+      const { id_player } = request.params as { id_player: string };
+      const player = await repo.getplayerbyid(Number(id_player));
+      return reply.send(player);
+    } catch (err) {
+      return reply.status(500).send({ error: (err as Error).message });
+    }
+  });
+
+
   web_server.get("/subscriptions", async (request: FastifyRequest, reply: FastifyReply) => {
     try {
       const subscriptions = await repo.getallSubscriptions();

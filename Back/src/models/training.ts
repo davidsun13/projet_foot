@@ -5,7 +5,8 @@ const createTrainingSchema = z.object({
   hour: z.string().min(1),
   location: z.string().min(1),
   type: z.string().min(1),
-  team: z.string().min(1),
+  id_team: z.number().int().positive(),
+  id_coach: z.number().int().optional(),
 });
 
 export { createTrainingSchema };

@@ -1,12 +1,19 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from "react-router-dom";
 import Button from './button';
+
 type FormState = {
   date: string;
   time: string;
-  equipe: string;
+  equipe: string; // id_team en string
   type: string;
   lieu: string;
+  id_coach: number;
+};
+
+type Team = {
+  id_team: number;
+  name: string;
 };
 
 export default function CreationEntrainement() {
@@ -16,11 +23,34 @@ export default function CreationEntrainement() {
     equipe: '',
     type: '',
     lieu: '',
+    id_coach: '',
   });
+
+  const [teams, setTeams] = useState<Team[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const navigate = useNavigate();
 
+  // 🔹 Charger dynamiquement les équipes du coach
+  useEffect(() => {
+    async function fetchTeams() {
+      try {
+        const res = await fetch("http://localhost:1234/teams", {
+          credentials: "include",
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("access_token") || ""}`,
+          },
+        });
+
+        if (!res.ok) throw new Error(`Erreur ${res.status}`);
+        const data = await res.json();
+        setTeams(data);
+      } catch (err) {
+        console.error("Impossible de charger les équipes:", err);
+      }
+    }
+    fetchTeams();
+  }, []);
 
   function handleChange(e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) {
     const { id, value } = e.target;
@@ -35,7 +65,7 @@ export default function CreationEntrainement() {
       setError('Veuillez remplir tous les champs.');
       return;
     }
-
+    console.log("Envoi du formulaire avec les données :", form);
     try {
       setError(null);
       const res = await fetch("http://localhost:1234/createtraining", {
@@ -48,9 +78,10 @@ export default function CreationEntrainement() {
         body: JSON.stringify({
           date: form.date,
           hour: form.time,
-          team: form.equipe,
+          id_team: Number(form.equipe), // envoyer l'id_team
           type: form.type,
           location: form.lieu,
+          id_coach: 1,
         }),
       });
 
@@ -61,7 +92,7 @@ export default function CreationEntrainement() {
       }
 
       setSuccess("Entraînement créé avec succès.");
-      setForm({ date: "", time: "", equipe: "", type: "Technique", lieu: "" });
+      setForm({ date: "", time: "", equipe: "", type: "Technique", lieu: "", id_coach: null });
       navigate("/entrainements");
     } catch (err) {
       setError("Erreur réseau : " + (err as Error).message);
@@ -100,6 +131,7 @@ export default function CreationEntrainement() {
           </div>
         </div>
 
+        {/* 🔹 Sélection dynamique des équipes */}
         <div>
           <label htmlFor="equipe" className="block text-sm font-[Arsenal] text-gray-700">Équipe</label>
           <select
@@ -109,14 +141,15 @@ export default function CreationEntrainement() {
             className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md bg-white focus:outline-none focus:ring-red-500 focus:border-red-500"
           >
             <option value="">Sélectionner une équipe</option>
-            <option value="U10">U10</option>
-            <option value="U12">U12</option>
-            <option value="U16">U16</option>
-            <option value="Seniors">Seniors</option>
-            <option value="Réserve">Réserve</option>
+            {teams.map(team => (
+              <option key={team.id_team} value={team.id_team}>
+                {team.name}
+              </option>
+            ))}
           </select>
         </div>
 
+        {/* Type d'entraînement */}
         <div>
           <label htmlFor="type" className="block text-sm font-[Arsenal] text-gray-700">Type d'entraînement</label>
           <select
@@ -132,9 +165,11 @@ export default function CreationEntrainement() {
             <option value="Match">Match</option>
           </select>
         </div>
+
+        {/* Lieu */}
         <div>
           <label htmlFor="lieu" className="block text-sm font-[Arsenal] text-gray-700">Lieu</label>
-          <select 
+          <select
             id="lieu"
             value={form.lieu}
             onChange={handleChange}

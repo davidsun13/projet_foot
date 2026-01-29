@@ -7,7 +7,7 @@ type Training = {
   hour?: string;
   type?: string;
   location?: string;
-  team?: string;
+  team_name?: string; // correspond à la valeur renvoyée par le back
 };
 
 type MeResponse = {
@@ -26,27 +26,27 @@ const ListeEntrainements = () => {
   const [error, setError] = useState<string | null>(null);
   const [currentUser, setCurrentUser] = useState<MeResponse | null>(null);
 
+  // 🔹 Récupérer l'utilisateur courant
   useEffect(() => {
     async function fetchUser() {
       try {
         const res = await fetch("http://localhost:1234/me", {
           credentials: "include",
           headers: {
-            Authorization: `Bearer ${localStorage.getItem("access_token")}`,
+            Authorization: `Bearer ${localStorage.getItem("access_token") || ""}`,
           },
         });
-
         if (!res.ok) return;
-
         const data: MeResponse = await res.json();
         setCurrentUser(data);
-      } catch (err) {
+      } catch {
         console.log("Not logged in");
       }
     }
     fetchUser();
   }, []);
 
+  // 🔹 Récupérer les entraînements
   async function fetchTrainings() {
     setLoading(true);
     setError(null);
@@ -62,9 +62,7 @@ const ListeEntrainements = () => {
 
       if (!res.ok) {
         const err = await res.json().catch(() => null);
-        throw new Error(
-          err?.error || "Impossible de charger les entraînements",
-        );
+        throw new Error(err?.error || "Impossible de charger les entraînements");
       }
 
       const data = await res.json();
@@ -80,6 +78,7 @@ const ListeEntrainements = () => {
     fetchTrainings();
   }, []);
 
+  // 🔹 Supprimer un entraînement
   async function handleDelete(id?: number) {
     if (!id) return;
     if (!confirm("Confirmer la suppression de cet entraînement ?")) return;
@@ -92,6 +91,7 @@ const ListeEntrainements = () => {
           Authorization: `Bearer ${localStorage.getItem("access_token") || ""}`,
         },
       });
+
       if (!res.ok) {
         const err = await res.json().catch(() => null);
         throw new Error(err?.error || "Erreur lors de la suppression");
@@ -102,49 +102,8 @@ const ListeEntrainements = () => {
     }
   }
 
-  async function handleModify(t: Training) {
-    if (!t.id_training) return;
-    const date = prompt("Date (YYYY-MM-DD)", t.date ?? "");
-    if (date === null) return;
-    const hour = prompt("Heure (HH:MM)", t.hour ?? "");
-    if (hour === null) return;
-    const location = prompt("Lieu", t.location ?? "");
-    if (location === null) return;
-    const team = prompt("Équipe", t.team ?? "");
-    if (team === null) return;
-    const type = prompt("Type", t.type ?? "");
-    if (type === null) return;
-
-    try {
-      const res = await fetch("http://localhost:1234/modifytraining", {
-        method: "PUT",
-        credentials: "include",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${localStorage.getItem("access_token") || ""}`,
-        },
-        body: JSON.stringify({
-          id_training: t.id_training,
-          date,
-          hour,
-          location,
-          team,
-          type,
-        }),
-      });
-
-      const data = await res.json();
-      if (!res.ok) {
-        throw new Error(data.error || "Erreur lors de la modification");
-      }
-      fetchTrainings();
-    } catch (err) {
-      alert("Erreur: " + (err as Error).message);
-    }
-  }
-
   return (
-    <div className="w-full max-w-5xl">
+    <div className="w-full max-w-5xl mx-auto p-4">
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-2xl font-[Arsenal] font-bold">Entraînements</h2>
         {currentUser?.userType === "coach" && (
@@ -157,10 +116,8 @@ const ListeEntrainements = () => {
         )}
       </div>
 
-      <div className="mb-4 flex items-center justify-between">
-        {loading && <span>Chargement...</span>}
-        {error && <span className="text-red-600">{error}</span>}
-      </div>
+      {loading && <div>Chargement...</div>}
+      {error && <div className="text-red-600 mb-4">{error}</div>}
 
       <table className="w-full border-collapse bg-white shadow-md rounded text-gray-700">
         <thead className="bg-gray-200">
@@ -173,7 +130,6 @@ const ListeEntrainements = () => {
             <th className="p-3 text-left">Actions</th>
           </tr>
         </thead>
-
         <tbody>
           {trainings.length === 0 && !loading ? (
             <tr>
@@ -183,23 +139,21 @@ const ListeEntrainements = () => {
             </tr>
           ) : (
             trainings.map((t) => (
-              <tr key={t.id_training} className="border-b">
-                <td className="p-3">
-                  {t.date ? new Date(t.date).toLocaleDateString("fr-FR") : "-"}
-                </td>
+              <tr key={t.id_training ?? t.date}>
+                <td className="p-3">{t.date ? new Date(t.date).toLocaleDateString("fr-FR") : "-"}</td>
                 <td className="p-3">{t.hour ?? "-"}</td>
                 <td className="p-3">{t.location ?? "-"}</td>
-                <td className="p-3">{t.name ?? "-"}</td>
+                <td className="p-3">{t.team_name ?? "-"}</td>
                 <td className="p-3">{t.type ?? "-"}</td>
                 <td className="p-3 flex gap-2">
-                  {currentUser?.userType === "coach" && (
+                  {currentUser?.userType === "coach" && t.id_training ? (
                     <>
-                      <button
-                        onClick={() => handleModify(t)}
-                        className="px-2 py-1 bg-yellow-200 rounded hover:bg-yellow-300"
+                      <Link
+                        to={`/entrainements/modifier/${t.id_training}`}
+                        className="px-2 py-1 bg-green-200 rounded hover:bg-green-300"
                       >
                         Modifier
-                      </button>
+                      </Link>
                       <button
                         onClick={() => handleDelete(t.id_training)}
                         className="px-2 py-1 bg-red-200 text-red-800 rounded hover:bg-red-300"
@@ -207,6 +161,8 @@ const ListeEntrainements = () => {
                         Supprimer
                       </button>
                     </>
+                  ) : (
+                    <span className="text-gray-400">—</span>
                   )}
                 </td>
               </tr>
