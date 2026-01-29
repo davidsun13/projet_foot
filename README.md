@@ -1,73 +1,216 @@
-# React + TypeScript + Vite
+📌 Présentation du projet
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Ce projet est une application web de gestion d’un club sportif.
+Elle permet de gérer :
 
-Currently, two official plugins are available:
+les joueurs et les équipes
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+les entraîneurs (coach / administrateur)
 
-## React Compiler
+les matchs et entraînements
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+les convocations
 
-## Expanding the ESLint configuration
+la présence
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+les statistiques de match
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+les cotisations
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+l’authentification sécurisée (JWT, refresh token)
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+L’application est composée d’un frontend React et d’un backend Node.js (Fastify), avec une base de données PostgreSQL conteneurisée via Docker.
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+🧱 Architecture du projet
+projet-club/
+│
+├── Front/                 # Application React
+│   ├── src/
+│   └── package.json
+│
+├── Back/                  # API Fastify
+│   ├── src/
+│   ├── initdb.d/           # Scripts SQL (création + seed)
+│   ├── docker-compose.yml
+│   └── package.json
+│
+└── README.md
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+🛠️ Technologies utilisées
+Frontend
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+React
+
+TypeScript
+
+Tailwind CSS
+
+React Router
+
+Backend
+
+Node.js
+
+Fastify
+
+TypeScript
+
+Zod (validation)
+
+Argon2 (hash des mots de passe)
+
+JWT (access token)
+
+Cookies HTTP-only (refresh token)
+
+Base de données
+
+PostgreSQL 16
+
+Docker & Docker Compose
+
+🔐 Sécurité
+
+Le projet met en place plusieurs mesures de sécurité :
+
+Hash des mots de passe avec Argon2
+
+Authentification via Access Token JWT
+
+Refresh Token stocké en base, révocable
+
+Refresh token stocké dans un cookie HTTP-only
+
+Protection contre :
+
+SQL Injection (requêtes préparées)
+
+XSS (cookies HTTP-only, pas de JWT en JS)
+
+CSRF (SameSite + refresh sécurisé)
+
+Séparation des rôles player / coach
+
+🚀 Installation et lancement
+Prérequis
+
+Node.js (v18+ recommandé)
+Docker & Docker Compose
+
+🔹 Lancer la base de données
+
+Depuis le dossier Back :
+docker compose up -d
+
+
+➡️ Cela lance PostgreSQL et initialise automatiquement la base grâce aux scripts SQL.
+
+🔹 Lancer le backend
+cd Back
+npm install
+node Back/src/server.js
+
+
+API disponible sur :
+
+http://localhost:1234
+
+🔹 Lancer le frontend
+cd Front
+npm install
+npm run dev
+
+
+Application disponible sur :
+
+http://localhost:5173
+
+🗄️ Base de données
+
+La base est initialisée automatiquement grâce au dossier :
+
+Back/initdb.d/
+
+
+Il contient :
+
+la création des tables (MLD)
+
+les ENUM
+
+les contraintes
+
+des données de test (seed)
+
+🔁 Réinitialisation de la base de données
+
+Pour repartir d’une base propre :
+docker compose down -v
+docker compose up -d
+
+
+➡️ Supprime les données et relance l’initialisation.
+
+🧪 Comptes de test
+
+Rôle	       Email	        Mot de passe
+
+Coach	  jean.dupont@club.com   mdp123
+Joueur	paul.durand@mail.com   pass1
+
+
+📊 Fonctionnalités principales
+Coach (admin)
+
+Créer / modifier / supprimer :
+
+matchs
+
+entraînements
+
+Convoquer une équipe entière
+
+Saisir les présences
+
+Ajouter les statistiques
+
+Voir les cotisations
+
+Joueur
+
+Voir ses matchs et entraînements convoqués
+
+Consulter ses statistiques
+
+Voir l’état de sa cotisation
+
+📐 Modélisation
+
+MCD : entités Player, Coach, Team, Match, Training, etc.
+
+MLD conforme au MCD
+
+Diagrammes :
+
+Use Case
+
+Séquence
+
+Classes
+
+🧑‍💻 Auteur
+
+Projet réalisé par David SUN
+Dans le cadre d’un projet de formation 
+
+✅ Compétences couvertes
+
+CP1 : Installation, configuration, déploiement
+
+CP10 : Base de données, migration, ré-initialisation
+
+Sécurité web
+
+Architecture client / serveur
+
+Modélisation de données
