@@ -91,29 +91,67 @@ CSRF (SameSite + refresh sécurisé)
 
 Séparation des rôles player / coach
 
-🚀 Installation et lancement
-Prérequis
+1️⃣ Prérequis système
 
-Node.js (v18+ recommandé)
-Docker & Docker Compose
+Avant d’installer le projet, assurez-vous d’avoir les outils suivants installés sur votre machine :
 
-🔹 Lancer la base de données
+Node.js (version 18 ou supérieure recommandée)
+
+Docker
+
+Docker Compose
+
+Git
+
+Vérification rapide :
+
+node -v
+docker -v
+docker compose version
+git --version
+
+2️⃣ Récupération du projet
+
+Cloner le dépôt Git :
+
+git clone <url-du-repository>
+cd projet-club
+
+3️⃣ Installation et lancement de la base de données
+
+La base de données PostgreSQL est entièrement conteneurisée via Docker.
 
 Depuis le dossier Back :
+
+cd Back
 docker compose up -d
 
 
-➡️ Cela lance PostgreSQL et initialise automatiquement la base grâce aux scripts SQL.
+➡️ Cette commande :
 
-🔹 Lancer le backend
-cd Back
+lance un conteneur PostgreSQL 16
+
+crée automatiquement la base de données
+
+exécute les scripts SQL présents dans initdb.d/
+
+applique le schéma (MLD), les ENUM et les données de test (seed)
+
+📌 Les données sont persistées grâce à un volume Docker.
+
+4️⃣ Configuration du backend
+
+Créer un fichier .env dans le dossier Back :
+
+PORT=1234
+JWT_SECRET=change_me
+COOKIE_SECRET=change_me
+NODE_ENV=development
+
+
+Installer les dépendances backend :
+
 npm install
-node Back/src/server.js
-
-
-API disponible sur :
-
-http://localhost:1234
 
 🔹 Lancer le frontend
 cd Front
