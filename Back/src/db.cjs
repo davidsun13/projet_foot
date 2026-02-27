@@ -577,13 +577,26 @@ var Repository = /** @class */ (function () {
             });
         });
     };
+    Repository.prototype.getdetailsplayer = function (id_player) {
+        return __awaiter(this, void 0, void 0, function () {
+            var result;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0: return [4 /*yield*/, this.sql(templateObject_41 || (templateObject_41 = __makeTemplateObject(["\n      SELECT p.id_player, p.surname, p.name, p.mail, p.position, p.number, p.phone, p.status,team.name AS team_name,\n      s.goals, s.passes, s.yellow_cards, s.red_cards\n      FROM player AS p JOIN team ON p.id_team = team.id_team\n      JOIN statistics s ON p.id_player = s.id_player WHERE p.id_player = ", "\n    "], ["\n      SELECT p.id_player, p.surname, p.name, p.mail, p.position, p.number, p.phone, p.status,team.name AS team_name,\n      s.goals, s.passes, s.yellow_cards, s.red_cards\n      FROM player AS p JOIN team ON p.id_team = team.id_team\n      JOIN statistics s ON p.id_player = s.id_player WHERE p.id_player = ", "\n    "])), id_player)];
+                    case 1:
+                        result = _a.sent();
+                        return [2 /*return*/, result[0] || null];
+                }
+            });
+        });
+    };
     Repository.prototype.addSubscription = function (_a) {
         return __awaiter(this, arguments, void 0, function (_b) {
             var result;
             var id_player = _b.id_player, total = _b.total, status = _b.status, payment_date = _b.payment_date;
             return __generator(this, function (_c) {
                 switch (_c.label) {
-                    case 0: return [4 /*yield*/, this.sql(templateObject_41 || (templateObject_41 = __makeTemplateObject(["\n    INSERT INTO subscription (id_player, total, status, payment_date)\n    VALUES (", ", ", ", ", ", ", ")\n    RETURNING id_subscription\n  "], ["\n    INSERT INTO subscription (id_player, total, status, payment_date)\n    VALUES (", ", ", ", ", ", ", ")\n    RETURNING id_subscription\n  "])), id_player, total, status, payment_date)];
+                    case 0: return [4 /*yield*/, this.sql(templateObject_42 || (templateObject_42 = __makeTemplateObject(["\n    INSERT INTO subscription (id_player, total, status, payment_date)\n    VALUES (", ", ", ", ", ", ", ")\n    RETURNING id_subscription\n  "], ["\n    INSERT INTO subscription (id_player, total, status, payment_date)\n    VALUES (", ", ", ", ", ", ", ")\n    RETURNING id_subscription\n  "])), id_player, total, status, payment_date)];
                     case 1:
                         result = _c.sent();
                         return [2 /*return*/, result[0]];
@@ -596,7 +609,7 @@ var Repository = /** @class */ (function () {
             var result;
             return __generator(this, function (_a) {
                 switch (_a.label) {
-                    case 0: return [4 /*yield*/, this.sql(templateObject_42 || (templateObject_42 = __makeTemplateObject(["\n      SELECT\n        s.id_subscription AS id,\n        s.id_player,\n        s.total,\n        s.status,\n        s.payment_date,\n        p.name AS player_name,\n        p.surname AS player_surname\n      FROM subscription s\n      JOIN player p ON p.id_player = s.id_player\n      ORDER BY s.id_subscription DESC\n    "], ["\n      SELECT\n        s.id_subscription AS id,\n        s.id_player,\n        s.total,\n        s.status,\n        s.payment_date,\n        p.name AS player_name,\n        p.surname AS player_surname\n      FROM subscription s\n      JOIN player p ON p.id_player = s.id_player\n      ORDER BY s.id_subscription DESC\n    "])))];
+                    case 0: return [4 /*yield*/, this.sql(templateObject_43 || (templateObject_43 = __makeTemplateObject(["\n      SELECT\n        s.id_subscription AS id,\n        s.id_player,\n        s.total,\n        s.status,\n        s.payment_date,\n        p.name AS player_name,\n        p.surname AS player_surname\n      FROM subscription s\n      JOIN player p ON p.id_player = s.id_player\n      ORDER BY s.id_subscription DESC\n    "], ["\n      SELECT\n        s.id_subscription AS id,\n        s.id_player,\n        s.total,\n        s.status,\n        s.payment_date,\n        p.name AS player_name,\n        p.surname AS player_surname\n      FROM subscription s\n      JOIN player p ON p.id_player = s.id_player\n      ORDER BY s.id_subscription DESC\n    "])))];
                     case 1:
                         result = _a.sent();
                         return [2 /*return*/, result.map(function (r) { return ({
@@ -619,7 +632,7 @@ var Repository = /** @class */ (function () {
             var result;
             return __generator(this, function (_a) {
                 switch (_a.label) {
-                    case 0: return [4 /*yield*/, this.sql(templateObject_43 || (templateObject_43 = __makeTemplateObject(["\n      SELECT\n      count(*) AS total_players,\n      count(CASE WHEN s.status = 'Paid' THEN 1 END) AS paid_players,\n      count(CASE WHEN s.status = 'Late' THEN 1 END) AS late_players,\n      count(CASE WHEN s.status = 'Not paid' THEN 1 END) AS unpaid_players\n      FROM subscription s\n      JOIN player p ON p.id_player = s.id_player\n      WHERE p.id_team = ", "\n    "], ["\n      SELECT\n      count(*) AS total_players,\n      count(CASE WHEN s.status = 'Paid' THEN 1 END) AS paid_players,\n      count(CASE WHEN s.status = 'Late' THEN 1 END) AS late_players,\n      count(CASE WHEN s.status = 'Not paid' THEN 1 END) AS unpaid_players\n      FROM subscription s\n      JOIN player p ON p.id_player = s.id_player\n      WHERE p.id_team = ", "\n    "])), id_team)];
+                    case 0: return [4 /*yield*/, this.sql(templateObject_44 || (templateObject_44 = __makeTemplateObject(["\n      SELECT\n      count(*) AS total_players,\n      count(CASE WHEN s.status = 'Paid' THEN 1 END) AS paid_players,\n      count(CASE WHEN s.status = 'Late' THEN 1 END) AS late_players,\n      count(CASE WHEN s.status = 'Not paid' THEN 1 END) AS unpaid_players\n      FROM subscription s\n      JOIN player p ON p.id_player = s.id_player\n      WHERE p.id_team = ", "\n    "], ["\n      SELECT\n      count(*) AS total_players,\n      count(CASE WHEN s.status = 'Paid' THEN 1 END) AS paid_players,\n      count(CASE WHEN s.status = 'Late' THEN 1 END) AS late_players,\n      count(CASE WHEN s.status = 'Not paid' THEN 1 END) AS unpaid_players\n      FROM subscription s\n      JOIN player p ON p.id_player = s.id_player\n      WHERE p.id_team = ", "\n    "])), id_team)];
                     case 1:
                         result = _a.sent();
                         return [2 /*return*/, result[0]];
@@ -632,7 +645,7 @@ var Repository = /** @class */ (function () {
             var result;
             return __generator(this, function (_a) {
                 switch (_a.label) {
-                    case 0: return [4 /*yield*/, this.sql(templateObject_44 || (templateObject_44 = __makeTemplateObject(["\n      SELECT id_subscription, total, status, payment_date\n      FROM subscription WHERE id_player = ", "\n    "], ["\n      SELECT id_subscription, total, status, payment_date\n      FROM subscription WHERE id_player = ", "\n    "])), id_player)];
+                    case 0: return [4 /*yield*/, this.sql(templateObject_45 || (templateObject_45 = __makeTemplateObject(["\n      SELECT id_subscription, total, status, payment_date\n      FROM subscription WHERE id_player = ", "\n    "], ["\n      SELECT id_subscription, total, status, payment_date\n      FROM subscription WHERE id_player = ", "\n    "])), id_player)];
                     case 1:
                         result = _a.sent();
                         return [2 /*return*/, result[0] || null];
@@ -645,7 +658,7 @@ var Repository = /** @class */ (function () {
             var result;
             return __generator(this, function (_a) {
                 switch (_a.label) {
-                    case 0: return [4 /*yield*/, this.sql(templateObject_45 || (templateObject_45 = __makeTemplateObject(["\n      SELECT id_player, surname, name, mail, position, number, phone, status,id_team\n      FROM player WHERE id_player NOT IN (SELECT id_player FROM subscription)\n    "], ["\n      SELECT id_player, surname, name, mail, position, number, phone, status,id_team\n      FROM player WHERE id_player NOT IN (SELECT id_player FROM subscription)\n    "])))];
+                    case 0: return [4 /*yield*/, this.sql(templateObject_46 || (templateObject_46 = __makeTemplateObject(["\n      SELECT id_player, surname, name, mail, position, number, phone, status,id_team\n      FROM player WHERE id_player NOT IN (SELECT id_player FROM subscription)\n    "], ["\n      SELECT id_player, surname, name, mail, position, number, phone, status,id_team\n      FROM player WHERE id_player NOT IN (SELECT id_player FROM subscription)\n    "])))];
                     case 1:
                         result = _a.sent();
                         return [2 /*return*/, result];
@@ -658,7 +671,7 @@ var Repository = /** @class */ (function () {
             var result;
             return __generator(this, function (_a) {
                 switch (_a.label) {
-                    case 0: return [4 /*yield*/, this.sql(templateObject_46 || (templateObject_46 = __makeTemplateObject(["\n      SELECT\n      COUNT(*) AS total_players,\n      COUNT(CASE WHEN goals > 0 THEN 1 END) AS players_with_goals,\n      COUNT(CASE WHEN passes > 0 THEN 1 END) AS players_with_passes,\n      COUNT(CASE WHEN yellow_cards > 0 THEN 1 END) AS players_with_yellow_cards,\n      COUNT(CASE WHEN red_cards > 0 THEN 1 END) AS players_with_red_cards\n      FROM statistics s\n      JOIN player p ON p.id_player = s.id_player\n      WHERE id_team = ", "\n    "], ["\n      SELECT\n      COUNT(*) AS total_players,\n      COUNT(CASE WHEN goals > 0 THEN 1 END) AS players_with_goals,\n      COUNT(CASE WHEN passes > 0 THEN 1 END) AS players_with_passes,\n      COUNT(CASE WHEN yellow_cards > 0 THEN 1 END) AS players_with_yellow_cards,\n      COUNT(CASE WHEN red_cards > 0 THEN 1 END) AS players_with_red_cards\n      FROM statistics s\n      JOIN player p ON p.id_player = s.id_player\n      WHERE id_team = ", "\n    "])), id_team)];
+                    case 0: return [4 /*yield*/, this.sql(templateObject_47 || (templateObject_47 = __makeTemplateObject(["\n      SELECT\n      COUNT(*) AS total_players,\n      COUNT(CASE WHEN goals > 0 THEN 1 END) AS players_with_goals,\n      COUNT(CASE WHEN passes > 0 THEN 1 END) AS players_with_passes,\n      COUNT(CASE WHEN yellow_cards > 0 THEN 1 END) AS players_with_yellow_cards,\n      COUNT(CASE WHEN red_cards > 0 THEN 1 END) AS players_with_red_cards\n      FROM statistics s\n      JOIN player p ON p.id_player = s.id_player\n      WHERE id_team = ", "\n    "], ["\n      SELECT\n      COUNT(*) AS total_players,\n      COUNT(CASE WHEN goals > 0 THEN 1 END) AS players_with_goals,\n      COUNT(CASE WHEN passes > 0 THEN 1 END) AS players_with_passes,\n      COUNT(CASE WHEN yellow_cards > 0 THEN 1 END) AS players_with_yellow_cards,\n      COUNT(CASE WHEN red_cards > 0 THEN 1 END) AS players_with_red_cards\n      FROM statistics s\n      JOIN player p ON p.id_player = s.id_player\n      WHERE id_team = ", "\n    "])), id_team)];
                     case 1:
                         result = _a.sent();
                         return [2 /*return*/, result[0]];
@@ -671,7 +684,7 @@ var Repository = /** @class */ (function () {
             var result;
             return __generator(this, function (_a) {
                 switch (_a.label) {
-                    case 0: return [4 /*yield*/, this.sql(templateObject_47 || (templateObject_47 = __makeTemplateObject(["\n      SELECT goals, passes, yellow_cards, red_cards\n      FROM statistics\n      WHERE id_player = ", "\n    "], ["\n      SELECT goals, passes, yellow_cards, red_cards\n      FROM statistics\n      WHERE id_player = ", "\n    "])), id_player)];
+                    case 0: return [4 /*yield*/, this.sql(templateObject_48 || (templateObject_48 = __makeTemplateObject(["\n      SELECT goals, passes, yellow_cards, red_cards\n      FROM statistics\n      WHERE id_player = ", "\n    "], ["\n      SELECT goals, passes, yellow_cards, red_cards\n      FROM statistics\n      WHERE id_player = ", "\n    "])), id_player)];
                     case 1:
                         result = _a.sent();
                         return [2 /*return*/, result[0] || null];
@@ -679,12 +692,12 @@ var Repository = /** @class */ (function () {
             });
         });
     };
-    Repository.prototype.nextMatch = function (id_team) {
+    Repository.prototype.nextMatch = function () {
         return __awaiter(this, void 0, void 0, function () {
             var result;
             return __generator(this, function (_a) {
                 switch (_a.label) {
-                    case 0: return [4 /*yield*/, this.sql(templateObject_48 || (templateObject_48 = __makeTemplateObject(["\n      SELECT *\n      FROM matches\n      WHERE id_team = ", " AND date >= CURRENT_DATE\n      ORDER BY date ASC\n      LIMIT 1\n    "], ["\n      SELECT *\n      FROM matches\n      WHERE id_team = ", " AND date >= CURRENT_DATE\n      ORDER BY date ASC\n      LIMIT 1\n    "])), id_team)];
+                    case 0: return [4 /*yield*/, this.sql(templateObject_49 || (templateObject_49 = __makeTemplateObject(["\n      SELECT *\n      FROM matches\n      WHERE date >= CURRENT_DATE\n      ORDER BY date ASC\n      LIMIT 1\n    "], ["\n      SELECT *\n      FROM matches\n      WHERE date >= CURRENT_DATE\n      ORDER BY date ASC\n      LIMIT 1\n    "])))];
                     case 1:
                         result = _a.sent();
                         return [2 /*return*/, result[0] || null];
@@ -692,12 +705,12 @@ var Repository = /** @class */ (function () {
             });
         });
     };
-    Repository.prototype.nextTraining = function (id_team) {
+    Repository.prototype.nextTraining = function () {
         return __awaiter(this, void 0, void 0, function () {
             var result;
             return __generator(this, function (_a) {
                 switch (_a.label) {
-                    case 0: return [4 /*yield*/, this.sql(templateObject_49 || (templateObject_49 = __makeTemplateObject(["\n      SELECT *\n      FROM training\n      WHERE id_team = ", " AND date >= CURRENT_DATE\n      ORDER BY date ASC\n      LIMIT 1\n    "], ["\n      SELECT *\n      FROM training\n      WHERE id_team = ", " AND date >= CURRENT_DATE\n      ORDER BY date ASC\n      LIMIT 1\n    "])), id_team)];
+                    case 0: return [4 /*yield*/, this.sql(templateObject_50 || (templateObject_50 = __makeTemplateObject(["\n      SELECT *\n      FROM training\n      WHERE date >= CURRENT_DATE\n      ORDER BY date ASC\n      LIMIT 1\n    "], ["\n      SELECT *\n      FROM training\n      WHERE date >= CURRENT_DATE\n      ORDER BY date ASC\n      LIMIT 1\n    "])))];
                     case 1:
                         result = _a.sent();
                         return [2 /*return*/, result[0] || null];
@@ -708,4 +721,4 @@ var Repository = /** @class */ (function () {
     return Repository;
 }());
 exports.Repository = Repository;
-var templateObject_1, templateObject_2, templateObject_3, templateObject_4, templateObject_5, templateObject_6, templateObject_7, templateObject_8, templateObject_9, templateObject_10, templateObject_11, templateObject_12, templateObject_13, templateObject_14, templateObject_15, templateObject_16, templateObject_17, templateObject_18, templateObject_19, templateObject_20, templateObject_21, templateObject_22, templateObject_23, templateObject_24, templateObject_25, templateObject_26, templateObject_27, templateObject_28, templateObject_29, templateObject_30, templateObject_31, templateObject_32, templateObject_33, templateObject_34, templateObject_35, templateObject_36, templateObject_37, templateObject_38, templateObject_39, templateObject_40, templateObject_41, templateObject_42, templateObject_43, templateObject_44, templateObject_45, templateObject_46, templateObject_47, templateObject_48, templateObject_49;
+var templateObject_1, templateObject_2, templateObject_3, templateObject_4, templateObject_5, templateObject_6, templateObject_7, templateObject_8, templateObject_9, templateObject_10, templateObject_11, templateObject_12, templateObject_13, templateObject_14, templateObject_15, templateObject_16, templateObject_17, templateObject_18, templateObject_19, templateObject_20, templateObject_21, templateObject_22, templateObject_23, templateObject_24, templateObject_25, templateObject_26, templateObject_27, templateObject_28, templateObject_29, templateObject_30, templateObject_31, templateObject_32, templateObject_33, templateObject_34, templateObject_35, templateObject_36, templateObject_37, templateObject_38, templateObject_39, templateObject_40, templateObject_41, templateObject_42, templateObject_43, templateObject_44, templateObject_45, templateObject_46, templateObject_47, templateObject_48, templateObject_49, templateObject_50;

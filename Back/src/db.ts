@@ -586,6 +586,16 @@ async getprofileplayer(id_player: number) {
     return result[0] || null;
   }
 
+async getdetailsplayer(id_player: number) {
+    const result = await this.sql`
+      SELECT p.id_player, p.surname, p.name, p.mail, p.position, p.number, p.phone, p.status,team.name AS team_name,
+      s.goals, s.passes, s.yellow_cards, s.red_cards
+      FROM player AS p JOIN team ON p.id_team = team.id_team
+      JOIN statistics s ON p.id_player = s.id_player WHERE p.id_player = ${id_player}
+    `;
+    return result[0] || null;
+  }>
+
 async addSubscription({
     id_player,
     total,

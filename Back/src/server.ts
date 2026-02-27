@@ -501,6 +501,15 @@ async function requireCoach(
       return reply.status(500).send({ error: (err as Error).message });
     }
   });
+  web_server.get("/detailsplayer/:id_player", async (request: FastifyRequest, reply: FastifyReply) => {
+    try {
+      const { id_player } = request.params as { id_player: string };
+      const player = await repo.getdetailsplayer(Number(id_player));
+      return reply.send(player);
+    } catch (err) {
+      return reply.status(500).send({ error: (err as Error).message });
+    }
+  });
   web_server.get("/convocationstraining/:id_player", async (request: FastifyRequest, reply: FastifyReply) => {
     try {
       const { id_player } = request.params as { id_player: string };

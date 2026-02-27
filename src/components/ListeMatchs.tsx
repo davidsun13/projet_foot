@@ -108,6 +108,7 @@ const ListeMatchs = () => {
             <th className="p-3 text-left">Type</th>
             <th className="p-3 text-left">Equipe</th>
             <th className="p-3 text-left">Score</th>
+            <th className="p-3 text-left">Actions</th>
           </tr>
         </thead>
 
@@ -121,6 +122,7 @@ const ListeMatchs = () => {
               <td className="p-3">{m.type}</td>
               <td className="p-3">{m.name}</td>
               <td className="p-3">{m.score_home} - {m.score_outside}</td>
+              <td className="p-3"><button className="bg-blue-500 text-black px-2 py-1 rounded hover:bg-blue-600">Modifier</button> </td>
             </tr>
           ))}
         </tbody>

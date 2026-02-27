@@ -16,8 +16,10 @@ import ProfilePlayer from './components/profileplayer'
 import ConvocationsPlayer from './components/convocationsplayer'
 import ConvocationTrainingDetail from './components/convocationTrainingdetail'
 import CreationCotisation from './components/CreationCotisation'
+import detailsPlayer from './components/detailsPlayer'
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import './App.css'
+import DetailsPlayer from './components/detailsPlayer'
 
 function App() {
   return (
@@ -45,6 +47,7 @@ function App() {
               <Route path="/convocations/:id_player" element={<ConvocationsPlayer />} />
               <Route path="/convocations/training/:id_training" element={<ConvocationTrainingDetail />}/>
               <Route path="/cotisations/ajouter" element={<CreationCotisation />} />
+              <Route path="/joueurs/:id_player" element={<DetailsPlayer />} />
             </Routes>
           </div>
         </main>

@@ -746,8 +746,26 @@ function start_web_server() {
                             }
                         });
                     }); });
+                    web_server.get("/detailsplayer/:id_player", function (request, reply) { return __awaiter(_this, void 0, void 0, function () {
+                        var id_player, player, err_24;
+                        return __generator(this, function (_a) {
+                            switch (_a.label) {
+                                case 0:
+                                    _a.trys.push([0, 2, , 3]);
+                                    id_player = request.params.id_player;
+                                    return [4 /*yield*/, repo.getdetailsplayer(Number(id_player))];
+                                case 1:
+                                    player = _a.sent();
+                                    return [2 /*return*/, reply.send(player)];
+                                case 2:
+                                    err_24 = _a.sent();
+                                    return [2 /*return*/, reply.status(500).send({ error: err_24.message })];
+                                case 3: return [2 /*return*/];
+                            }
+                        });
+                    }); });
                     web_server.get("/convocationstraining/:id_player", function (request, reply) { return __awaiter(_this, void 0, void 0, function () {
-                        var id_player, convocations, err_24;
+                        var id_player, convocations, err_25;
                         return __generator(this, function (_a) {
                             switch (_a.label) {
                                 case 0:
@@ -758,14 +776,14 @@ function start_web_server() {
                                     convocations = _a.sent();
                                     return [2 /*return*/, reply.send(convocations)];
                                 case 2:
-                                    err_24 = _a.sent();
-                                    return [2 /*return*/, reply.status(500).send({ error: err_24.message })];
+                                    err_25 = _a.sent();
+                                    return [2 /*return*/, reply.status(500).send({ error: err_25.message })];
                                 case 3: return [2 /*return*/];
                             }
                         });
                     }); });
                     web_server.get("/convocationsmatch/:id_player", function (request, reply) { return __awaiter(_this, void 0, void 0, function () {
-                        var id_player, convocations, err_25;
+                        var id_player, convocations, err_26;
                         return __generator(this, function (_a) {
                             switch (_a.label) {
                                 case 0:
@@ -776,14 +794,14 @@ function start_web_server() {
                                     convocations = _a.sent();
                                     return [2 /*return*/, reply.send(convocations)];
                                 case 2:
-                                    err_25 = _a.sent();
-                                    return [2 /*return*/, reply.status(500).send({ error: err_25.message })];
+                                    err_26 = _a.sent();
+                                    return [2 /*return*/, reply.status(500).send({ error: err_26.message })];
                                 case 3: return [2 /*return*/];
                             }
                         });
                     }); });
                     web_server.get("/convocationstraining/coach/:id_training", function (request, reply) { return __awaiter(_this, void 0, void 0, function () {
-                        var id_training, convocations, err_26;
+                        var id_training, convocations, err_27;
                         return __generator(this, function (_a) {
                             switch (_a.label) {
                                 case 0:
@@ -794,14 +812,14 @@ function start_web_server() {
                                     convocations = _a.sent();
                                     return [2 /*return*/, reply.send(convocations)];
                                 case 2:
-                                    err_26 = _a.sent();
-                                    return [2 /*return*/, reply.status(500).send({ error: err_26.message })];
+                                    err_27 = _a.sent();
+                                    return [2 /*return*/, reply.status(500).send({ error: err_27.message })];
                                 case 3: return [2 /*return*/];
                             }
                         });
                     }); });
                     web_server.get("/convocationsmatch/coach/:id_match", function (request, reply) { return __awaiter(_this, void 0, void 0, function () {
-                        var id_match, convocations, err_27;
+                        var id_match, convocations, err_28;
                         return __generator(this, function (_a) {
                             switch (_a.label) {
                                 case 0:
@@ -812,14 +830,14 @@ function start_web_server() {
                                     convocations = _a.sent();
                                     return [2 /*return*/, reply.send(convocations)];
                                 case 2:
-                                    err_27 = _a.sent();
-                                    return [2 /*return*/, reply.status(500).send({ error: err_27.message })];
+                                    err_28 = _a.sent();
+                                    return [2 /*return*/, reply.status(500).send({ error: err_28.message })];
                                 case 3: return [2 /*return*/];
                             }
                         });
                     }); });
                     web_server.post("/addsubscription", function (request, reply) { return __awaiter(_this, void 0, void 0, function () {
-                        var body, subscription, err_28;
+                        var body, subscription, err_29;
                         return __generator(this, function (_a) {
                             switch (_a.label) {
                                 case 0:
@@ -830,14 +848,14 @@ function start_web_server() {
                                     subscription = _a.sent();
                                     return [2 /*return*/, reply.send(subscription)];
                                 case 2:
-                                    err_28 = _a.sent();
-                                    return [2 /*return*/, reply.status(500).send({ error: err_28.message })];
+                                    err_29 = _a.sent();
+                                    return [2 /*return*/, reply.status(500).send({ error: err_29.message })];
                                 case 3: return [2 /*return*/];
                             }
                         });
                     }); });
                     web_server.get("/subscriptions/:id_team", function (request, reply) { return __awaiter(_this, void 0, void 0, function () {
-                        var id_team, subscriptions, err_29;
+                        var id_team, subscriptions, err_30;
                         return __generator(this, function (_a) {
                             switch (_a.label) {
                                 case 0:
@@ -848,14 +866,14 @@ function start_web_server() {
                                     subscriptions = _a.sent();
                                     return [2 /*return*/, reply.send(subscriptions)];
                                 case 2:
-                                    err_29 = _a.sent();
-                                    return [2 /*return*/, reply.status(500).send({ error: err_29.message })];
+                                    err_30 = _a.sent();
+                                    return [2 /*return*/, reply.status(500).send({ error: err_30.message })];
                                 case 3: return [2 /*return*/];
                             }
                         });
                     }); });
                     web_server.get("/subscriptions/player/:id_player", function (request, reply) { return __awaiter(_this, void 0, void 0, function () {
-                        var id_player, subscription, err_30;
+                        var id_player, subscription, err_31;
                         return __generator(this, function (_a) {
                             switch (_a.label) {
                                 case 0:
@@ -866,14 +884,14 @@ function start_web_server() {
                                     subscription = _a.sent();
                                     return [2 /*return*/, reply.send(subscription)];
                                 case 2:
-                                    err_30 = _a.sent();
-                                    return [2 /*return*/, reply.status(500).send({ error: err_30.message })];
+                                    err_31 = _a.sent();
+                                    return [2 /*return*/, reply.status(500).send({ error: err_31.message })];
                                 case 3: return [2 /*return*/];
                             }
                         });
                     }); });
                     web_server.get("/subscriptions/players", function (request, reply) { return __awaiter(_this, void 0, void 0, function () {
-                        var players, err_31;
+                        var players, err_32;
                         return __generator(this, function (_a) {
                             switch (_a.label) {
                                 case 0:
@@ -883,14 +901,14 @@ function start_web_server() {
                                     players = _a.sent();
                                     return [2 /*return*/, reply.send(players)];
                                 case 2:
-                                    err_31 = _a.sent();
-                                    return [2 /*return*/, reply.status(500).send({ error: err_31.message })];
+                                    err_32 = _a.sent();
+                                    return [2 /*return*/, reply.status(500).send({ error: err_32.message })];
                                 case 3: return [2 /*return*/];
                             }
                         });
                     }); });
                     web_server.get("/subscriptions", function (request, reply) { return __awaiter(_this, void 0, void 0, function () {
-                        var subscriptions, err_32;
+                        var subscriptions, err_33;
                         return __generator(this, function (_a) {
                             switch (_a.label) {
                                 case 0:
@@ -900,14 +918,14 @@ function start_web_server() {
                                     subscriptions = _a.sent();
                                     return [2 /*return*/, reply.send(subscriptions)];
                                 case 2:
-                                    err_32 = _a.sent();
-                                    return [2 /*return*/, reply.status(500).send({ error: err_32.message })];
+                                    err_33 = _a.sent();
+                                    return [2 /*return*/, reply.status(500).send({ error: err_33.message })];
                                 case 3: return [2 /*return*/];
                             }
                         });
                     }); });
                     web_server.get("/statistics/:id_team", function (request, reply) { return __awaiter(_this, void 0, void 0, function () {
-                        var id_team, stats, err_33;
+                        var id_team, stats, err_34;
                         return __generator(this, function (_a) {
                             switch (_a.label) {
                                 case 0:
@@ -918,14 +936,14 @@ function start_web_server() {
                                     stats = _a.sent();
                                     return [2 /*return*/, reply.send(stats)];
                                 case 2:
-                                    err_33 = _a.sent();
-                                    return [2 /*return*/, reply.status(500).send({ error: err_33.message })];
+                                    err_34 = _a.sent();
+                                    return [2 /*return*/, reply.status(500).send({ error: err_34.message })];
                                 case 3: return [2 /*return*/];
                             }
                         });
                     }); });
                     web_server.get("/statistics/player/:id_player", function (request, reply) { return __awaiter(_this, void 0, void 0, function () {
-                        var id_player, stats, err_34;
+                        var id_player, stats, err_35;
                         return __generator(this, function (_a) {
                             switch (_a.label) {
                                 case 0:
@@ -936,44 +954,42 @@ function start_web_server() {
                                     stats = _a.sent();
                                     return [2 /*return*/, reply.send(stats)];
                                 case 2:
-                                    err_34 = _a.sent();
-                                    return [2 /*return*/, reply.status(500).send({ error: err_34.message })];
-                                case 3: return [2 /*return*/];
-                            }
-                        });
-                    }); });
-                    web_server.get("/nextmatch/:id_team", function (request, reply) { return __awaiter(_this, void 0, void 0, function () {
-                        var id_team, match, err_35;
-                        return __generator(this, function (_a) {
-                            switch (_a.label) {
-                                case 0:
-                                    _a.trys.push([0, 2, , 3]);
-                                    id_team = request.params.id_team;
-                                    return [4 /*yield*/, repo.nextMatch(Number(id_team))];
-                                case 1:
-                                    match = _a.sent();
-                                    return [2 /*return*/, reply.send(match)];
-                                case 2:
                                     err_35 = _a.sent();
                                     return [2 /*return*/, reply.status(500).send({ error: err_35.message })];
                                 case 3: return [2 /*return*/];
                             }
                         });
                     }); });
-                    web_server.get("/nexttraining/:id_team", function (request, reply) { return __awaiter(_this, void 0, void 0, function () {
-                        var id_team, training, err_36;
+                    web_server.get("/nextmatch", function (request, reply) { return __awaiter(_this, void 0, void 0, function () {
+                        var match, err_36;
                         return __generator(this, function (_a) {
                             switch (_a.label) {
                                 case 0:
                                     _a.trys.push([0, 2, , 3]);
-                                    id_team = request.params.id_team;
-                                    return [4 /*yield*/, repo.nextTraining(Number(id_team))];
+                                    return [4 /*yield*/, repo.nextMatch()];
+                                case 1:
+                                    match = _a.sent();
+                                    return [2 /*return*/, reply.send(match)];
+                                case 2:
+                                    err_36 = _a.sent();
+                                    return [2 /*return*/, reply.status(500).send({ error: err_36.message })];
+                                case 3: return [2 /*return*/];
+                            }
+                        });
+                    }); });
+                    web_server.get("/nexttraining", function (request, reply) { return __awaiter(_this, void 0, void 0, function () {
+                        var training, err_37;
+                        return __generator(this, function (_a) {
+                            switch (_a.label) {
+                                case 0:
+                                    _a.trys.push([0, 2, , 3]);
+                                    return [4 /*yield*/, repo.nextTraining()];
                                 case 1:
                                     training = _a.sent();
                                     return [2 /*return*/, reply.send(training)];
                                 case 2:
-                                    err_36 = _a.sent();
-                                    return [2 /*return*/, reply.status(500).send({ error: err_36.message })];
+                                    err_37 = _a.sent();
+                                    return [2 /*return*/, reply.status(500).send({ error: err_37.message })];
                                 case 3: return [2 /*return*/];
                             }
                         });

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import Card from './card';
 import ballon from '../assets/signe.png';
 import calendrier from '../assets/calendrier.png';
@@ -7,32 +7,6 @@ import stats from '../assets/statistiques.png';
 function DashboardContent() {
   const handleEdit = (data?: any) => console.log('edit', data);
   const handleDelete = (id?: string | number) => console.log('delete', id);
-  const token = localStorage.getItem("access_token");
-  const [training, setTraining] = useState<any>(null);
-  const [match, setMatch] = useState<any>(null);
-
-   useEffect(() => {
-    fetchDashboard();
-  }, []);
-
-  const fetchDashboard = async () => {
-    try {
-      const trainingRes = await fetch(
-        `http://localhost:1234/nexttraining/${id_team}`,
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
-      const trainingData = await trainingRes.json();
-      setTraining(trainingData);
-
-      const matchRes = await fetch(
-        `http://localhost:1234/nextmatch/${id_team}`,
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
-      const matchData = await matchRes.json();
-      setMatch(matchData);
-    } catch (err) {
-      console.error('Erreur lors du chargement du dashboard:', err);
-    }
 
   return (
     <main className="flex-1 p-6 bg-gray-100 min-h-screen flex items-center justify-center">
