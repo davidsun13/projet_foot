@@ -52,6 +52,32 @@ export async function start_web_server() {
       message: issue.message
     }));
   }
+  async function requireAuth(
+  request: FastifyRequest,
+  reply: FastifyReply
+) {
+  try {
+    await request.jwtVerify();
+  } catch {
+    reply.status(401).send({ error: "Unauthorized" });
+  }
+}
+async function requireCoach(
+  request: FastifyRequest,
+  reply: FastifyReply
+) {
+  try {
+    await request.jwtVerify();
+
+    if (request.user.userType !== "coach") {
+      return reply.status(403).send({ error: "Forbidden" });
+    }
+  } catch {
+    reply.status(401).send({ error: "Unauthorized" });
+  }
+}
+
+
   web_server.post("/registercoach", async (request, reply) => {
     try {
       const parsed = registerSchema.parse(request.body);
@@ -169,19 +195,15 @@ export async function start_web_server() {
     try {
       const parsed = loginSchema.parse(request.body);
       const { mail, password } = parsed;
-
       const user = await repo.loginCoach(mail, password);
-
       const accessToken = web_server.jwt.sign({ id: user.id_coach, userType: "coach" }, { expiresIn: "15m" });
       const refreshToken = generateRefreshToken();
-
       await repo.saveRefreshToken({
         userId: user.id_coach,
-        userType: "coach", // <--- ajouté
+        userType: "coach",
         token: refreshToken,
         expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
       });
-
       reply.setCookie("refresh_token", refreshToken, {
         httpOnly: true,
         secure: isProduction,
@@ -189,7 +211,6 @@ export async function start_web_server() {
         path: "/",
         maxAge: 7 * 24 * 60 * 60,
       });
-
       return reply.send({ accessToken, user });
     } catch (err) {
       if (err instanceof ZodError) {
@@ -212,13 +233,10 @@ export async function start_web_server() {
       return reply.status(401).send({ error: "Expired refresh token" });
     }
 
-    // Révoque l'ancien token
     await repo.revokeRefreshToken(oldRefresh);
 
-    // Détermine l'ID utilisateur pour le JWT
     const userId = stored.userType === "player" ? stored.player_id : stored.coach_id;
 
-    // Génère un nouvel access token et refresh token
     const newRefresh = generateRefreshToken();
     const newAccess = web_server.jwt.sign({ id: userId, userType: stored.userType }, { expiresIn: "15m" });
 
@@ -263,7 +281,7 @@ export async function start_web_server() {
     }
   });
 
-  web_server.post("/createtraining", async (request: FastifyRequest, reply: FastifyReply) => {
+  web_server.post("/createtraining",{preHandler: [requireCoach]}, async (request: FastifyRequest, reply: FastifyReply) => {
     try {
       const parsed = createTrainingSchema.parse(request.body);
       const training = await repo.createTrainingSession(parsed);
@@ -285,7 +303,7 @@ export async function start_web_server() {
       return reply.status(500).send({ error: (err as Error).message });
     }
   });
-  web_server.put("/training/:id_training/modify", async (request: FastifyRequest, reply: FastifyReply) => {
+  web_server.put("/training/:id_training/modify",{preHandler: [requireCoach]}, async (request: FastifyRequest, reply: FastifyReply) => {
     try {
       const body = request.body as any;
       const training = await repo.modifyTrainingSession(body);
@@ -295,7 +313,7 @@ export async function start_web_server() {
     }
   }
   );
-  web_server.delete("/deletetraining/:id_training", async (request: FastifyRequest, reply: FastifyReply) => {
+  web_server.delete("/deletetraining/:id_training",{preHandler: [requireCoach]}, async (request: FastifyRequest, reply: FastifyReply) => {
     try {
       const id_training = Number((request.params as any).id_training);
       const training = await repo.deleteTrainingSession(id_training);
@@ -305,7 +323,7 @@ export async function start_web_server() {
     }
   }
   );
-  web_server.get("/trainings", async (request: FastifyRequest, reply: FastifyReply) => {
+  web_server.get("/trainings",{preHandler: [requireAuth]}, async (request: FastifyRequest, reply: FastifyReply) => {
     try {
       const trainings = await repo.getAllTrainings();
       return reply.send(trainings);
@@ -314,7 +332,7 @@ export async function start_web_server() {
     }
   }
   );
-  web_server.post("/creatematch", async (request: FastifyRequest, reply: FastifyReply) => {
+  web_server.post("/creatematch",{preHandler: [requireCoach]},async (request: FastifyRequest, reply: FastifyReply) => {
     try {
       const body = request.body as any;
       const parsed = createMatchSchema.parse(body);
@@ -325,7 +343,7 @@ export async function start_web_server() {
     }
   });
 
-  web_server.put("/modifymatch", async (request: FastifyRequest, reply: FastifyReply) => {
+  web_server.put("/modifymatch",{preHandler: [requireCoach]}, async (request: FastifyRequest, reply: FastifyReply) => {
     try {
       const body = request.body as any;
       const match = await repo.modifyMatchSession(body);
@@ -335,7 +353,7 @@ export async function start_web_server() {
     }
   }
   );
-  web_server.delete("/deletematch/:id_match", async (request: FastifyRequest, reply: FastifyReply) => {
+  web_server.delete("/deletematch/:id_match",{preHandler: [requireCoach]}, async (request: FastifyRequest, reply: FastifyReply) => {
     try {
       const id_match = Number((request.params as any).id_match);
       const match = await repo.deleteMatchSession(id_match);
@@ -364,7 +382,7 @@ export async function start_web_server() {
     }
   });
 
-  web_server.get("/matchs", async (request: FastifyRequest, reply: FastifyReply) => {
+  web_server.get("/matchs",{preHandler: [requireAuth]}, async (request: FastifyRequest, reply: FastifyReply) => {
     try {
       const matches = await repo.listMatchSessions();
       return reply.send(matches);
@@ -474,7 +492,83 @@ export async function start_web_server() {
     }
   });
 
-
+  web_server.get("/player-profile/:id_player", async (request: FastifyRequest, reply: FastifyReply) => {
+    try {
+      const { id_player } = request.params as { id_player: string };
+      const player = await repo.getprofileplayer(Number(id_player));
+      return reply.send(player);
+    } catch (err) {
+      return reply.status(500).send({ error: (err as Error).message });
+    }
+  });
+  web_server.get("/convocationstraining/:id_player", async (request: FastifyRequest, reply: FastifyReply) => {
+    try {
+      const { id_player } = request.params as { id_player: string };
+      const convocations = await repo.getConvocationsTrainingbyplayer(Number(id_player));
+      return reply.send(convocations);
+    } catch (err) {
+      return reply.status(500).send({ error: (err as Error).message });
+    }
+  });
+  web_server.get("/convocationsmatch/:id_player", async (request: FastifyRequest, reply: FastifyReply) => {
+    try {
+      const { id_player } = request.params as { id_player: string };
+      const convocations = await repo.getConvocationsMatchbyplayer(Number(id_player));
+      return reply.send(convocations);
+    } catch (err) {      return reply.status(500).send({ error: (err as Error).message });
+    }
+  });
+  web_server.get("/convocationstraining/coach/:id_training", async (request: FastifyRequest, reply: FastifyReply) => {
+    try {      
+      const { id_training } = request.params as { id_training: string };
+      const convocations = await repo.getConvocationsByTraining(Number(id_training));      
+      return reply.send(convocations);
+    } catch (err) {      return reply.status(500).send({ error: (err as Error).message });
+    }
+  }); 
+  web_server.get("/convocationsmatch/coach/:id_match", async (request: FastifyRequest, reply: FastifyReply) => {
+    try {
+      const { id_match } = request.params as { id_match: string };
+      const convocations = await repo.getConvocationsByMatch(Number(id_match) as number);
+      return reply.send(convocations);
+    } catch (err) {      return reply.status(500).send({ error: (err as Error).message });
+    }
+  });
+  web_server.post("/addsubscription", async (request: FastifyRequest, reply: FastifyReply) => {
+    try {
+      const body = request.body as any;
+      const subscription = await repo.addSubscription(body);
+      return reply.send(subscription);
+    } catch (err) {
+      return reply.status(500).send({ error: (err as Error).message });
+    }
+  });
+  web_server.get("/subscriptions/:id_team", async (request: FastifyRequest, reply: FastifyReply) => {
+    try {     
+      const { id_team } = request.params as { id_team: string };
+      const subscriptions = await repo.subscriptionteam(Number(id_team));
+      return reply.send(subscriptions);
+    } catch (err) {      
+      return reply.status(500).send({ error: (err as Error).message });
+    }
+  });
+  web_server.get("/subscriptions/player/:id_player", async (request: FastifyRequest, reply: FastifyReply) => {
+    try {
+      const { id_player } = request.params as { id_player: string };
+      const subscription = await repo.getsubscriptionbyplayer(Number(id_player));
+      return reply.send(subscription);
+    } catch (err) {
+      return reply.status(500).send({ error: (err as Error).message });
+    }
+  });
+  web_server.get("/subscriptions/players", async (request: FastifyRequest, reply: FastifyReply) => {
+    try {
+      const players = await repo.getplayerwithnosubscription();
+      return reply.send(players);
+    } catch (err) {
+      return reply.status(500).send({ error: (err as Error).message });
+    }
+  });
   web_server.get("/subscriptions", async (request: FastifyRequest, reply: FastifyReply) => {
     try {
       const subscriptions = await repo.getallSubscriptions();
@@ -483,7 +577,40 @@ export async function start_web_server() {
       return reply.status(500).send({ error: (err as Error).message });
     }
   });
-
+  web_server.get("/statistics/:id_team", async (request: FastifyRequest, reply: FastifyReply) => {
+    try {
+      const { id_team } = request.params as { id_team: string };
+      const stats = await repo.getstatisticsteam(Number(id_team));
+      return reply.send(stats);
+    } catch (err) {      
+      return reply.status(500).send({ error: (err as Error).message });
+    }
+  });
+  web_server.get("/statistics/player/:id_player", async (request: FastifyRequest, reply: FastifyReply) => {
+    try {
+      const { id_player } = request.params as { id_player: string };
+      const stats = await repo.statisticsplayer(Number(id_player));
+      return reply.send(stats);
+    } catch (err) {
+      return reply.status(500).send({ error: (err as Error).message });
+    }
+  });
+  web_server.get("/nextmatch", async (request: FastifyRequest, reply: FastifyReply) => {
+    try {
+      const match = await repo.nextMatch();
+      return reply.send(match);
+    } catch (err) {
+      return reply.status(500).send({ error: (err as Error).message });
+    }
+  });
+  web_server.get("/nexttraining", async (request: FastifyRequest, reply: FastifyReply) => {
+    try {
+      const training = await repo.nextTraining();
+      return reply.send(training);
+    } catch (err) {
+      return reply.status(500).send({ error: (err as Error).message });
+    }
+  }); 
   const port = Number(process.env.PORT) || 1234;
   await web_server.listen({ port, host: "0.0.0.0" });
   web_server.log.info(`listening on http://0.0.0.0:${port}`);

@@ -12,6 +12,10 @@ import ListeMatchs from './components/ListeMatchs'
 import CreationMatch from './components/CreationMatch'
 import ModifPlayer from './components/ModifPlayer'
 import ModifEntrainement from './components/Modifentrainement'
+import ProfilePlayer from './components/profileplayer'
+import ConvocationsPlayer from './components/convocationsplayer'
+import ConvocationTrainingDetail from './components/convocationTrainingdetail'
+import CreationCotisation from './components/CreationCotisation'
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import './App.css'
 
@@ -37,6 +41,10 @@ function App() {
               <Route path="/players" element={<ListeJoueurs />} />
               <Route path="/joueurs/modifier/:id_player" element={<ModifPlayer />} />
               <Route path="/entrainements/modifier/:id_entrainement" element={<ModifEntrainement />} />
+              <Route path="/player-profile/:id_player" element={<ProfilePlayer />} />
+              <Route path="/convocations/:id_player" element={<ConvocationsPlayer />} />
+              <Route path="/convocations/training/:id_training" element={<ConvocationTrainingDetail />}/>
+              <Route path="/cotisations/ajouter" element={<CreationCotisation />} />
             </Routes>
           </div>
         </main>

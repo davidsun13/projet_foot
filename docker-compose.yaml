@@ -1,0 +1,30 @@
+version: "3.9"
+
+services:
+  db:
+    image: postgres:16
+    container_name: club_db
+    restart: always
+    environment:
+      POSTGRES_USER: toto
+      POSTGRES_PASSWORD: example
+      POSTGRES_DB: projet_club_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - db_data:/var/lib/postgresql/data
+      - ./initdb.d:/docker-entrypoint-initdb.d
+
+  api:
+    build: .
+    container_name: club_api
+    restart: always
+    depends_on:
+      - db
+    ports:
+      - "1234:1234"
+    env_file:
+      - .env
+
+volumes:
+  db_data:

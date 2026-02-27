@@ -31,7 +31,6 @@ export class Repository {
     phone: string | null;
     password: string;
   }) {
-    // 1️⃣ Vérifier si l'email existe déjà
     const existing = await this.sql`
     SELECT * FROM player WHERE mail = ${mail}
   `;
@@ -39,13 +38,10 @@ export class Repository {
       throw new Error("Un compte existe déjà avec cet email.");
     }
 
-    // 2️⃣ Hasher le mot de passe
     const hash = await argon2.hash(password);
 
-    // 3️⃣ S'assurer que phone n'est jamais undefined
     const phoneValue = phone ?? null;
 
-    // 4️⃣ Insérer le joueur sans id_team
     const result = await this.sql`
     INSERT INTO player (surname, name, mail, phone, password, status)
     VALUES (
@@ -263,6 +259,63 @@ export class Repository {
     `;
     return result[0] || null;
   }
+  async getConvocationsTrainingbyplayer(id_player: number) {
+    const result = await this.sql`
+    SELECT
+  c.id_convocation,
+  c.status,
+  t.date,
+  t.hour,
+  t.type,
+  t.location,
+  tm.name AS team_name
+FROM convocation c
+JOIN training t ON c.id_training = t.id_training
+JOIN team tm ON t.id_team = tm.id_team
+WHERE c.id_player = ${id_player}
+ORDER BY t.date DESC, tm.name;
+  `;
+    return result;
+  }
+  async getConvocationsMatchbyplayer(id_player: number) {
+    const result = await this.sql`
+    SELECT
+  c.id_convocation,
+  c.status,
+  m.date,
+  m.hour,
+  m.type,
+  m.location,
+  tm.name AS team_name,
+  m.opponent
+FROM convocation c
+JOIN matches m ON c.id_match = m.id_match 
+JOIN team tm ON m.id_team = tm.id_team
+WHERE c.id_player = ${id_player}
+ORDER BY m.date DESC, tm.name;
+  `;
+    return result;
+  }
+  
+  async getConvocationsByTraining(id_training: number) {
+    const result = await this.sql`
+    SELECT c.*, p.name AS player_name, p.surname AS player_surname
+    FROM convocation c
+    JOIN player p ON c.id_player = p.id_player
+    WHERE c.id_training = ${id_training}
+  `;
+    return result;
+  }
+  async getConvocationsByMatch(id_match: number) {
+    const result = await this.sql`
+    SELECT c.*, p.name AS player_name, p.surname AS player_surname
+    FROM convocation c
+    JOIN player p ON c.id_player = p.id_player
+    WHERE c.id_match = ${id_match}
+  `;
+    return result;
+  }
+
   async modifyTrainingSession({
     id_training,
     date,
@@ -299,7 +352,7 @@ export class Repository {
     `;
   }
   async getAllTrainings() {
-  const result = await this.sql`
+    const result = await this.sql`
     SELECT
       tr.id_training,
       tr.date,
@@ -313,8 +366,8 @@ export class Repository {
     LEFT JOIN team t ON tr.id_team = t.id_team
     ORDER BY tr.date DESC, t.name;
   `;
-  return result;
-}
+    return result;
+  }
   async createMatchSession({
     date,
     hour,
@@ -494,23 +547,23 @@ export class Repository {
     return result[0] || null;
   }
   async updatePlayer({
-  id_player,
-  surname,
-  name,
-  position,
-  number,
-  status,
-  id_team,
-}: {
-  id_player: number;
-  surname: string;
-  name: string;
-  position: string;
-  number: number;
-  status: string;
-  id_team: number | null;
-}) {
-  const result = await this.sql`
+    id_player,
+    surname,
+    name,
+    position,
+    number,
+    status,
+    id_team,
+  }: {
+    id_player: number;
+    surname: string;
+    name: string;
+    position: string;
+    number: number;
+    status: string;
+    id_team: number | null;
+  }) {
+    const result = await this.sql`
     UPDATE player
     SET
       surname = ${surname},
@@ -522,9 +575,35 @@ export class Repository {
     WHERE id_player = ${id_player}
     RETURNING id_player
   `;
-  return result[0];
-}
+    return result[0];
+  }
 
+async getprofileplayer(id_player: number) {
+    const result = await this.sql`
+      SELECT p.id_player, p.surname, p.name, p.mail, p.position, p.number, p.phone, p.status,team.name AS team_name
+      FROM player AS p JOIN team ON p.id_team = team.id_team WHERE id_player = ${id_player}
+    `;
+    return result[0] || null;
+  }
+
+async addSubscription({
+    id_player,
+    total,
+    status,
+    payment_date,
+  }: {
+    id_player: number;
+    total: number;
+    status: string;
+    payment_date: Date;
+  }) {
+    const result = await this.sql`
+    INSERT INTO subscription (id_player, total, status, payment_date)
+    VALUES (${id_player}, ${total}, ${status}, ${payment_date})
+    RETURNING id_subscription
+  `;
+    return result[0];
+  }
   async getallSubscriptions() {
     const result = await this.sql`
       SELECT
@@ -551,6 +630,76 @@ export class Repository {
       },
     }));
   }
+async subscriptionteam(id_team: number) {
+    const result = await this.sql`
+      SELECT
+      count(*) AS total_players,
+      count(CASE WHEN s.status = 'Paid' THEN 1 END) AS paid_players,
+      count(CASE WHEN s.status = 'Late' THEN 1 END) AS late_players,
+      count(CASE WHEN s.status = 'Not paid' THEN 1 END) AS unpaid_players
+      FROM subscription s
+      JOIN player p ON p.id_player = s.id_player
+      WHERE p.id_team = ${id_team}
+    `;
+    return result[0];
+  }
+async getsubscriptionbyplayer(id_player: number) {
+    const result = await this.sql`
+      SELECT id_subscription, total, status, payment_date
+      FROM subscription WHERE id_player = ${id_player}
+    `;
+    return result[0] || null;
+  }
+async getplayerwithnosubscription() {
+    const result = await this.sql`
+      SELECT id_player, surname, name, mail, position, number, phone, status,id_team
+      FROM player WHERE id_player NOT IN (SELECT id_player FROM subscription)
+    `;
+    return result;
+  }
+async getstatisticsteam(id_team: number) {
+    const result = await this.sql`
+      SELECT
+      COUNT(*) AS total_players,
+      COUNT(CASE WHEN goals > 0 THEN 1 END) AS players_with_goals,
+      COUNT(CASE WHEN passes > 0 THEN 1 END) AS players_with_passes,
+      COUNT(CASE WHEN yellow_cards > 0 THEN 1 END) AS players_with_yellow_cards,
+      COUNT(CASE WHEN red_cards > 0 THEN 1 END) AS players_with_red_cards
+      FROM statistics s
+      JOIN player p ON p.id_player = s.id_player
+      WHERE id_team = ${id_team}
+    `;
+    return result[0];
+  }
+  async statisticsplayer(id_player: number) {
+    const result = await this.sql`
+      SELECT goals, passes, yellow_cards, red_cards
+      FROM statistics
+      WHERE id_player = ${id_player}
+    `;
+    return result[0] || null;
+  }
+async nextMatch() {
+    const result = await this.sql`
+      SELECT *
+      FROM matches
+      WHERE date >= CURRENT_DATE
+      ORDER BY date ASC
+      LIMIT 1
+    `;
+    return result[0] || null;
+  }
+async nextTraining(){
+    const result = await this.sql`
+      SELECT *
+      FROM training
+      WHERE date >= CURRENT_DATE
+      ORDER BY date ASC
+      LIMIT 1
+    `;
+    return result[0] || null;
+  }
+
 }
 
 

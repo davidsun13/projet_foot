@@ -7,9 +7,8 @@ type Training = {
   hour?: string;
   type?: string;
   location?: string;
-  team_name?: string; // correspond à la valeur renvoyée par le back
-};
-
+  team_name?: string; 
+}
 type MeResponse = {
   userType: "player" | "coach";
   user: {
@@ -148,6 +147,12 @@ const ListeEntrainements = () => {
                 <td className="p-3 flex gap-2">
                   {currentUser?.userType === "coach" && t.id_training ? (
                     <>
+                      <Link
+                        to={`/convocations/training/${t.id_training}`}
+                        className="px-2 py-1 bg-blue-200 rounded hover:bg-blue-300"
+                      >
+                        Détails
+                      </Link>
                       <Link
                         to={`/entrainements/modifier/${t.id_training}`}
                         className="px-2 py-1 bg-green-200 rounded hover:bg-green-300"

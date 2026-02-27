@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 
 type Subscription = {
   id?: number;
@@ -68,6 +69,11 @@ export const GestionCotisations = () => {
           <option>Partiel</option>
           <option>Non payé</option>
         </select>
+        <button className="bg-blue-600 text-black px-4 py-2 rounded hover:bg-blue-700">
+          <Link to="/cotisations/ajouter" className="text-white">
+          Ajouter une cotisation
+          </Link>
+        </button>
       </div>
 
       {loading && <p>Chargement...</p>}

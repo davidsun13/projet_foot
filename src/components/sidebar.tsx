@@ -4,6 +4,7 @@ import training from "../assets/1540533.png";
 import player from "../assets/606545.png";
 import ball from "../assets/signe.png";
 import money from "../assets/pieces-de-monnaie.png";
+import convocation from "../assets/liste-de-controle.png";
 
 type MeResponse = {
   userType: "player" | "coach";
@@ -75,6 +76,35 @@ function Sidebar() {
           >
             <img src={player} alt="" className="w-15 h-15" />
             <span className="text-white font-[Arsenal]">Joueurs</span>
+          </Link>
+        )}
+        {/* 🔒 Visible uniquement pour les coachs */}
+        {currentUser?.userType === "coach" && (
+          <Link
+            to="/convocations"
+            className="flex items-center gap-2 px-2 py-1 rounded hover:bg-gray-700"
+          >
+            <img src={convocation} alt="" className="w-15 h-15" />
+            <span className="text-white font-[Arsenal]">Convocations</span>
+          </Link>
+        )}
+        {/* 🔒 Visible uniquement pour les joueurs */}
+        {currentUser?.userType === "player" && (
+          <Link
+            to={`/player-profile/${currentUser.user.id_player}`}
+            className="flex items-center gap-2 px-2 py-1 rounded hover:bg-gray-700"
+          >
+            <img src={player} alt="" className="w-15 h-15" />
+            <span className="text-white font-[Arsenal]">Profil</span>
+          </Link>
+        )}
+        {currentUser?.userType === "player" && (
+          <Link
+            to={`/convocations/${currentUser.user.id_player}`}
+            className="flex items-center gap-2 px-2 py-1 rounded hover:bg-gray-700"
+          >
+            <img src={convocation} alt="" className="w-15 h-15" />
+            <span className="text-white font-[Arsenal]">Convocations</span>
           </Link>
         )}
       </nav>

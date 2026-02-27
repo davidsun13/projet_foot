@@ -214,3 +214,13 @@ Sécurité web
 Architecture client / serveur
 
 Modélisation de données
+
+
+Dépendances:
+Fastify-cookie 
+fastify-jwt
+argon2
+jose
+lolcatjs
+postgres
+zod, zod-validation-error
