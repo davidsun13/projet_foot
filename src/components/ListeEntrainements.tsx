@@ -7,8 +7,9 @@ type Training = {
   hour?: string;
   type?: string;
   location?: string;
-  team_name?: string; 
-}
+  team_name?: string;
+};
+
 type MeResponse = {
   userType: "player" | "coach";
   user: {
@@ -21,160 +22,175 @@ type MeResponse = {
 
 const ListeEntrainements = () => {
   const [trainings, setTrainings] = useState<Training[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
   const [currentUser, setCurrentUser] = useState<MeResponse | null>(null);
 
-  // 🔹 Récupérer l'utilisateur courant
   useEffect(() => {
     async function fetchUser() {
-      try {
-        const res = await fetch("http://localhost:1234/me", {
-          credentials: "include",
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("access_token") || ""}`,
-          },
-        });
-        if (!res.ok) return;
-        const data: MeResponse = await res.json();
-        setCurrentUser(data);
-      } catch {
-        console.log("Not logged in");
-      }
-    }
-    fetchUser();
-  }, []);
-
-  // 🔹 Récupérer les entraînements
-  async function fetchTrainings() {
-    setLoading(true);
-    setError(null);
-    try {
-      const res = await fetch("http://localhost:1234/trainings", {
-        method: "GET",
+      const res = await fetch("http://localhost:1234/me", {
         credentials: "include",
         headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${localStorage.getItem("access_token") || ""}`,
+          Authorization: `Bearer ${localStorage.getItem("access_token")}`,
         },
       });
 
-      if (!res.ok) {
-        const err = await res.json().catch(() => null);
-        throw new Error(err?.error || "Impossible de charger les entraînements");
-      }
-
+      if (!res.ok) return;
       const data = await res.json();
-      setTrainings(Array.isArray(data) ? data : data.trainings || data);
-    } catch (err) {
-      setError((err as Error).message);
-    } finally {
-      setLoading(false);
+      setCurrentUser(data);
     }
+
+    fetchUser();
+  }, []);
+
+  async function fetchTrainings() {
+    const res = await fetch("http://localhost:1234/trainings", {
+      credentials: "include",
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem("access_token")}`,
+      },
+    });
+
+    const data = await res.json();
+    setTrainings(data);
   }
 
   useEffect(() => {
     fetchTrainings();
   }, []);
 
-  // 🔹 Supprimer un entraînement
   async function handleDelete(id?: number) {
     if (!id) return;
-    if (!confirm("Confirmer la suppression de cet entraînement ?")) return;
 
-    try {
-      const res = await fetch(`http://localhost:1234/deletetraining/${id}`, {
-        method: "DELETE",
-        credentials: "include",
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("access_token") || ""}`,
-        },
-      });
+    if (!confirm("Confirmer la suppression ?")) return;
 
-      if (!res.ok) {
-        const err = await res.json().catch(() => null);
-        throw new Error(err?.error || "Erreur lors de la suppression");
-      }
-      fetchTrainings();
-    } catch (err) {
-      alert("Erreur: " + (err as Error).message);
-    }
+    await fetch(`http://localhost:1234/deletetraining/${id}`, {
+      method: "DELETE",
+      credentials: "include",
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem("access_token")}`,
+      },
+    });
+
+    fetchTrainings();
   }
 
   return (
-    <div className="w-full max-w-5xl mx-auto p-4">
-      <div className="flex justify-between items-center mb-4">
-        <h2 className="text-2xl font-[Arsenal] font-bold">Entraînements</h2>
+    <div className="w-full max-w-6xl mx-auto p-4">
+
+      <div className="flex flex-col md:flex-row justify-between items-center mb-6 gap-3">
+        <h2 className="text-2xl font-bold font-[Arsenal]">Entraînements</h2>
+
         {currentUser?.userType === "coach" && (
           <Link
             to="/entrainements/creer"
-            className="bg-white text-red-600 px-4 py-2 rounded hover:bg-red-600 hover:text-white font-[Arsenal]"
+            className="bg-white text-red-600 px-4 py-2 rounded hover:bg-red-600 hover:text-white"
           >
             + Créer un entraînement
           </Link>
         )}
       </div>
 
-      {loading && <div>Chargement...</div>}
-      {error && <div className="text-red-600 mb-4">{error}</div>}
+      <div className="md:hidden space-y-4">
+        {trainings.map((t) => (
+          <div
+            key={t.id_training}
+            className="bg-white shadow rounded-lg p-4 text-left"
+          >
+            <p className="font-semibold text-lg">
+              {t.date
+                ? new Date(t.date).toLocaleDateString("fr-FR")
+                : "-"}{" "}
+              • {t.hour}
+            </p>
 
-      <table className="w-full border-collapse bg-white shadow-md rounded text-gray-700">
-        <thead className="bg-gray-200">
-          <tr>
-            <th className="p-3 text-left">Date</th>
-            <th className="p-3 text-left">Heure</th>
-            <th className="p-3 text-left">Lieu</th>
-            <th className="p-3 text-left">Équipe</th>
-            <th className="p-3 text-left">Type</th>
-            <th className="p-3 text-left">Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          {trainings.length === 0 && !loading ? (
+            <p className="text-gray-600">📍 {t.location}</p>
+            <p className="text-gray-600">👥 {t.team_name}</p>
+            <p className="text-gray-600">⚽ {t.type}</p>
+
+            {currentUser?.userType === "coach" && (
+              <div className="flex flex-wrap gap-2 mt-3">
+                <Link
+                  to={`/convocations/training/${t.id_training}`}
+                  className="px-3 py-1 bg-blue-200 rounded"
+                >
+                  Détails
+                </Link>
+
+                <Link
+                  to={`/entrainements/modifier/${t.id_training}`}
+                  className="px-3 py-1 bg-green-200 rounded"
+                >
+                  Modifier
+                </Link>
+
+                <button
+                  onClick={() => handleDelete(t.id_training)}
+                  className="px-3 py-1 bg-red-200 rounded"
+                >
+                  Supprimer
+                </button>
+              </div>
+            )}
+          </div>
+        ))}
+      </div>
+
+      <div className="hidden md:block overflow-x-auto">
+        <table className="w-full bg-white shadow rounded">
+          <thead className="bg-gray-200">
             <tr>
-              <td colSpan={6} className="p-4 text-center text-gray-600">
-                Aucune session d'entraînement.
-              </td>
+              <th className="p-3 text-left">Date</th>
+              <th className="p-3 text-left">Heure</th>
+              <th className="p-3 text-left">Lieu</th>
+              <th className="p-3 text-left">Équipe</th>
+              <th className="p-3 text-left">Type</th>
+              <th className="p-3 text-left">Actions</th>
             </tr>
-          ) : (
-            trainings.map((t) => (
-              <tr key={t.id_training ?? t.date}>
-                <td className="p-3">{t.date ? new Date(t.date).toLocaleDateString("fr-FR") : "-"}</td>
-                <td className="p-3">{t.hour ?? "-"}</td>
-                <td className="p-3">{t.location ?? "-"}</td>
-                <td className="p-3">{t.team_name ?? "-"}</td>
-                <td className="p-3">{t.type ?? "-"}</td>
+          </thead>
+
+          <tbody>
+            {trainings.map((t) => (
+              <tr key={t.id_training} className="border-t">
+                <td className="p-3">
+                  {t.date
+                    ? new Date(t.date).toLocaleDateString("fr-FR")
+                    : "-"}
+                </td>
+                <td className="p-3">{t.hour}</td>
+                <td className="p-3">{t.location}</td>
+                <td className="p-3">{t.team_name}</td>
+                <td className="p-3">{t.type}</td>
+
                 <td className="p-3 flex gap-2">
-                  {currentUser?.userType === "coach" && t.id_training ? (
+                  {currentUser?.userType === "coach" && (
                     <>
                       <Link
                         to={`/convocations/training/${t.id_training}`}
-                        className="px-2 py-1 bg-blue-200 rounded hover:bg-blue-300"
+                        className="px-2 py-1 bg-blue-200 rounded"
                       >
                         Détails
                       </Link>
+
                       <Link
                         to={`/entrainements/modifier/${t.id_training}`}
-                        className="px-2 py-1 bg-green-200 rounded hover:bg-green-300"
+                        className="px-2 py-1 bg-green-200 rounded"
                       >
                         Modifier
                       </Link>
+
                       <button
                         onClick={() => handleDelete(t.id_training)}
-                        className="px-2 py-1 bg-red-200 text-red-800 rounded hover:bg-red-300"
+                        className="px-2 py-1 bg-red-200 rounded"
                       >
                         Supprimer
                       </button>
                     </>
-                  ) : (
-                    <span className="text-gray-400">—</span>
                   )}
                 </td>
               </tr>
-            ))
-          )}
-        </tbody>
-      </table>
+            ))}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 };

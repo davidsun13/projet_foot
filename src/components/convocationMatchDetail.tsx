@@ -4,14 +4,14 @@ import { useParams, useNavigate } from "react-router-dom";
 type Convocation = {
   id_convocation: number;
   id_player: number;
-  id_training: number;
+  id_match: number;
   status: string | null;
   player_name: string;
   player_surname: string;
 };
 
-const ConvocationTrainingDetail = () => {
-  const { id_training } = useParams();
+const ConvocationMatchDetail = () => {
+  const { id_match } = useParams();
   const navigate = useNavigate();
 
   const [convocations, setConvocations] = useState<Convocation[]>([]);
@@ -19,7 +19,7 @@ const ConvocationTrainingDetail = () => {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!id_training) return;
+    if (!id_match) return;
 
     const fetchConvocations = async () => {
       try {
@@ -27,7 +27,7 @@ const ConvocationTrainingDetail = () => {
         setError(null);
 
         const res = await fetch(
-          `http://localhost:1234/convocationstraining/coach/${id_training}`,
+          `http://localhost:1234/convocationsmatch/coach/${id_match}`,
           {
             credentials: "include",
             headers: {
@@ -59,7 +59,7 @@ const ConvocationTrainingDetail = () => {
     };
 
     fetchConvocations();
-  }, [id_training]);
+  }, [id_match]);
 
 
   const presentCount = convocations.filter(c => c.status === "Called").length;
@@ -89,7 +89,7 @@ const ConvocationTrainingDetail = () => {
     <div className="max-w-5xl mx-auto p-6 space-y-6">
       <div className="flex justify-between items-center">
         <h1 className="text-3xl font-bold">
-          Convocations - Entraînement #{id_training}
+          Convocations - Match #{id_match}
         </h1>
         <button
           onClick={() => navigate(-1)}
@@ -118,7 +118,6 @@ const ConvocationTrainingDetail = () => {
         </div>
       </div>
 
-      {/* Tableau */}
       <table className="w-full border-collapse bg-white shadow-md rounded text-gray-700">
         <thead className="bg-gray-200">
           <tr>
@@ -154,7 +153,6 @@ const ConvocationTrainingDetail = () => {
         </tbody>
       </table>
 
-      {/* Résumé */}
       {total > 0 && (
         <div className="text-sm text-gray-600">
           Total joueurs convoqués : <strong>{total}</strong>
@@ -164,4 +162,4 @@ const ConvocationTrainingDetail = () => {
   );
 };
 
-export default ConvocationTrainingDetail;
+export default ConvocationMatchDetail;

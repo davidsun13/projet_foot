@@ -56,68 +56,83 @@ const ProfilePlayer = () => {
     fetchPlayerProfile();
   }, [id_player]);
 
-  if (loading) return <div>Chargement du profil…</div>;
-  if (error) return <div className="text-red-600">{error}</div>;
+  if (loading) return <div className="p-4 text-center">Chargement…</div>;
+  if (error) return <div className="p-4 text-center text-red-600">{error}</div>;
   if (!player) return null;
 
   return (
-    <div className="max-w-xl mx-auto bg-white p-6 rounded shadow-md">
-      <h2 className="text-2xl font-[Arsenal] font-bold mb-4">
-        Profil du joueur
-      </h2>
+    <div className="w-full px-4 py-6 flex justify-center">
+      <div className="w-full max-w-md md:max-w-2xl bg-white rounded-xl shadow-lg p-5 md:p-8">
+        
+        {/* HEADER */}
+        <div className="flex flex-col items-center md:flex-row md:justify-between mb-6">
+          <h2 className="text-xl md:text-2xl font-bold font-[Arsenal] text-center md:text-left">
+            Profil du joueur
+          </h2>
 
-      <div className="space-y-2 text-gray-700">
-        <p>
-          <strong>Nom :</strong> {player.surname}
-        </p>
-        <p>
-          <strong>Prénom :</strong> {player.name}
-        </p>
+          <button
+            onClick={() => navigate(-1)}
+            className="mt-3 md:mt-0 px-4 py-2 bg-gray-200 rounded hover:bg-gray-300 text-sm"
+          >
+            Retour
+          </button>
+        </div>
 
-        {player.team_name && (
-          <p>
-            <strong>Équipe :</strong> {player.team_name}
-          </p>
-        )}
+        {/* INFOS */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-gray-700 text-sm md:text-base">
+          
+          <div className="bg-gray-50 p-3 rounded">
+            <span className="font-semibold">Nom :</span>
+            <p>{player.surname}</p>
+          </div>
 
-        {player.position && (
-          <p>
-            <strong>Poste :</strong> {player.position}
-          </p>
-        )}
+          <div className="bg-gray-50 p-3 rounded">
+            <span className="font-semibold">Prénom :</span>
+            <p>{player.name}</p>
+          </div>
 
-        {player.number !== undefined && (
-          <p>
-            <strong>Numéro :</strong> {player.number}
-          </p>
-        )}
+          {player.team_name && (
+            <div className="bg-gray-50 p-3 rounded">
+              <span className="font-semibold">Équipe :</span>
+              <p>{player.team_name}</p>
+            </div>
+          )}
 
-        {player.status && (
-          <p>
-            <strong>Statut :</strong> {player.status}
-          </p>
-        )}
+          {player.position && (
+            <div className="bg-gray-50 p-3 rounded">
+              <span className="font-semibold">Poste :</span>
+              <p>{player.position}</p>
+            </div>
+          )}
 
-        {player.mail && (
-          <p>
-            <strong>Email :</strong> {player.mail}
-          </p>
-        )}
+          {player.number !== undefined && (
+            <div className="bg-gray-50 p-3 rounded">
+              <span className="font-semibold">Numéro :</span>
+              <p>{player.number}</p>
+            </div>
+          )}
 
-        {player.phone && (
-          <p>
-            <strong>Téléphone :</strong> {player.phone}
-          </p>
-        )}
-      </div>
+          {player.status && (
+            <div className="bg-gray-50 p-3 rounded">
+              <span className="font-semibold">Statut :</span>
+              <p>{player.status}</p>
+            </div>
+          )}
 
-      <div className="mt-6 flex justify-end">
-        <button
-          onClick={() => navigate(-1)}
-          className="px-4 py-2 bg-gray-200 rounded hover:bg-gray-300"
-        >
-          Retour
-        </button>
+          {player.mail && (
+            <div className="bg-gray-50 p-3 rounded sm:col-span-2">
+              <span className="font-semibold">Email :</span>
+              <p className="break-all">{player.mail}</p>
+            </div>
+          )}
+
+          {player.phone && (
+            <div className="bg-gray-50 p-3 rounded sm:col-span-2">
+              <span className="font-semibold">Téléphone :</span>
+              <p>{player.phone}</p>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );

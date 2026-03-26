@@ -1,7 +1,7 @@
-import canon from '../assets/télécharger.jpg';
-import userImg from '../assets/profil.png';
-import { Link, useNavigate } from 'react-router-dom';
-import { useEffect, useState } from 'react';
+import canon from "../assets/télécharger.jpg";
+import userImg from "../assets/profil.png";
+import { Link, useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
 
 function Header() {
   const [currentUser, setCurrentUser] = useState<any>(null);
@@ -25,6 +25,7 @@ function Header() {
         console.log("Not logged in");
       }
     }
+
     fetchUser();
   }, []);
 
@@ -45,39 +46,44 @@ function Header() {
   }
 
   return (
-    <header className="relative w-full bg-red-600 text-white sticky top-0 z-50 h-20 md:h-24">
-      <div className="absolute left-4 top-1/2 transform -translate-y-1/2">
-        <Link to="/">
+    <header className="w-full bg-red-600 text-white sticky top-0 z-50">
+      
+      <div className="w-full max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
+
+        <Link to="/" className="flex items-center">
           <img
             src={canon}
             alt="Logo"
-            className="w-16 h-16 md:w-20 md:h-20 object-contain"
+            className="w-10 h-10 md:w-12 md:h-12 object-contain"
           />
         </Link>
-      </div>
 
-      <div className="absolute right-4 top-1/2 transform -translate-y-1/2 flex items-center space-x-3">
-        {currentUser && (
-          <button
-            type="button"
-            onClick={handleLogout}
-            className="text-sm bg-white text-red-600 px-3 py-1 rounded hover:bg-gray-100 transition"
-          >
-            Déconnexion
-          </button>
-        )}
+        {}
+        <div className="flex items-center gap-3">
 
-        <img
-          src={userImg}
-          alt="User"
-          className="w-12 h-12 md:w-16 md:h-16 object-contain rounded-full border-2 border-white"
-        />
+          {currentUser && (
+            <button
+              type="button"
+              onClick={handleLogout}
+              className="hidden sm:block text-sm bg-white text-[#19202F] px-3 py-1 rounded hover:bg-gray-200 transition"
+            >
+              Déconnexion
+            </button>
+          )}
 
-        <p className="hidden md:block md:text-sm">
-          {currentUser
-            ? `${currentUser.name} ${currentUser.surname}`
-            : "Non connecté"}
-        </p>
+          <img
+            src={userImg}
+            alt="User"
+            className="w-10 h-10 md:w-12 md:h-12 object-contain rounded-full border-2 border-white"
+          />
+
+          <p className="hidden md:block text-sm">
+            {currentUser
+              ? `${currentUser.name} ${currentUser.surname}`
+              : "Non connecté"}
+          </p>
+
+        </div>
       </div>
     </header>
   );

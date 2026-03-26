@@ -117,7 +117,7 @@ const DetailsPlayer = () => {
             <p className="font-semibold">{player.goals}</p>
           </div>
           <div>
-            <p className="text-sm text-gray-500">Passes</p>
+            <p className="text-sm text-gray-500">Passes Décisives</p>
             <p className="font-semibold">{player.passes}</p>
           </div>
           <div>

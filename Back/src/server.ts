@@ -343,16 +343,18 @@ async function requireCoach(
     }
   });
 
-  web_server.put("/modifymatch",{preHandler: [requireCoach]}, async (request: FastifyRequest, reply: FastifyReply) => {
+  web_server.put("/match/:id_match/modify",{preHandler: [requireCoach]}, async (request: FastifyRequest, reply: FastifyReply) => {
     try {
       const body = request.body as any;
-      const match = await repo.modifyMatchSession(body);
+      const match = await repo.modifyMatchSession(body)
       return reply.send(match);
-    } catch (err) {
+    } catch (err) {      
+      if (err instanceof ZodError) {
+        return reply.status(400).send({ errors: formatZodError(err) });
+      }
       return reply.status(500).send({ error: (err as Error).message });
     }
-  }
-  );
+  });
   web_server.delete("/deletematch/:id_match",{preHandler: [requireCoach]}, async (request: FastifyRequest, reply: FastifyReply) => {
     try {
       const id_match = Number((request.params as any).id_match);
@@ -391,6 +393,15 @@ async function requireCoach(
     }
   }
   );
+  web_server.get("/matchs/:id_match", async (request: FastifyRequest, reply: FastifyReply) => {
+    try {
+      const id_match = Number((request.params as any).id_match);
+      const match = await repo.getMatchById(id_match);
+      return reply.send(match);
+    } catch (err) {
+      return reply.status(500).send({ error: (err as Error).message });
+    }
+  });
   web_server.post("/createteam", async (request: FastifyRequest, reply: FastifyReply) => {
     try {
       const body = request.body as any;
@@ -525,6 +536,20 @@ async function requireCoach(
       const convocations = await repo.getConvocationsMatchbyplayer(Number(id_player));
       return reply.send(convocations);
     } catch (err) {      return reply.status(500).send({ error: (err as Error).message });
+    }
+  });
+  web_server.put("/convocations/:id_convocation/status/:id_player", async (request: FastifyRequest, reply: FastifyReply) => {
+    try {
+      const { id_convocation, id_player } = request.params as { id_convocation: string; id_player: string };
+      const body = request.body as { status: string };
+      const convocation = await repo.updateConvocationStatus({
+        id_convocation: Number(id_convocation),
+        id_player: Number(id_player),
+        ...body,
+      });
+      return reply.send(convocation);
+    } catch (err) {
+      return reply.status(500).send({ error: (err as Error).message });
     }
   });
   web_server.get("/convocationstraining/coach/:id_training", async (request: FastifyRequest, reply: FastifyReply) => {

@@ -296,7 +296,23 @@ ORDER BY m.date DESC, tm.name;
   `;
     return result;
   }
-  
+  async updateConvocationStatus({
+    id_convocation,
+    status,
+    id_player
+  }: {
+    id_convocation: number;
+    status: string;
+    id_player: number;
+  }) {
+    const result = await this.sql`
+    UPDATE convocation
+    SET status = ${status}
+    WHERE id_convocation = ${id_convocation} AND id_player = ${id_player}
+    RETURNING id_convocation
+  `;
+    return result[0];
+  }
   async getConvocationsByTraining(id_training: number) {
     const result = await this.sql`
     SELECT c.*, p.name AS player_name, p.surname AS player_surname
@@ -458,6 +474,12 @@ ORDER BY m.date DESC, tm.name;
     return result;
   }
 
+  async getMatchById(id_match: number) {
+    const result = await this.sql`
+      SELECT * FROM matches WHERE id_match = ${id_match}
+    `;
+    return result[0] || null;
+  }
   async updateMatchScore({
     id_match,
     score_home,
@@ -594,7 +616,7 @@ async getdetailsplayer(id_player: number) {
       JOIN statistics s ON p.id_player = s.id_player WHERE p.id_player = ${id_player}
     `;
     return result[0] || null;
-  }>
+  }
 
 async addSubscription({
     id_player,

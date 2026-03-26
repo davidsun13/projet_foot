@@ -9,7 +9,7 @@ function DashboardContent() {
   const handleDelete = (id?: string | number) => console.log('delete', id);
 
   return (
-    <main className="flex-1 p-6 bg-gray-100 min-h-screen flex items-center justify-center">
+    <main className="flex-1 p-6 bg-gray-100 min-h-screen ">
       <div className="w-full max-w-4xl">
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 items-stretch">
           <Card
