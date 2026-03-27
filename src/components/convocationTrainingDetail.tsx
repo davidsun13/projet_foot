@@ -86,41 +86,73 @@ const ConvocationTrainingDetail = () => {
   if (error) return <div className="p-6 text-red-600">{error}</div>;
 
   return (
-    <div className="max-w-5xl mx-auto p-6 space-y-6">
-      <div className="flex justify-between items-center">
-        <h1 className="text-3xl font-bold">
-          Convocations - Entraînement #{id_training}
-        </h1>
-        <button
-          onClick={() => navigate(-1)}
-          className="px-4 py-2 bg-gray-200 rounded hover:bg-gray-300"
-        >
-          Retour
-        </button>
-      </div>
+  <div className="w-full px-4 py-6 space-y-6">
+    {/* HEADER */}
+    <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4">
+      <h1 className="text-xl md:text-3xl font-bold text-center md:text-left">
+        Convocations - Entraînement #{id_training}
+      </h1>
 
-      <div className="grid grid-cols-4 gap-4">
-        <div className="bg-green-100 p-4 rounded text-center">
-          <div className="text-xl font-bold">{presentCount}</div>
-          <div>Présents</div>
-        </div>
-        <div className="bg-red-100 p-4 rounded text-center">
-          <div className="text-xl font-bold">{absentCount}</div>
-          <div>Absents</div>
-        </div>
-        <div className="bg-yellow-100 p-4 rounded text-center">
-          <div className="text-xl font-bold">{unsureCount}</div>
-          <div>Incertain</div>
-        </div>
-        <div className="bg-gray-100 p-4 rounded text-center">
-          <div className="text-xl font-bold">{pendingCount}</div>
-          <div>En attente</div>
-        </div>
-      </div>
+      <button
+        onClick={() => navigate(-1)}
+        className="w-full md:w-auto px-4 py-2 bg-gray-200 rounded hover:bg-gray-300"
+      >
+        Retour
+      </button>
+    </div>
 
-      {/* Tableau */}
+    {/* STATS */}
+    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <div className="bg-green-100 p-4 rounded text-center">
+        <div className="text-lg md:text-xl font-bold">{presentCount}</div>
+        <div className="text-sm md:text-base">Présents</div>
+      </div>
+      <div className="bg-red-100 p-4 rounded text-center">
+        <div className="text-lg md:text-xl font-bold">{absentCount}</div>
+        <div className="text-sm md:text-base">Absents</div>
+      </div>
+      <div className="bg-yellow-100 p-4 rounded text-center">
+        <div className="text-lg md:text-xl font-bold">{unsureCount}</div>
+        <div className="text-sm md:text-base">Incertain</div>
+      </div>
+      <div className="bg-gray-100 p-4 rounded text-center">
+        <div className="text-lg md:text-xl font-bold">{pendingCount}</div>
+        <div className="text-sm md:text-base">En attente</div>
+      </div>
+    </div>
+
+    {/* 📱 MOBILE */}
+    <div className="space-y-4 md:hidden">
+      {total === 0 ? (
+        <p className="text-center text-gray-500">
+          Aucun joueur convoqué.
+        </p>
+      ) : (
+        convocations.map((c) => (
+          <div
+            key={c.id_convocation}
+            className="bg-white p-4 rounded-lg shadow space-y-2"
+          >
+            <p className="font-medium">
+              {c.player_name} {c.player_surname}
+            </p>
+
+            <span
+              className={`inline-block px-3 py-1 rounded-full text-sm font-semibold ${getStatusBadge(
+                c.status
+              )}`}
+            >
+              {c.status || "En attente"}
+            </span>
+          </div>
+        ))
+      )}
+    </div>
+
+    {/* 💻 DESKTOP */}
+    <div className="hidden md:block overflow-x-auto">
       <table className="w-full border-collapse bg-white shadow-md rounded text-gray-700">
-        <thead className="bg-gray-200">
+        <thead className="bg-gray-200 sticky top-0">
           <tr>
             <th className="p-3 text-left">Joueur</th>
             <th className="p-3 text-left">Statut</th>
@@ -153,15 +185,16 @@ const ConvocationTrainingDetail = () => {
           )}
         </tbody>
       </table>
-
-      {/* Résumé */}
-      {total > 0 && (
-        <div className="text-sm text-gray-600">
-          Total joueurs convoqués : <strong>{total}</strong>
-        </div>
-      )}
     </div>
-  );
+
+    {/* FOOTER INFO */}
+    {total > 0 && (
+      <div className="text-sm text-gray-600 text-center md:text-left">
+        Total joueurs convoqués : <strong>{total}</strong>
+      </div>
+    )}
+  </div>
+);
 };
 
 export default ConvocationTrainingDetail;

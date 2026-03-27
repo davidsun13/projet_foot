@@ -12,8 +12,8 @@ services:
     ports:
       - "5432:5432"
     volumes:
-      - db_data:/var/lib/postgresql/data
-      - ./initdb.d:/docker-entrypoint-initdb.d
+      - pg_data:/var/lib/postgresql/data
+      - ./Back/initdb.d/:/docker-entrypoint-initdb.d
 
   api:
     build: .
@@ -27,4 +27,5 @@ services:
       - .env
 
 volumes:
-  db_data:
+  pg_data:
+    name: "projet_club_db_pg_data"
