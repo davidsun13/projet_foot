@@ -59,7 +59,7 @@ function Sidebar() {
       )}
 
       <aside
-        className={`fixed md:static top-0 left-0 w-64 bg-red-600 text-white p-4 transform transition-transform duration-300 z-50
+        className={`fixed md:static top-0 left-0 w-48 bg-red-600 text-white p-4 transform transition-transform duration-300 z-50
         ${open ? "translate-x-0" : "-translate-x-full"}
         md:translate-x-0`}
       >
@@ -69,7 +69,7 @@ function Sidebar() {
             className="flex items-center gap-3 p-2 rounded hover:bg-red-700"
             onClick={() => setOpen(false)}
           >
-            <img src={training} alt="" className="w-16 h-16" />
+            <img src={training} alt="" className="w-10 h-10" />
             <span className="font-[Arsenal] text-white">Entraînements</span>
           </Link>
 
@@ -78,7 +78,7 @@ function Sidebar() {
             className="flex items-center gap-3 p-2 rounded hover:bg-red-700"
             onClick={() => setOpen(false)}
           >
-            <img src={ball} alt="" className="w-16 h-16" />
+            <img src={ball} alt="" className="w-10 h-10" />
             <span className="font-[Arsenal] text-white">Matchs</span>
           </Link>
 
@@ -87,7 +87,7 @@ function Sidebar() {
             className="flex items-center gap-3 p-2 rounded hover:bg-red-700"
             onClick={() => setOpen(false)}
           >
-            <img src={money} alt="" className="w-16 h-16" />
+            <img src={money} alt="" className="w-10 h-10" />
             <span className="font-[Arsenal] text-white">Cotisations</span>
           </Link>
 
@@ -97,7 +97,7 @@ function Sidebar() {
               className="flex items-center gap-3 p-2 rounded hover:bg-red-700"
               onClick={() => setOpen(false)}
             >
-              <img src={player} alt="" className="w-16 h-16" />
+              <img src={player} alt="" className="w-10 h-10" />
               <span className="font-[Arsenal] text-white">Joueurs</span>
             </Link>
           )}
@@ -108,7 +108,7 @@ function Sidebar() {
               className="flex items-center gap-3 p-2 rounded hover:bg-red-700"
               onClick={() => setOpen(false)}
             >
-              <img src={player} alt="" className="w-16 h-16" />
+              <img src={player} alt="" className="w-10 h-10" />
               <span className="font-[Arsenal] text-white">Profil</span>
             </Link>
           )}
@@ -119,7 +119,7 @@ function Sidebar() {
               className="flex items-center gap-3 p-2 rounded hover:bg-red-700"
               onClick={() => setOpen(false)}
             >
-              <img src={convocation} alt="" className="w-16 h-16" />
+              <img src={convocation} alt="" className="w-10 h-10" />
               <span className="font-[Arsenal] text-white">Convocations</span>
             </Link>
           )}

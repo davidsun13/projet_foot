@@ -3,8 +3,8 @@
 -- ================================
 INSERT INTO coach (surname, name, mail, phone, password)
 VALUES
-('Dupont', 'Jean', 'jean.dupont@club.com', '0601020304', 'mdp123'),
-('Martin', 'Lucas', 'lucas.martin@club.com', '0611223344', 'coachpass');
+('Dupont', 'Jean', 'jean.dupont@club.com', '0601020304', '$argon2id$v=19$m=65536,t=3,p=4$y5QZm08F5l46ceHQDI9BGg$+VucjCT6PuGLUWAIyHRV/wBSLc5C+u6Bs9DjpmOEt3k'),
+('Martin', 'Lucas', 'lucas.martin@club.com', '0611223344', '$argon2id$v=19$m=65536,t=3,p=4$J3a2NAl5SdpdyPPy+5LwRA$o9CK2AtAW4aa35bBJD0kZcfv9ft+8l9CxVGxx/8VWt4');
 
 -- ================================
 -- TEAMS
@@ -19,11 +19,10 @@ VALUES
 -- ================================
 INSERT INTO player (surname, name, position, number, mail, phone, password, status, id_team)
 VALUES
-('Durand', 'Paul', 'Attaquant', 9, 'paul.durand@mail.com', '0601020304', 'pass1', 'Actif', 1),
-('Morel', 'Antoine', 'Milieu', 8, 'antoine.morel@mail.com', '0611223344', 'pass2', 'Actif', 1),
-('Leroy', 'Hugo', 'Défenseur', 4, 'hugo.leroy@mail.com', '0622334455', 'pass3', 'Blessé', 1),
-('Bernard', 'Julien', 'Gardien', 1, 'julien.bernard@mail.com', '0633445566', 'pass4', 'Actif', 1);
-
+('Durand', 'Paul', 'Attaquant', 9, 'paul.durand@mail.com', '0601020304', '$argon2id$v=19$m=65536,t=3,p=4$DmAdD8YS3kVdw712Y9APBA$eiB2CeBvT342MpNloB7zrTjH01KTGuQoUMXqv8lGMW4', 'Actif', 1),
+('Morel', 'Antoine', 'Milieu', 8, 'antoine.morel@mail.com', '0611223344', '$argon2id$v=19$m=65536,t=3,p=4$ZnV+r/T3pxK7EQ1Z97P9mA$TX7UMNlvaV7nykm5TdBnucVzt16FyXyxmDdA9BMzPBE', 'Actif', 1),
+('Leroy', 'Hugo', 'Défenseur', 4, 'hugo.leroy@mail.com', '0622334455', '$argon2id$v=19$m=65536,t=3,p=4$orb4wuhzG48kXnVRWYJa0A$L5XSK60eXAKJpsmLd4hquSerMQaUuVtmfy625cZB910', 'Blessé', 1),
+('Bernard', 'Julien', 'Gardien', 1, 'julien.bernard@mail.com', '0633445566', '$argon2id$v=19$m=65536,t=3,p=4$sXk1CkvHIFCSEickuckAGQ$9wmvFqf+397y3AhJvOl0juZeGscSNMRxTmZQ/tOOVg4', 'Actif', 1);
 -- ================================
 -- TRAININGS
 -- ================================

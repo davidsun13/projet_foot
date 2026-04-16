@@ -48,7 +48,7 @@ function Header() {
   return (
     <header className="w-full bg-red-600 text-white sticky top-0 z-50">
       
-      <div className="w-full max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
+      <div className="w-full max-w-7xl mx-auto px-2 py-1 flex items-center justify-between">
 
         <Link to="/" className="flex items-center">
           <img
