@@ -25,7 +25,11 @@ services:
     depends_on:
       - db
     environment:
-      DATABASE_URL: postgres://toto:example@db:5432/projet_club_db
+      PGHOST: db
+      PGPORT: 5432
+      PGUSER: toto
+      PGPASSWORD: example
+      PGDATABASE: projet_club_db
 
   frontend:
     build:

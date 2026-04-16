@@ -29,7 +29,7 @@ export async function start_web_server() {
   const isProduction = process.env.NODE_ENV === "production";
 
   web_server.register(require("@fastify/cors"), {
-    origin: "http://localhost:5173",
+    origin: ["http://localhost","http://localhost:5173"],
     credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
   });
