@@ -11,6 +11,10 @@ type PlayerProfile = {
   number?: number;
   status?: string;
   team_name?: string;
+  yellow_cards?: number;
+  red_cards?: number;
+  goals?: number;
+  passes?: number;
 };
 
 const ProfilePlayer = () => {
@@ -30,7 +34,7 @@ const ProfilePlayer = () => {
 
       try {
         const res = await fetch(
-          `http://localhost:1234/player-profile/${id_player}`,
+          `http://localhost:1234/detailsplayer/${id_player}`,
           {
             credentials: "include",
             headers: {
@@ -132,9 +136,30 @@ const ProfilePlayer = () => {
               <p>{player.phone}</p>
             </div>
           )}
-        </div>
-      </div>
-    </div>
+          
+          <div className="bg-gray-50 p-3 rounded">
+            <span className="font-semibold">Cartons jaunes :</span>
+            <p>{player.yellow_cards ?? 0}</p>
+          </div>
+
+          <div className="bg-gray-50 p-3 rounded">
+            <span className="font-semibold">Cartons rouges :</span>
+            <p>{player.red_cards ?? 0}</p>
+          </div>
+
+          <div className="bg-gray-50 p-3 rounded">
+            <span className="font-semibold">Buts :</span>
+            <p>{player.goals ?? 0}</p>
+          </div>
+
+          <div className="bg-gray-50 p-3 rounded">
+            <span className="font-semibold">Passes décisives :</span>
+            <p>{player.passes ?? 0}</p>
+          </div>
+
+                  </div>
+                </div>
+              </div>
   );
 };
 

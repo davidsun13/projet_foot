@@ -155,6 +155,15 @@ const ListeMatchs = () => {
                 Voir
               </button>
 
+              {currentUser?.userType === "coach" && (
+                <Link
+                  to={`/matchs/cloturer/${m.id_match}`}
+                  className="flex-1 bg-orange-500 text-white py-1 rounded hover:bg-orange-600 text-center"
+                  >
+                  Clôturer
+                </Link>
+              )}
+
             </div>
 
           </div>
@@ -225,6 +234,15 @@ const ListeMatchs = () => {
                       >
                       Détails
                       </Link>
+
+                    {currentUser?.userType === "coach" && (
+                      <Link
+                        to={`/matchs/cloturer/${m.id_match}`}
+                        className="px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600"
+                        >
+                        Clôturer
+                        </Link>
+                    )}
                     
 
                 </td>

@@ -72,7 +72,7 @@ const CreationMatch = () => {
 
       console.log("Payload envoyé 👉", payload);
 
-      const res = await fetch("http://localhost:1234/creatematch", {
+      const res = await fetch("http://localhost:1234/matchs", {
         method: "POST",
         credentials: "include",
         headers: {

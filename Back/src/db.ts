@@ -711,6 +711,36 @@ async getstatisticsteam(id_team: number) {
     `;
     return result[0] || null;
   }
+  async savePlayerStatistics({
+    id_player,
+    id_match,
+    goals,
+    passes,
+    yellow_cards,
+    red_cards,
+    minutes_played,
+  }: {
+    id_player: number;
+    id_match: number;
+    goals: number;
+    passes: number;
+    yellow_cards: number;
+    red_cards: number;
+    minutes_played: number;
+  }) {
+    const result = await this.sql`
+      INSERT INTO statistics (id_player, id_match, goals, passes, yellow_cards, red_cards, minutes_played)
+      VALUES (${id_player}, ${id_match}, ${goals}, ${passes}, ${yellow_cards}, ${red_cards}, ${minutes_played})
+      ON CONFLICT (id_player, id_match) DO UPDATE SET
+        goals = ${goals},
+        passes = ${passes},
+        yellow_cards = ${yellow_cards},
+        red_cards = ${red_cards},
+        minutes_played = ${minutes_played}
+      RETURNING *
+    `;
+    return result[0];
+  }
 async nextMatch() {
     const result = await this.sql`
       SELECT *

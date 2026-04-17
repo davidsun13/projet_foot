@@ -62,7 +62,7 @@ const ListeEntrainements = () => {
 
     if (!confirm("Confirmer la suppression ?")) return;
 
-    await fetch(`http://localhost:1234/deletetraining/${id}`, {
+    await fetch(`http://localhost:1234/trainings/${id}`, {
       method: "DELETE",
       credentials: "include",
       headers: {

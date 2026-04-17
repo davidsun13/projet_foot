@@ -19,6 +19,7 @@ import ConvocationTrainingDetail from './components/convocationTrainingDetail'
 import ConvocationMatchDetail from './components/convocationMatchDetail'
 import CreationCotisation from './components/CreationCotisation'
 import DetailsPlayer from './components/detailsPlayer'
+import ClotureMatch from './components/ClotureMatch'
 
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import './App.css'
@@ -53,6 +54,7 @@ function App() {
               <Route path="/matchs" element={<ListeMatchs />} />
               <Route path="/matchs/creer" element={<CreationMatch />} />
               <Route path="/matchs/modifier/:id_match" element={<ModifMatch />} />
+              <Route path="/matchs/cloturer/:id_match" element={<ClotureMatch />} />
 
               <Route path="/cotisations" element={<GestionCotisations />} />
               <Route path="/cotisations/ajouter" element={<CreationCotisation />} />

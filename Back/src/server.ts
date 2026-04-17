@@ -281,7 +281,7 @@ async function requireCoach(
     }
   });
 
-  web_server.post("/createtraining",{preHandler: [requireCoach]}, async (request: FastifyRequest, reply: FastifyReply) => {
+  web_server.post("/trainings",{preHandler: [requireCoach]}, async (request: FastifyRequest, reply: FastifyReply) => {
     try {
       const parsed = createTrainingSchema.parse(request.body);
       const training = await repo.createTrainingSession(parsed);
@@ -303,7 +303,7 @@ async function requireCoach(
       return reply.status(500).send({ error: (err as Error).message });
     }
   });
-  web_server.put("/training/:id_training/modify",{preHandler: [requireCoach]}, async (request: FastifyRequest, reply: FastifyReply) => {
+  web_server.put("/trainings/:id_training/modify",{preHandler: [requireCoach]}, async (request: FastifyRequest, reply: FastifyReply) => {
     try {
       const body = request.body as any;
       const training = await repo.modifyTrainingSession(body);
@@ -313,7 +313,7 @@ async function requireCoach(
     }
   }
   );
-  web_server.delete("/deletetraining/:id_training",{preHandler: [requireCoach]}, async (request: FastifyRequest, reply: FastifyReply) => {
+  web_server.delete("/trainings/:id_training",{preHandler: [requireCoach]}, async (request: FastifyRequest, reply: FastifyReply) => {
     try {
       const id_training = Number((request.params as any).id_training);
       const training = await repo.deleteTrainingSession(id_training);
@@ -332,7 +332,7 @@ async function requireCoach(
     }
   }
   );
-  web_server.post("/creatematch",{preHandler: [requireCoach]},async (request: FastifyRequest, reply: FastifyReply) => {
+  web_server.post("/matchs",{preHandler: [requireCoach]},async (request: FastifyRequest, reply: FastifyReply) => {
     try {
       const body = request.body as any;
       const parsed = createMatchSchema.parse(body);
@@ -343,7 +343,7 @@ async function requireCoach(
     }
   });
 
-  web_server.put("/match/:id_match/modify",{preHandler: [requireCoach]}, async (request: FastifyRequest, reply: FastifyReply) => {
+  web_server.put("/matchs/:id_match/modify",{preHandler: [requireCoach]}, async (request: FastifyRequest, reply: FastifyReply) => {
     try {
       const body = request.body as any;
       const match = await repo.modifyMatchSession(body)
@@ -355,7 +355,7 @@ async function requireCoach(
       return reply.status(500).send({ error: (err as Error).message });
     }
   });
-  web_server.delete("/deletematch/:id_match",{preHandler: [requireCoach]}, async (request: FastifyRequest, reply: FastifyReply) => {
+  web_server.delete("/matchs/:id_match",{preHandler: [requireCoach]}, async (request: FastifyRequest, reply: FastifyReply) => {
     try {
       const id_match = Number((request.params as any).id_match);
       const match = await repo.deleteMatchSession(id_match);
@@ -402,7 +402,7 @@ async function requireCoach(
       return reply.status(500).send({ error: (err as Error).message });
     }
   });
-  web_server.post("/createteam", async (request: FastifyRequest, reply: FastifyReply) => {
+  web_server.post("/teams", async (request: FastifyRequest, reply: FastifyReply) => {
     try {
       const body = request.body as any;
       const team = await repo.createTeam(body);
@@ -419,7 +419,7 @@ async function requireCoach(
       return reply.status(500).send({ error: (err as Error).message });
     }
   });
-  web_server.put("/modifyteam", async (request: FastifyRequest, reply: FastifyReply) => {
+  web_server.put("/teams", async (request: FastifyRequest, reply: FastifyReply) => {
     try {
       const body = request.body as any;
       const team = await repo.modifyTeam(body);
@@ -428,7 +428,7 @@ async function requireCoach(
       return reply.status(500).send({ error: (err as Error).message });
     }
   });
-  web_server.delete("/deleteteam/:id_team", async (request: FastifyRequest, reply: FastifyReply) => {
+  web_server.delete("/teams/:id_team", async (request: FastifyRequest, reply: FastifyReply) => {
     try {
       const id_team = Number((request.params as any).id_team);
       const team = await repo.deleteTeam(id_team);
@@ -568,7 +568,7 @@ async function requireCoach(
     } catch (err) {      return reply.status(500).send({ error: (err as Error).message });
     }
   });
-  web_server.post("/addsubscription", async (request: FastifyRequest, reply: FastifyReply) => {
+  web_server.post("/subscription", async (request: FastifyRequest, reply: FastifyReply) => {
     try {
       const body = request.body as any;
       const subscription = await repo.addSubscription(body);
@@ -624,6 +624,33 @@ async function requireCoach(
     try {
       const { id_player } = request.params as { id_player: string };
       const stats = await repo.statisticsplayer(Number(id_player));
+      return reply.send(stats);
+    } catch (err) {
+      return reply.status(500).send({ error: (err as Error).message });
+    }
+  });
+  web_server.post("/statistics", { preHandler: [requireCoach] }, async (request: FastifyRequest, reply: FastifyReply) => {
+    try {
+      const body = request.body as {
+        id_player: number;
+        id_match: number;
+        goals: number;
+        passes: number;
+        yellow_cards: number;
+        red_cards: number;
+        minutes_played: number;
+      };
+
+      const stats = await repo.savePlayerStatistics({
+        id_player: body.id_player,
+        id_match: body.id_match,
+        goals: body.goals,
+        passes: body.passes,
+        yellow_cards: body.yellow_cards,
+        red_cards: body.red_cards,
+        minutes_played: body.minutes_played,
+      });
+
       return reply.send(stats);
     } catch (err) {
       return reply.status(500).send({ error: (err as Error).message });

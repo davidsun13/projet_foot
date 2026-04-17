@@ -68,7 +68,7 @@ export default function CreationEntrainement() {
     console.log("Envoi du formulaire avec les données :", form);
     try {
       setError(null);
-      const res = await fetch("http://localhost:1234/createtraining", {
+      const res = await fetch("http://localhost:1234/trainings", {
         method: "POST",
         credentials: "include",
         headers: {

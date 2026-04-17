@@ -57,7 +57,7 @@ const CreationCotisation = () => {
     }
 
     try {
-      const response = await fetch("http://localhost:1234/addsubscription", {
+      const response = await fetch("http://localhost:1234/subscription", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
