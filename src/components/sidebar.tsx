@@ -82,15 +82,17 @@ function Sidebar() {
             <span className="font-[Arsenal] text-white">Matchs</span>
           </Link>
 
-          <Link
-            to="/cotisations"
-            className="flex items-center gap-3 p-2 rounded hover:bg-red-700"
-            onClick={() => setOpen(false)}
-          >
+
+          {currentUser?.userType === "coach" && (
+            <Link
+              to="/cotisations"
+              className="flex items-center gap-3 p-2 rounded hover:bg-red-700"
+              onClick={() => setOpen(false)}
+            >
             <img src={money} alt="" className="w-10 h-10" />
             <span className="font-[Arsenal] text-white">Cotisations</span>
           </Link>
-
+          )}
           {currentUser?.userType === "coach" && (
             <Link
               to="/players"
@@ -121,6 +123,17 @@ function Sidebar() {
             >
               <img src={convocation} alt="" className="w-10 h-10" />
               <span className="font-[Arsenal] text-white">Convocations</span>
+            </Link>
+          )}
+
+          {currentUser?.userType === "player" && (
+            <Link
+              to="/mes-cotisations"
+              className="flex items-center gap-3 p-2 rounded hover:bg-red-700"
+              onClick={() => setOpen(false)}
+            >
+              <img src={money} alt="" className="w-10 h-10" />
+              <span className="font-[Arsenal] text-white">Mes Cotisations</span>
             </Link>
           )}
         </nav>

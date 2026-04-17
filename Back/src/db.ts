@@ -679,8 +679,9 @@ async getsubscriptionbyplayer(id_player: number) {
     const result = await this.sql`
       SELECT id_subscription, total, status, payment_date
       FROM subscription WHERE id_player = ${id_player}
+      ORDER BY id_subscription DESC
     `;
-    return result[0] || null;
+    return result;
   }
 async getplayerwithnosubscription() {
     const result = await this.sql`
@@ -759,6 +760,37 @@ async nextTraining(){
       ORDER BY date ASC
       LIMIT 1
     `;
+    return result[0] || null;
+  }
+
+  async getPresenceForPlayer(id_player: number) {
+    const result = await this.sql`
+      SELECT p.*, 
+             CASE WHEN p.id_match IS NOT NULL THEN 'match' ELSE 'training' END as type,
+             CASE WHEN p.id_match IS NOT NULL THEN m.date ELSE t.date END as event_date,
+             CASE WHEN p.id_match IS NOT NULL THEN m.opponent ELSE t.type END as event_name
+      FROM presence p
+      LEFT JOIN matches m ON p.id_match = m.id_match
+      LEFT JOIN training t ON p.id_training = t.id_training
+      WHERE p.id_player = ${id_player} AND p.commentary IS NOT NULL AND p.commentary != ''
+      ORDER BY event_date DESC
+    `;
+    return result;
+  }
+
+  async getPresenceForPlayerAndEvent(id_player: number, id_match?: number, id_training?: number) {
+    let query;
+    let params;
+    if (id_match) {
+      query = `SELECT * FROM presence WHERE id_player = $1 AND id_match = $2`;
+      params = [id_player, id_match];
+    } else if (id_training) {
+      query = `SELECT * FROM presence WHERE id_player = $1 AND id_training = $2`;
+      params = [id_player, id_training];
+    } else {
+      return null;
+    }
+    const result = await this.sql.unsafe(query, params);
     return result[0] || null;
   }
 

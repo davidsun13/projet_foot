@@ -20,9 +20,18 @@ type MeResponse = {
   };
 };
 
+type CommentHistory = {
+  id_presence: number;
+  commentary: string;
+  type: 'match' | 'training';
+  event_date: string;
+  event_name: string;
+};
+
 const ListeEntrainements = () => {
   const [trainings, setTrainings] = useState<Training[]>([]);
   const [currentUser, setCurrentUser] = useState<MeResponse | null>(null);
+  const [comments, setComments] = useState<CommentHistory[]>([]);
 
   useEffect(() => {
     async function fetchUser() {
@@ -40,6 +49,33 @@ const ListeEntrainements = () => {
 
     fetchUser();
   }, []);
+
+  useEffect(() => {
+    if (currentUser?.userType === "player" && currentUser.user.id_player) {
+      async function fetchComments() {
+        try {
+          const res = await fetch(
+            `http://localhost:1234/presence/player/${currentUser.user.id_player}`,
+            {
+              credentials: "include",
+              headers: {
+                Authorization: `Bearer ${localStorage.getItem("access_token")}`,
+              },
+            }
+          );
+
+          if (res.ok) {
+            const data = await res.json();
+            setComments(data);
+          }
+        } catch (err) {
+          console.log("Erreur chargement commentaires:", err);
+        }
+      }
+
+      fetchComments();
+    }
+  }, [currentUser]);
 
   async function fetchTrainings() {
     const res = await fetch("http://localhost:1234/trainings", {
@@ -88,6 +124,28 @@ const ListeEntrainements = () => {
           </Link>
         )}
       </div>
+
+      {/* COMMENTAIRES DU COACH */}
+      {currentUser?.userType === "player" && comments.length > 0 && (
+        <div className="bg-blue-50 p-4 rounded-lg border-l-4 border-blue-500 mb-6">
+          <h3 className="text-lg font-semibold mb-3 text-blue-800">Commentaires du coach</h3>
+          <div className="space-y-2">
+            {comments.slice(0, 3).map((comment) => (
+              <div key={comment.id_presence} className="bg-white p-3 rounded shadow-sm">
+                <div className="flex justify-between items-start mb-1">
+                  <span className="font-medium">
+                    {comment.type === 'match' ? 'Match' : 'Entraînement'} - {comment.event_name}
+                  </span>
+                  <span className="text-sm text-gray-500">
+                    {new Date(comment.event_date).toLocaleDateString("fr-FR")}
+                  </span>
+                </div>
+                <p className="text-gray-700 text-sm">{comment.commentary}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       <div className="md:hidden space-y-4">
         {trainings.map((t) => (

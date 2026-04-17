@@ -672,10 +672,10 @@ var Repository = /** @class */ (function () {
             var result;
             return __generator(this, function (_a) {
                 switch (_a.label) {
-                    case 0: return [4 /*yield*/, this.sql(templateObject_47 || (templateObject_47 = __makeTemplateObject(["\n      SELECT id_subscription, total, status, payment_date\n      FROM subscription WHERE id_player = ", "\n    "], ["\n      SELECT id_subscription, total, status, payment_date\n      FROM subscription WHERE id_player = ", "\n    "])), id_player)];
+                    case 0: return [4 /*yield*/, this.sql(templateObject_47 || (templateObject_47 = __makeTemplateObject(["\n      SELECT id_subscription, total, status, payment_date\n      FROM subscription WHERE id_player = ", "\n      ORDER BY id_subscription DESC\n    "], ["\n      SELECT id_subscription, total, status, payment_date\n      FROM subscription WHERE id_player = ", "\n      ORDER BY id_subscription DESC\n    "])), id_player)];
                     case 1:
                         result = _a.sent();
-                        return [2 /*return*/, result[0] || null];
+                        return [2 /*return*/, result];
                 }
             });
         });
@@ -719,12 +719,26 @@ var Repository = /** @class */ (function () {
             });
         });
     };
+    Repository.prototype.savePlayerStatistics = function (_a) {
+        return __awaiter(this, arguments, void 0, function (_b) {
+            var result;
+            var id_player = _b.id_player, id_match = _b.id_match, goals = _b.goals, passes = _b.passes, yellow_cards = _b.yellow_cards, red_cards = _b.red_cards, minutes_played = _b.minutes_played;
+            return __generator(this, function (_c) {
+                switch (_c.label) {
+                    case 0: return [4 /*yield*/, this.sql(templateObject_51 || (templateObject_51 = __makeTemplateObject(["\n      INSERT INTO statistics (id_player, id_match, goals, passes, yellow_cards, red_cards, minutes_played)\n      VALUES (", ", ", ", ", ", ", ", ", ", ", ", ", ")\n      ON CONFLICT (id_player, id_match) DO UPDATE SET\n        goals = ", ",\n        passes = ", ",\n        yellow_cards = ", ",\n        red_cards = ", ",\n        minutes_played = ", "\n      RETURNING *\n    "], ["\n      INSERT INTO statistics (id_player, id_match, goals, passes, yellow_cards, red_cards, minutes_played)\n      VALUES (", ", ", ", ", ", ", ", ", ", ", ", ", ")\n      ON CONFLICT (id_player, id_match) DO UPDATE SET\n        goals = ", ",\n        passes = ", ",\n        yellow_cards = ", ",\n        red_cards = ", ",\n        minutes_played = ", "\n      RETURNING *\n    "])), id_player, id_match, goals, passes, yellow_cards, red_cards, minutes_played, goals, passes, yellow_cards, red_cards, minutes_played)];
+                    case 1:
+                        result = _c.sent();
+                        return [2 /*return*/, result[0]];
+                }
+            });
+        });
+    };
     Repository.prototype.nextMatch = function () {
         return __awaiter(this, void 0, void 0, function () {
             var result;
             return __generator(this, function (_a) {
                 switch (_a.label) {
-                    case 0: return [4 /*yield*/, this.sql(templateObject_51 || (templateObject_51 = __makeTemplateObject(["\n      SELECT *\n      FROM matches\n      WHERE date >= CURRENT_DATE\n      ORDER BY date ASC\n      LIMIT 1\n    "], ["\n      SELECT *\n      FROM matches\n      WHERE date >= CURRENT_DATE\n      ORDER BY date ASC\n      LIMIT 1\n    "])))];
+                    case 0: return [4 /*yield*/, this.sql(templateObject_52 || (templateObject_52 = __makeTemplateObject(["\n      SELECT *\n      FROM matches\n      WHERE date >= CURRENT_DATE\n      ORDER BY date ASC\n      LIMIT 1\n    "], ["\n      SELECT *\n      FROM matches\n      WHERE date >= CURRENT_DATE\n      ORDER BY date ASC\n      LIMIT 1\n    "])))];
                     case 1:
                         result = _a.sent();
                         return [2 /*return*/, result[0] || null];
@@ -737,7 +751,45 @@ var Repository = /** @class */ (function () {
             var result;
             return __generator(this, function (_a) {
                 switch (_a.label) {
-                    case 0: return [4 /*yield*/, this.sql(templateObject_52 || (templateObject_52 = __makeTemplateObject(["\n      SELECT *\n      FROM training\n      WHERE date >= CURRENT_DATE\n      ORDER BY date ASC\n      LIMIT 1\n    "], ["\n      SELECT *\n      FROM training\n      WHERE date >= CURRENT_DATE\n      ORDER BY date ASC\n      LIMIT 1\n    "])))];
+                    case 0: return [4 /*yield*/, this.sql(templateObject_53 || (templateObject_53 = __makeTemplateObject(["\n      SELECT *\n      FROM training\n      WHERE date >= CURRENT_DATE\n      ORDER BY date ASC\n      LIMIT 1\n    "], ["\n      SELECT *\n      FROM training\n      WHERE date >= CURRENT_DATE\n      ORDER BY date ASC\n      LIMIT 1\n    "])))];
+                    case 1:
+                        result = _a.sent();
+                        return [2 /*return*/, result[0] || null];
+                }
+            });
+        });
+    };
+    Repository.prototype.getPresenceForPlayer = function (id_player) {
+        return __awaiter(this, void 0, void 0, function () {
+            var result;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0: return [4 /*yield*/, this.sql(templateObject_54 || (templateObject_54 = __makeTemplateObject(["\n      SELECT p.*, \n             CASE WHEN p.id_match IS NOT NULL THEN 'match' ELSE 'training' END as type,\n             CASE WHEN p.id_match IS NOT NULL THEN m.date ELSE t.date END as event_date,\n             CASE WHEN p.id_match IS NOT NULL THEN m.opponent ELSE t.type END as event_name\n      FROM presence p\n      LEFT JOIN matches m ON p.id_match = m.id_match\n      LEFT JOIN training t ON p.id_training = t.id_training\n      WHERE p.id_player = ", " AND p.commentary IS NOT NULL AND p.commentary != ''\n      ORDER BY event_date DESC\n    "], ["\n      SELECT p.*, \n             CASE WHEN p.id_match IS NOT NULL THEN 'match' ELSE 'training' END as type,\n             CASE WHEN p.id_match IS NOT NULL THEN m.date ELSE t.date END as event_date,\n             CASE WHEN p.id_match IS NOT NULL THEN m.opponent ELSE t.type END as event_name\n      FROM presence p\n      LEFT JOIN matches m ON p.id_match = m.id_match\n      LEFT JOIN training t ON p.id_training = t.id_training\n      WHERE p.id_player = ", " AND p.commentary IS NOT NULL AND p.commentary != ''\n      ORDER BY event_date DESC\n    "])), id_player)];
+                    case 1:
+                        result = _a.sent();
+                        return [2 /*return*/, result];
+                }
+            });
+        });
+    };
+    Repository.prototype.getPresenceForPlayerAndEvent = function (id_player, id_match, id_training) {
+        return __awaiter(this, void 0, void 0, function () {
+            var query, params, result;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        if (id_match) {
+                            query = "SELECT * FROM presence WHERE id_player = $1 AND id_match = $2";
+                            params = [id_player, id_match];
+                        }
+                        else if (id_training) {
+                            query = "SELECT * FROM presence WHERE id_player = $1 AND id_training = $2";
+                            params = [id_player, id_training];
+                        }
+                        else {
+                            return [2 /*return*/, null];
+                        }
+                        return [4 /*yield*/, this.sql.unsafe(query, params)];
                     case 1:
                         result = _a.sent();
                         return [2 /*return*/, result[0] || null];
@@ -748,4 +800,4 @@ var Repository = /** @class */ (function () {
     return Repository;
 }());
 exports.Repository = Repository;
-var templateObject_1, templateObject_2, templateObject_3, templateObject_4, templateObject_5, templateObject_6, templateObject_7, templateObject_8, templateObject_9, templateObject_10, templateObject_11, templateObject_12, templateObject_13, templateObject_14, templateObject_15, templateObject_16, templateObject_17, templateObject_18, templateObject_19, templateObject_20, templateObject_21, templateObject_22, templateObject_23, templateObject_24, templateObject_25, templateObject_26, templateObject_27, templateObject_28, templateObject_29, templateObject_30, templateObject_31, templateObject_32, templateObject_33, templateObject_34, templateObject_35, templateObject_36, templateObject_37, templateObject_38, templateObject_39, templateObject_40, templateObject_41, templateObject_42, templateObject_43, templateObject_44, templateObject_45, templateObject_46, templateObject_47, templateObject_48, templateObject_49, templateObject_50, templateObject_51, templateObject_52;
+var templateObject_1, templateObject_2, templateObject_3, templateObject_4, templateObject_5, templateObject_6, templateObject_7, templateObject_8, templateObject_9, templateObject_10, templateObject_11, templateObject_12, templateObject_13, templateObject_14, templateObject_15, templateObject_16, templateObject_17, templateObject_18, templateObject_19, templateObject_20, templateObject_21, templateObject_22, templateObject_23, templateObject_24, templateObject_25, templateObject_26, templateObject_27, templateObject_28, templateObject_29, templateObject_30, templateObject_31, templateObject_32, templateObject_33, templateObject_34, templateObject_35, templateObject_36, templateObject_37, templateObject_38, templateObject_39, templateObject_40, templateObject_41, templateObject_42, templateObject_43, templateObject_44, templateObject_45, templateObject_46, templateObject_47, templateObject_48, templateObject_49, templateObject_50, templateObject_51, templateObject_52, templateObject_53, templateObject_54;

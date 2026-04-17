@@ -17,6 +17,14 @@ type PlayerProfile = {
   passes?: number;
 };
 
+type CommentHistory = {
+  id_presence: number;
+  commentary: string;
+  type: 'match' | 'training';
+  event_date: string;
+  event_name: string;
+};
+
 const ProfilePlayer = () => {
   const { id_player } = useParams();
   const navigate = useNavigate();
@@ -24,6 +32,7 @@ const ProfilePlayer = () => {
   const [player, setPlayer] = useState<PlayerProfile | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [comments, setComments] = useState<CommentHistory[]>([]);
 
   useEffect(() => {
     if (!id_player) return;
@@ -57,7 +66,29 @@ const ProfilePlayer = () => {
       }
     }
 
+    async function fetchComments() {
+      try {
+        const res = await fetch(
+          `http://localhost:1234/presence/player/${id_player}`,
+          {
+            credentials: "include",
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem("access_token")}`,
+            },
+          }
+        );
+
+        if (res.ok) {
+          const data = await res.json();
+          setComments(data);
+        }
+      } catch (err) {
+        console.log("Erreur chargement commentaires:", err);
+      }
+    }
+
     fetchPlayerProfile();
+    fetchComments();
   }, [id_player]);
 
   if (loading) return <div className="p-4 text-center">Chargement…</div>;
@@ -158,6 +189,28 @@ const ProfilePlayer = () => {
           </div>
 
                   </div>
+
+        {/* HISTORIQUE COMMENTAIRES */}
+        {comments.length > 0 && (
+          <div className="mt-6">
+            <h3 className="text-lg font-semibold mb-4">Historique des commentaires</h3>
+            <div className="space-y-3">
+              {comments.map((comment) => (
+                <div key={comment.id_presence} className="bg-blue-50 p-4 rounded-lg border-l-4 border-blue-500">
+                  <div className="flex justify-between items-start mb-2">
+                    <span className="font-medium text-blue-800">
+                      {comment.type === 'match' ? 'Match' : 'Entraînement'} - {comment.event_name}
+                    </span>
+                    <span className="text-sm text-gray-500">
+                      {new Date(comment.event_date).toLocaleDateString("fr-FR")}
+                    </span>
+                  </div>
+                  <p className="text-gray-700">{comment.commentary}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
                 </div>
               </div>
   );

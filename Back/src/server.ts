@@ -672,6 +672,33 @@ async function requireCoach(
       return reply.status(500).send({ error: (err as Error).message });
     }
   }); 
+  web_server.get("/presence/player/:id_player", async (request: FastifyRequest, reply: FastifyReply) => {
+    try {
+      const { id_player } = request.params as { id_player: string };
+      const presence = await repo.getPresenceForPlayer(Number(id_player));
+      return reply.send(presence);
+    } catch (err) {
+      return reply.status(500).send({ error: (err as Error).message });
+    }
+  });
+  web_server.get("/presence/player/:id_player/match/:id_match", async (request: FastifyRequest, reply: FastifyReply) => {
+    try {
+      const { id_player, id_match } = request.params as { id_player: string; id_match: string };
+      const presence = await repo.getPresenceForPlayerAndEvent(Number(id_player), Number(id_match));
+      return reply.send(presence);
+    } catch (err) {
+      return reply.status(500).send({ error: (err as Error).message });
+    }
+  });
+  web_server.get("/presence/player/:id_player/training/:id_training", async (request: FastifyRequest, reply: FastifyReply) => {
+    try {
+      const { id_player, id_training } = request.params as { id_player: string; id_training: string };
+      const presence = await repo.getPresenceForPlayerAndEvent(Number(id_player), undefined, Number(id_training));
+      return reply.send(presence);
+    } catch (err) {
+      return reply.status(500).send({ error: (err as Error).message });
+    }
+  });
   const port = Number(process.env.PORT) || 1234;
   await web_server.listen({ port, host: "0.0.0.0" });
   web_server.log.info(`listening on http://0.0.0.0:${port}`);

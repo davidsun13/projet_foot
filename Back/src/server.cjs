@@ -385,7 +385,7 @@ function start_web_server() {
                             }
                         });
                     }); });
-                    web_server.post("/createtraining", { preHandler: [requireCoach] }, function (request, reply) { return __awaiter(_this, void 0, void 0, function () {
+                    web_server.post("/trainings", { preHandler: [requireCoach] }, function (request, reply) { return __awaiter(_this, void 0, void 0, function () {
                         var parsed, training, err_5;
                         return __generator(this, function (_a) {
                             switch (_a.label) {
@@ -425,7 +425,7 @@ function start_web_server() {
                             }
                         });
                     }); });
-                    web_server.put("/training/:id_training/modify", { preHandler: [requireCoach] }, function (request, reply) { return __awaiter(_this, void 0, void 0, function () {
+                    web_server.put("/trainings/:id_training/modify", { preHandler: [requireCoach] }, function (request, reply) { return __awaiter(_this, void 0, void 0, function () {
                         var body, training, err_7;
                         return __generator(this, function (_a) {
                             switch (_a.label) {
@@ -443,7 +443,7 @@ function start_web_server() {
                             }
                         });
                     }); });
-                    web_server.delete("/deletetraining/:id_training", { preHandler: [requireCoach] }, function (request, reply) { return __awaiter(_this, void 0, void 0, function () {
+                    web_server.delete("/trainings/:id_training", { preHandler: [requireCoach] }, function (request, reply) { return __awaiter(_this, void 0, void 0, function () {
                         var id_training, training, err_8;
                         return __generator(this, function (_a) {
                             switch (_a.label) {
@@ -478,7 +478,7 @@ function start_web_server() {
                             }
                         });
                     }); });
-                    web_server.post("/creatematch", { preHandler: [requireCoach] }, function (request, reply) { return __awaiter(_this, void 0, void 0, function () {
+                    web_server.post("/matchs", { preHandler: [requireCoach] }, function (request, reply) { return __awaiter(_this, void 0, void 0, function () {
                         var body, parsed, match, err_10;
                         return __generator(this, function (_a) {
                             switch (_a.label) {
@@ -497,7 +497,7 @@ function start_web_server() {
                             }
                         });
                     }); });
-                    web_server.put("/match/:id_match/modify", { preHandler: [requireCoach] }, function (request, reply) { return __awaiter(_this, void 0, void 0, function () {
+                    web_server.put("/matchs/:id_match/modify", { preHandler: [requireCoach] }, function (request, reply) { return __awaiter(_this, void 0, void 0, function () {
                         var body, match, err_11;
                         return __generator(this, function (_a) {
                             switch (_a.label) {
@@ -518,7 +518,7 @@ function start_web_server() {
                             }
                         });
                     }); });
-                    web_server.delete("/deletematch/:id_match", { preHandler: [requireCoach] }, function (request, reply) { return __awaiter(_this, void 0, void 0, function () {
+                    web_server.delete("/matchs/:id_match", { preHandler: [requireCoach] }, function (request, reply) { return __awaiter(_this, void 0, void 0, function () {
                         var id_match, match, err_12;
                         return __generator(this, function (_a) {
                             switch (_a.label) {
@@ -593,7 +593,7 @@ function start_web_server() {
                             }
                         });
                     }); });
-                    web_server.post("/createteam", function (request, reply) { return __awaiter(_this, void 0, void 0, function () {
+                    web_server.post("/teams", function (request, reply) { return __awaiter(_this, void 0, void 0, function () {
                         var body, team, err_16;
                         return __generator(this, function (_a) {
                             switch (_a.label) {
@@ -628,7 +628,7 @@ function start_web_server() {
                             }
                         });
                     }); });
-                    web_server.put("/modifyteam", function (request, reply) { return __awaiter(_this, void 0, void 0, function () {
+                    web_server.put("/teams", function (request, reply) { return __awaiter(_this, void 0, void 0, function () {
                         var body, team, err_18;
                         return __generator(this, function (_a) {
                             switch (_a.label) {
@@ -646,7 +646,7 @@ function start_web_server() {
                             }
                         });
                     }); });
-                    web_server.delete("/deleteteam/:id_team", function (request, reply) { return __awaiter(_this, void 0, void 0, function () {
+                    web_server.delete("/teams/:id_team", function (request, reply) { return __awaiter(_this, void 0, void 0, function () {
                         var id_team, team, err_19;
                         return __generator(this, function (_a) {
                             switch (_a.label) {
@@ -876,7 +876,7 @@ function start_web_server() {
                             }
                         });
                     }); });
-                    web_server.post("/addsubscription", function (request, reply) { return __awaiter(_this, void 0, void 0, function () {
+                    web_server.post("/subscription", function (request, reply) { return __awaiter(_this, void 0, void 0, function () {
                         var body, subscription, err_31;
                         return __generator(this, function (_a) {
                             switch (_a.label) {
@@ -1000,8 +1000,34 @@ function start_web_server() {
                             }
                         });
                     }); });
+                    web_server.post("/statistics", { preHandler: [requireCoach] }, function (request, reply) { return __awaiter(_this, void 0, void 0, function () {
+                        var body, stats, err_38;
+                        return __generator(this, function (_a) {
+                            switch (_a.label) {
+                                case 0:
+                                    _a.trys.push([0, 2, , 3]);
+                                    body = request.body;
+                                    return [4 /*yield*/, repo.savePlayerStatistics({
+                                            id_player: body.id_player,
+                                            id_match: body.id_match,
+                                            goals: body.goals,
+                                            passes: body.passes,
+                                            yellow_cards: body.yellow_cards,
+                                            red_cards: body.red_cards,
+                                            minutes_played: body.minutes_played,
+                                        })];
+                                case 1:
+                                    stats = _a.sent();
+                                    return [2 /*return*/, reply.send(stats)];
+                                case 2:
+                                    err_38 = _a.sent();
+                                    return [2 /*return*/, reply.status(500).send({ error: err_38.message })];
+                                case 3: return [2 /*return*/];
+                            }
+                        });
+                    }); });
                     web_server.get("/nextmatch", function (request, reply) { return __awaiter(_this, void 0, void 0, function () {
-                        var match, err_38;
+                        var match, err_39;
                         return __generator(this, function (_a) {
                             switch (_a.label) {
                                 case 0:
@@ -1011,14 +1037,14 @@ function start_web_server() {
                                     match = _a.sent();
                                     return [2 /*return*/, reply.send(match)];
                                 case 2:
-                                    err_38 = _a.sent();
-                                    return [2 /*return*/, reply.status(500).send({ error: err_38.message })];
+                                    err_39 = _a.sent();
+                                    return [2 /*return*/, reply.status(500).send({ error: err_39.message })];
                                 case 3: return [2 /*return*/];
                             }
                         });
                     }); });
                     web_server.get("/nexttraining", function (request, reply) { return __awaiter(_this, void 0, void 0, function () {
-                        var training, err_39;
+                        var training, err_40;
                         return __generator(this, function (_a) {
                             switch (_a.label) {
                                 case 0:
@@ -1028,8 +1054,62 @@ function start_web_server() {
                                     training = _a.sent();
                                     return [2 /*return*/, reply.send(training)];
                                 case 2:
-                                    err_39 = _a.sent();
-                                    return [2 /*return*/, reply.status(500).send({ error: err_39.message })];
+                                    err_40 = _a.sent();
+                                    return [2 /*return*/, reply.status(500).send({ error: err_40.message })];
+                                case 3: return [2 /*return*/];
+                            }
+                        });
+                    }); });
+                    web_server.get("/presence/player/:id_player", function (request, reply) { return __awaiter(_this, void 0, void 0, function () {
+                        var id_player, presence, err_41;
+                        return __generator(this, function (_a) {
+                            switch (_a.label) {
+                                case 0:
+                                    _a.trys.push([0, 2, , 3]);
+                                    id_player = request.params.id_player;
+                                    return [4 /*yield*/, repo.getPresenceForPlayer(Number(id_player))];
+                                case 1:
+                                    presence = _a.sent();
+                                    return [2 /*return*/, reply.send(presence)];
+                                case 2:
+                                    err_41 = _a.sent();
+                                    return [2 /*return*/, reply.status(500).send({ error: err_41.message })];
+                                case 3: return [2 /*return*/];
+                            }
+                        });
+                    }); });
+                    web_server.get("/presence/player/:id_player/match/:id_match", function (request, reply) { return __awaiter(_this, void 0, void 0, function () {
+                        var _a, id_player, id_match, presence, err_42;
+                        return __generator(this, function (_b) {
+                            switch (_b.label) {
+                                case 0:
+                                    _b.trys.push([0, 2, , 3]);
+                                    _a = request.params, id_player = _a.id_player, id_match = _a.id_match;
+                                    return [4 /*yield*/, repo.getPresenceForPlayerAndEvent(Number(id_player), Number(id_match))];
+                                case 1:
+                                    presence = _b.sent();
+                                    return [2 /*return*/, reply.send(presence)];
+                                case 2:
+                                    err_42 = _b.sent();
+                                    return [2 /*return*/, reply.status(500).send({ error: err_42.message })];
+                                case 3: return [2 /*return*/];
+                            }
+                        });
+                    }); });
+                    web_server.get("/presence/player/:id_player/training/:id_training", function (request, reply) { return __awaiter(_this, void 0, void 0, function () {
+                        var _a, id_player, id_training, presence, err_43;
+                        return __generator(this, function (_b) {
+                            switch (_b.label) {
+                                case 0:
+                                    _b.trys.push([0, 2, , 3]);
+                                    _a = request.params, id_player = _a.id_player, id_training = _a.id_training;
+                                    return [4 /*yield*/, repo.getPresenceForPlayerAndEvent(Number(id_player), undefined, Number(id_training))];
+                                case 1:
+                                    presence = _b.sent();
+                                    return [2 /*return*/, reply.send(presence)];
+                                case 2:
+                                    err_43 = _b.sent();
+                                    return [2 /*return*/, reply.status(500).send({ error: err_43.message })];
                                 case 3: return [2 /*return*/];
                             }
                         });

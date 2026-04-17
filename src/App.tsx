@@ -20,6 +20,7 @@ import ConvocationMatchDetail from './components/convocationMatchDetail'
 import CreationCotisation from './components/CreationCotisation'
 import DetailsPlayer from './components/detailsPlayer'
 import ClotureMatch from './components/ClotureMatch'
+import MesCotisations from './components/MesCotisations'
 
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import './App.css'
@@ -58,6 +59,8 @@ function App() {
 
               <Route path="/cotisations" element={<GestionCotisations />} />
               <Route path="/cotisations/ajouter" element={<CreationCotisation />} />
+
+              <Route path="/mes-cotisations" element={<MesCotisations />} />
 
               <Route path="/players" element={<ListeJoueurs />} />
               <Route path="/joueurs/modifier/:id_player" element={<ModifPlayer />} />
