@@ -9,8 +9,8 @@ type Match = {
   location?: string;
   type?: string;
   name?: string;
-  score_home?: number;
-  score_outside?: number;
+  score_home?: number | null;
+  score_outside?: number | null;
 };
 
 type MeResponse = {
@@ -213,7 +213,7 @@ const ListeMatchs = () => {
                 Voir
               </button>
               )}
-              {currentUser?.userType === "coach" && (
+              {currentUser?.userType === "coach" && m.date && new Date(m.date) < new Date() && (m.score_home === null || m.score_outside === null) && (
                 <Link
                   to={`/matchs/cloturer/${m.id_match}`}
                   className="flex-1 bg-orange-500 text-white py-1 rounded hover:bg-orange-600 text-center"
@@ -294,7 +294,7 @@ const ListeMatchs = () => {
                       Détails
                       </Link>
                     )}
-                    {currentUser?.userType === "coach" && (
+                    {currentUser?.userType === "coach" && m.date && new Date(m.date) < new Date() && (m.score_home === null || m.score_outside === null) && (
                       <Link
                         to={`/matchs/cloturer/${m.id_match}`}
                         className="px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600"

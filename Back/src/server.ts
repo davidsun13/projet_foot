@@ -29,9 +29,9 @@ export async function start_web_server() {
   const isProduction = process.env.NODE_ENV === "production";
 
   web_server.register(require("@fastify/cors"), {
-    origin: ["http://localhost","http://localhost:5173"],
+    origin: ["http://localhost","http://localhost:5173","http://172.17.250.127"],
     credentials: true,
-    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
   });
   await web_server.register(cookie, {
     secret: COOKIE_SECRET,
@@ -319,8 +319,8 @@ async function requireCoach(
       const training = await repo.deleteTrainingSession(id_training);
       return reply.send(training);
     } catch (err) {
-      return reply.status(500).send({ error: (err as Error).message });
-    }
+    }      return reply.status(500).send({ error: (err as Error).message });
+
   }
   );
   web_server.get("/trainings",{preHandler: [requireAuth]}, async (request: FastifyRequest, reply: FastifyReply) => {
@@ -365,7 +365,7 @@ async function requireCoach(
     }
   }
   );
-  web_server.patch("/matchs/:id/score", async (request, reply) => {
+  web_server.patch("/matchs/:id/score", {preHandler: [requireCoach]}, async (request, reply) => {
     try {
       const id_match = Number((request.params as any).id);
       const parsed = updateScoreSchema.parse(request.body);
