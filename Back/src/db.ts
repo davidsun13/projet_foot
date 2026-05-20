@@ -14,8 +14,8 @@ const sql = postgres({
 export class Repository {
   sql: postgres.Sql;
 
-  constructor() {
-    this.sql = sql;
+  constructor(sqlClient?: postgres.Sql) {
+    this.sql = sqlClient ?? sql;
   }
 
   async registerPlayer({

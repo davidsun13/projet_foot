@@ -8,6 +8,10 @@
     "build": "tsc",
     "lint": "eslint .",
     "preview": "vite preview",
+    "test": "vitest run",
+    "test:unit": "vitest run tests/unit",
+    "test:integration": "vitest run tests/integration",
+    "test:functional": "npx playwright test",
     "test:e2e": "npx playwright test"
   },
   "dependencies": {
