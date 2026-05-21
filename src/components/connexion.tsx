@@ -12,15 +12,12 @@ function Connexion() {
     setForm({ ...form, [e.target.id]: e.target.value });
     setError(null);
   }
-
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError(null);
-
     try {
       const endpoint = userType === "player" ? "/login" : "/logincoach";
-
-      const res = await fetch(`http://localhost:1234${endpoint}`, {
+      const res = await fetch(`http://172.17.250.127${endpoint}`, {
         method: "POST",
         credentials: "include",
         headers: { "Content-Type": "application/json" },
@@ -29,14 +26,11 @@ function Connexion() {
           password: form.password,
         }),
       });
-
       const data = await res.json();
-
       if (!res.ok) {
         setError(data.error || "Identifiants incorrects.");
         return;
       }
-
       if (data.accessToken) {
         localStorage.setItem("access_token", data.accessToken);
       }
@@ -47,17 +41,13 @@ function Connexion() {
       setError("Erreur réseau : " + (err as Error).message);
     }
   }
-
   return (
     <div className="flex items-center justify-center h-full w-full bg-gray-100">
       <div className="bg-white p-10 rounded-lg shadow-md w-full max-w-md max-h-full overflow-auto">
         <h2 className="text-2xl font-bold mb-6 text-center font-[Arsenal]">
           Connexion
         </h2>
-
         {error && <p className="text-center text-red-600 mb-4">{error}</p>}
-
-        {/* Optionnel : bouton pour choisir joueur ou coach */}
         <div className="mb-4 text-center">
           <button
             type="button"
@@ -74,7 +64,6 @@ function Connexion() {
             Coach
           </button>
         </div>
-
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <label htmlFor="email" className="block text-sm text-gray-700">

@@ -1,0 +1,1 @@
+export { CotisationsList } from './CotisationsList';
