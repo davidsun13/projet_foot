@@ -70,8 +70,5 @@ jobs:
 
       - run: npm ci && npx playwright install --with-deps 
 
-        working-directory: projet_foot
 
       - run: npx playwright test 
-
-        working-directory: projet_foot
