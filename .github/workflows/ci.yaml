@@ -1,28 +1,77 @@
-name: CI
+# .github/workflows/ci.yml 
 
-on:
-  push:
-    branches:
-      - main
-  pull_request:
+name: CI — Tests automatisés 
 
-jobs:
-  build:
-    runs-on: ubuntu-latest
+ 
+
+on: 
+
+  push: 
+
+    branches: [main] 
+
+  pull_request: 
+
+    branches: [main] 
+
+ 
+
+jobs: 
+
+  test-backend: 
+
+    runs-on: ubuntu-latest 
+
+    services: 
+
+      postgres: 
+
+        image: postgres:15 
+
+        env: 
+
+          POSTGRES_PASSWORD: postgres 
+
+          POSTGRES_DB: test_db 
+
+        ports: ['5432:5432'] 
+
     steps: 
-    - name : Checkout 
-    - uses: actions/checkout@v2
-    
-    - name : install node.js 
-    - uses: actions/setup-node@v2
-      with:
-        node-version: '20'
-    
-    - name: install deps
-      run: npm ci
 
-    - name: run tests
-      run: npm test
-    
-    
-    
+      - uses: actions/checkout@v4 
+
+      - uses: actions/setup-node@v4 
+
+        with: { node-version: '20' } 
+
+      - run: npm ci 
+
+        working-directory: Back 
+
+      - run: npm test 
+
+        working-directory: Back 
+
+        env: 
+
+          DATABASE_URL: postgres://postgres:postgres@localhost:5432/test_db 
+
+          JWT_SECRET: ci-secret 
+
+ 
+
+  test-e2e: 
+
+    runs-on: ubuntu-latest 
+
+    steps: 
+
+      - uses: actions/checkout@v4 
+
+      - run: npm ci && npx playwright install --with-deps 
+
+        working-directory: Front 
+
+      - run: npx playwright test 
+
+        working-directory: Front 
