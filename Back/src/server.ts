@@ -20,9 +20,10 @@ declare module "@fastify/jwt" {
   }
 }
 
-export async function start_web_server() {
+export async function start_web_server(options?: { repo?: Repository; listen?: boolean }) {
   const web_server: FastifyInstance = Fastify({ logger: true });
-  const repo = new Repository();
+  const repo = options?.repo ?? new Repository();
+  const shouldListen = options?.listen ?? true;
 
   const JWT_SECRET = process.env.JWT_SECRET || "dev_jwt_secret_change_me";
   const COOKIE_SECRET = process.env.COOKIE_SECRET || "dev_cookie_secret_change_me";
@@ -700,8 +701,11 @@ async function requireCoach(
     }
   });
   const port = Number(process.env.PORT) || 1234;
-  await web_server.listen({ port, host: "0.0.0.0" });
-  web_server.log.info(`listening on http://0.0.0.0:${port}`);
+  if (shouldListen) {
+    await web_server.listen({ port, host: "0.0.0.0" });
+    web_server.log.info(`listening on http://0.0.0.0:${port}`);
+  }
+  return web_server;
 }
 
 if (require.main === module) {

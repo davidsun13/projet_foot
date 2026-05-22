@@ -49,7 +49,6 @@ describe('Repository integration', () => {
   it('registers a new player when the email does not already exist', async () => {
     const fakeSql = createFakeSql();
     const repo = new Repository(fakeSql);
-
     const user = await repo.registerPlayer({
       surname: 'Paul',
       name: 'Dupont',
@@ -57,7 +56,6 @@ describe('Repository integration', () => {
       phone: null,
       password: 'secret',
     });
-
     expect(user).toEqual({ id_player: 42, surname: 'Paul', name: 'Dupont', mail: 'new@mail.test' });
     expect(fakeSql).toHaveBeenCalled();
   });
