@@ -60,7 +60,7 @@ var crypto = require("node:crypto");
 function generateRefreshToken() {
     return crypto.randomBytes(48).toString("hex");
 }
-function start_web_server() {
+function start_web_server(options) {
     return __awaiter(this, void 0, void 0, function () {
         function formatZodError(err) {
             return err.issues.map(function (issue) { return ({
@@ -111,13 +111,15 @@ function start_web_server() {
                 });
             });
         }
-        var web_server, repo, JWT_SECRET, COOKIE_SECRET, isProduction, port;
+        var web_server, repo, shouldListen, JWT_SECRET, COOKIE_SECRET, isProduction, port;
         var _this = this;
-        return __generator(this, function (_a) {
-            switch (_a.label) {
+        var _a, _b;
+        return __generator(this, function (_c) {
+            switch (_c.label) {
                 case 0:
                     web_server = (0, fastify_1.default)({ logger: true });
-                    repo = new db_cjs_1.Repository();
+                    repo = (_a = options === null || options === void 0 ? void 0 : options.repo) !== null && _a !== void 0 ? _a : new db_cjs_1.Repository();
+                    shouldListen = (_b = options === null || options === void 0 ? void 0 : options.listen) !== null && _b !== void 0 ? _b : true;
                     JWT_SECRET = process.env.JWT_SECRET || "dev_jwt_secret_change_me";
                     COOKIE_SECRET = process.env.COOKIE_SECRET || "dev_cookie_secret_change_me";
                     isProduction = process.env.NODE_ENV === "production";
@@ -131,7 +133,7 @@ function start_web_server() {
                             hook: "onRequest",
                         })];
                 case 1:
-                    _a.sent();
+                    _c.sent();
                     return [4 /*yield*/, web_server.register(jwt_1.default, {
                             secret: JWT_SECRET,
                             cookie: {
@@ -141,7 +143,7 @@ function start_web_server() {
                             sign: { expiresIn: "15m" },
                         })];
                 case 2:
-                    _a.sent();
+                    _c.sent();
                     web_server.post("/registercoach", function (request, reply) { return __awaiter(_this, void 0, void 0, function () {
                         var parsed, user, accessToken, refreshToken, err_1;
                         var _a;
@@ -1115,11 +1117,13 @@ function start_web_server() {
                         });
                     }); });
                     port = Number(process.env.PORT) || 1234;
+                    if (!shouldListen) return [3 /*break*/, 4];
                     return [4 /*yield*/, web_server.listen({ port: port, host: "0.0.0.0" })];
                 case 3:
-                    _a.sent();
+                    _c.sent();
                     web_server.log.info("listening on http://0.0.0.0:".concat(port));
-                    return [2 /*return*/];
+                    _c.label = 4;
+                case 4: return [2 /*return*/, web_server];
             }
         });
     });

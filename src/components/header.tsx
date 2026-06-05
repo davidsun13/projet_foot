@@ -1,4 +1,4 @@
-import canon from "../assets/télécharger.jpg";
+import canon from "../assets/logo.png";
 import userImg from "../assets/profil.png";
 import { Link, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";

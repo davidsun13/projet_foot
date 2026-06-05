@@ -30,6 +30,9 @@ services:
       PGUSER: toto
       PGPASSWORD: example
       PGDATABASE: projet_club_db
+      JWT_SECRET: votre_secret_jwt
+      COOKIE_SECRET: votre_secret_cookie
+      PORT: 1234
 
   frontend:
     build:
