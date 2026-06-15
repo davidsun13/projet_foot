@@ -333,16 +333,22 @@ async function requireCoach(
     }
   }
   );
-  web_server.post("/matchs",{preHandler: [requireCoach]},async (request: FastifyRequest, reply: FastifyReply) => {
+  const createMatchHandler = async (request: FastifyRequest, reply: FastifyReply) => {
     try {
       const body = request.body as any;
       const parsed = createMatchSchema.parse(body);
       const match = await repo.createMatchSession(parsed);
-      return reply.send(match);
+      return reply.status(201).send(match);
     } catch (err) {
+      if (err instanceof ZodError) {
+        return reply.status(422).send({ errors: formatZodError(err) });
+      }
       return reply.status(500).send({ error: (err as Error).message });
     }
-  });
+  };
+
+  web_server.post("/matchs", { preHandler: [requireCoach] }, createMatchHandler);
+  web_server.post("/api/matchs", { preHandler: [requireCoach] }, createMatchHandler);
 
   web_server.put("/matchs/:id_match/modify",{preHandler: [requireCoach]}, async (request: FastifyRequest, reply: FastifyReply) => {
     try {
