@@ -122,7 +122,7 @@ function start_web_server() {
                     COOKIE_SECRET = process.env.COOKIE_SECRET || "dev_cookie_secret_change_me";
                     isProduction = process.env.NODE_ENV === "production";
                     web_server.register(require("@fastify/cors"), {
-                        origin: ["http://localhost", "http://localhost:5173", "http://172.17.250.127", "http://127.0.0.1"],
+                        origin: ["http://localhost", "http://localhost:5173", "http://172.17.250.127", "http://127.0.0.1", "http://10.89.60.76"],
                         credentials: true,
                         methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
                     });
