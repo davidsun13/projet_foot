@@ -10,7 +10,7 @@ function Header() {
   useEffect(() => {
     async function fetchUser() {
       try {
-        const res = await fetch("http://172.17.250.127:1234/me", {
+        const res = await fetch("http://10.89.60.76:1234/me", {
           credentials: "include",
           headers: {
             Authorization: `Bearer ${localStorage.getItem("access_token")}`,
@@ -31,7 +31,7 @@ function Header() {
 
   async function handleLogout() {
     try {
-      await fetch("http://172.17.250.127:1234/logout", {
+      await fetch("http://10.89.60.76:1234/logout", {
         method: "POST",
         credentials: "include",
       });
