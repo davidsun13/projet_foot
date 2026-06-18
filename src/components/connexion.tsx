@@ -20,7 +20,7 @@ function Connexion() {
     try {
       const endpoint = userType === "player" ? "/login" : "/logincoach";
 
-      const res = await fetch(`http://172.17.250.127${endpoint}`, {
+      const res = await fetch(`http://127.0.0.1${endpoint}`, {
         method: "POST",
         credentials: "include",
         headers: { "Content-Type": "application/json" },
