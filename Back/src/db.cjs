@@ -52,8 +52,8 @@ var sql = postgres({
     database: process.env.PGDATABASE || "projet_club_db",
 });
 var Repository = /** @class */ (function () {
-    function Repository() {
-        this.sql = sql;
+    function Repository(sqlClient) {
+        this.sql = sqlClient !== null && sqlClient !== void 0 ? sqlClient : sql;
     }
     Repository.prototype.registerPlayer = function (_a) {
         return __awaiter(this, arguments, void 0, function (_b) {
