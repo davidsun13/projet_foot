@@ -23,7 +23,7 @@ function Sidebar() {
   useEffect(() => {
     async function fetchUser() {
       try {
-        const res = await fetch("http://localhost:1234/me", {
+        const res = await fetch("http://10.89.60.76:1234/me", {
           credentials: "include",
           headers: {
             Authorization: `Bearer ${localStorage.getItem("access_token")}`,
