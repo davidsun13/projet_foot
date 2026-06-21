@@ -12,17 +12,19 @@ import * as crypto from "node:crypto";
 function generateRefreshToken() {
   return crypto.randomBytes(48).toString("hex");
 }
+
+type AppJwtPayload = { id: number; userType: 'player' | 'coach' };
+
 declare module "@fastify/jwt" {
   interface FastifyJWT {
-    payload: { id: number };
-    user: { id: number };
-    userType: 'player' | 'coach';
+    payload: AppJwtPayload;
+    user: AppJwtPayload;
   }
 }
 
-export async function start_web_server() {
+export async function buildWebServer(repository = new Repository()) {
   const web_server: FastifyInstance = Fastify({ logger: true });
-  const repo = new Repository();
+  const repo = repository;
 
   const JWT_SECRET = process.env.JWT_SECRET || "dev_jwt_secret_change_me";
   const COOKIE_SECRET = process.env.COOKIE_SECRET || "dev_cookie_secret_change_me";
@@ -319,8 +321,8 @@ async function requireCoach(
       const training = await repo.deleteTrainingSession(id_training);
       return reply.send(training);
     } catch (err) {
-    }      return reply.status(500).send({ error: (err as Error).message });
-
+      return reply.status(500).send({ error: (err as Error).message });
+    }
   }
   );
   web_server.get("/trainings",{preHandler: [requireAuth]}, async (request: FastifyRequest, reply: FastifyReply) => {
@@ -699,6 +701,12 @@ async function requireCoach(
       return reply.status(500).send({ error: (err as Error).message });
     }
   });
+
+  return web_server;
+}
+
+export async function start_web_server() {
+  const web_server = await buildWebServer();
   const port = Number(process.env.PORT) || 1234;
   await web_server.listen({ port, host: "0.0.0.0" });
   web_server.log.info(`listening on http://0.0.0.0:${port}`);
