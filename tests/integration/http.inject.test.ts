@@ -84,7 +84,7 @@ describe('Fastify HTTP routes via inject', () => {
       },
     });
 
-    expect(authorizedResponse.statusCode).toBe(200);
+    expect(authorizedResponse.statusCode).toBe(201);
     expect(authorizedResponse.json()).toEqual({
       message: 'Accès autorisé',
       data: 'Voici la fausse donnée secrète',
