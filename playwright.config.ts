@@ -9,14 +9,14 @@ export default defineConfig({
   fullyParallel: true,
   reporter: [['list'], ['html', { open: 'never' }]],
   use: {
-    baseURL: 'http://127.0.0.1:5173',
+    baseURL: 'http://198.168.3.14:5173',
     actionTimeout: 10000,
     trace: 'on-first-retry',
     screenshot: 'only-on-failure',
     video: 'retain-on-failure',
   },
   webServer: {
-    command: 'npm run dev -- --host 127.0.0.1',
+    command: 'npm run dev -- --host 198.168.3.14',
     port: 5173,
     reuseExistingServer: !process.env.CI,
     timeout: 120 * 1000,
