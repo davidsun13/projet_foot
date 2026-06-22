@@ -1,3 +1,4 @@
+import dotenv from "dotenv";
 import Fastify from "fastify";
 import type { FastifyInstance, FastifyReply, FastifyRequest } from "fastify";
 import fastifyJwt from "@fastify/jwt";
@@ -21,6 +22,8 @@ declare module "@fastify/jwt" {
 }
 
 export async function start_web_server(options?: { repo?: Repository; listen?: boolean }) {
+  dotenv.config();
+
   const web_server: FastifyInstance = Fastify({ logger: true });
   const repo = options?.repo ?? new Repository();
   const shouldListen = options?.listen ?? true;
