@@ -409,7 +409,7 @@ async function requireCoach(
       return reply.status(500).send({ error: (err as Error).message });
     }
   });
-  web_server.post("/teams", async (request: FastifyRequest, reply: FastifyReply) => {
+  web_server.post("/teams", { preHandler: [requireCoach] }, async (request: FastifyRequest, reply: FastifyReply) => {
     try {
       const body = request.body as any;
       const team = await repo.createTeam(body);
@@ -418,7 +418,7 @@ async function requireCoach(
       return reply.status(500).send({ error: (err as Error).message });
     }
   });
-  web_server.get("/teams", async (request: FastifyRequest, reply: FastifyReply) => {
+  web_server.get("/teams", { preHandler: [requireAuth] }, async (request: FastifyRequest, reply: FastifyReply) => {
     try {
       const teams = await repo.listTeams();
       return reply.send(teams);
@@ -426,7 +426,7 @@ async function requireCoach(
       return reply.status(500).send({ error: (err as Error).message });
     }
   });
-  web_server.put("/teams", async (request: FastifyRequest, reply: FastifyReply) => {
+  web_server.put("/teams", { preHandler: [requireCoach] }, async (request: FastifyRequest, reply: FastifyReply) => {
     try {
       const body = request.body as any;
       const team = await repo.modifyTeam(body);
@@ -435,7 +435,7 @@ async function requireCoach(
       return reply.status(500).send({ error: (err as Error).message });
     }
   });
-  web_server.delete("/teams/:id_team", async (request: FastifyRequest, reply: FastifyReply) => {
+  web_server.delete("/teams/:id_team", { preHandler: [requireCoach] }, async (request: FastifyRequest, reply: FastifyReply) => {
     try {
       const id_team = Number((request.params as any).id_team);
       const team = await repo.deleteTeam(id_team);
@@ -444,7 +444,7 @@ async function requireCoach(
       return reply.status(500).send({ error: (err as Error).message });
     }
   });
-  web_server.get("/me", async (request, reply) => {
+  web_server.get("/me", { preHandler: [requireAuth] }, async (request, reply) => {
     try {
       await request.jwtVerify();
 
@@ -467,7 +467,7 @@ async function requireCoach(
       return reply.status(401).send({ error: "Unauthorized" });
     }
   });
-  web_server.get("/players", async (request: FastifyRequest, reply: FastifyReply) => {
+  web_server.get("/players", { preHandler: [requireAuth] }, async (request: FastifyRequest, reply: FastifyReply) => {
     try {
       const players = await repo.getallPlayers();
       return reply.send(players);
@@ -477,6 +477,7 @@ async function requireCoach(
   });
   web_server.put(
     "/players/:id_player/modify",
+    { preHandler: [requireCoach] },
     async (request: FastifyRequest, reply: FastifyReply) => {
       try {
         const { id_player } = request.params as { id_player: string };
@@ -500,7 +501,7 @@ async function requireCoach(
       }
     }
   );
-  web_server.get("/players/:id_player", async (request: FastifyRequest, reply: FastifyReply) => {
+  web_server.get("/players/:id_player", { preHandler: [requireAuth] }, async (request: FastifyRequest, reply: FastifyReply) => {
     try {
       const { id_player } = request.params as { id_player: string };
       const player = await repo.getplayerbyid(Number(id_player));
@@ -510,7 +511,7 @@ async function requireCoach(
     }
   });
 
-  web_server.get("/player-profile/:id_player", async (request: FastifyRequest, reply: FastifyReply) => {
+  web_server.get("/player-profile/:id_player", { preHandler: [requireAuth] }, async (request: FastifyRequest, reply: FastifyReply) => {
     try {
       const { id_player } = request.params as { id_player: string };
       const player = await repo.getprofileplayer(Number(id_player));
@@ -519,7 +520,7 @@ async function requireCoach(
       return reply.status(500).send({ error: (err as Error).message });
     }
   });
-  web_server.get("/detailsplayer/:id_player", async (request: FastifyRequest, reply: FastifyReply) => {
+  web_server.get("/detailsplayer/:id_player", { preHandler: [requireAuth] }, async (request: FastifyRequest, reply: FastifyReply) => {
     try {
       const { id_player } = request.params as { id_player: string };
       const player = await repo.getdetailsplayer(Number(id_player));
@@ -528,7 +529,7 @@ async function requireCoach(
       return reply.status(500).send({ error: (err as Error).message });
     }
   });
-  web_server.get("/convocationstraining/:id_player", async (request: FastifyRequest, reply: FastifyReply) => {
+  web_server.get("/convocationstraining/:id_player", { preHandler: [requireAuth] }, async (request: FastifyRequest, reply: FastifyReply) => {
     try {
       const { id_player } = request.params as { id_player: string };
       const convocations = await repo.getConvocationsTrainingbyplayer(Number(id_player));
@@ -537,7 +538,7 @@ async function requireCoach(
       return reply.status(500).send({ error: (err as Error).message });
     }
   });
-  web_server.get("/convocationsmatch/:id_player", async (request: FastifyRequest, reply: FastifyReply) => {
+  web_server.get("/convocationsmatch/:id_player", { preHandler: [requireAuth] }, async (request: FastifyRequest, reply: FastifyReply) => {
     try {
       const { id_player } = request.params as { id_player: string };
       const convocations = await repo.getConvocationsMatchbyplayer(Number(id_player));
@@ -545,7 +546,7 @@ async function requireCoach(
     } catch (err) {      return reply.status(500).send({ error: (err as Error).message });
     }
   });
-  web_server.put("/convocations/:id_convocation/status/:id_player", async (request: FastifyRequest, reply: FastifyReply) => {
+  web_server.put("/convocations/:id_convocation/status/:id_player", { preHandler: [requireAuth] }, async (request: FastifyRequest, reply: FastifyReply) => {
     try {
       const { id_convocation, id_player } = request.params as { id_convocation: string; id_player: string };
       const body = request.body as { status: string };
@@ -559,7 +560,7 @@ async function requireCoach(
       return reply.status(500).send({ error: (err as Error).message });
     }
   });
-  web_server.get("/convocationstraining/coach/:id_training", async (request: FastifyRequest, reply: FastifyReply) => {
+  web_server.get("/convocationstraining/coach/:id_training", { preHandler: [requireCoach] }, async (request: FastifyRequest, reply: FastifyReply) => {
     try {      
       const { id_training } = request.params as { id_training: string };
       const convocations = await repo.getConvocationsByTraining(Number(id_training));      
@@ -567,7 +568,7 @@ async function requireCoach(
     } catch (err) {      return reply.status(500).send({ error: (err as Error).message });
     }
   }); 
-  web_server.get("/convocationsmatch/coach/:id_match", async (request: FastifyRequest, reply: FastifyReply) => {
+  web_server.get("/convocationsmatch/coach/:id_match", { preHandler: [requireCoach] }, async (request: FastifyRequest, reply: FastifyReply) => {
     try {
       const { id_match } = request.params as { id_match: string };
       const convocations = await repo.getConvocationsByMatch(Number(id_match) as number);
@@ -575,7 +576,7 @@ async function requireCoach(
     } catch (err) {      return reply.status(500).send({ error: (err as Error).message });
     }
   });
-  web_server.post("/subscription", async (request: FastifyRequest, reply: FastifyReply) => {
+  web_server.post("/subscription", { preHandler: [requireAuth] }, async (request: FastifyRequest, reply: FastifyReply) => {
     try {
       const body = request.body as any;
       const subscription = await repo.addSubscription(body);
@@ -584,7 +585,7 @@ async function requireCoach(
       return reply.status(500).send({ error: (err as Error).message });
     }
   });
-  web_server.get("/subscriptions/:id_team", async (request: FastifyRequest, reply: FastifyReply) => {
+  web_server.get("/subscriptions/:id_team", { preHandler: [requireAuth] }, async (request: FastifyRequest, reply: FastifyReply) => {
     try {     
       const { id_team } = request.params as { id_team: string };
       const subscriptions = await repo.subscriptionteam(Number(id_team));
@@ -593,7 +594,7 @@ async function requireCoach(
       return reply.status(500).send({ error: (err as Error).message });
     }
   });
-  web_server.get("/subscriptions/player/:id_player", async (request: FastifyRequest, reply: FastifyReply) => {
+  web_server.get("/subscriptions/player/:id_player", { preHandler: [requireAuth] }, async (request: FastifyRequest, reply: FastifyReply) => {
     try {
       const { id_player } = request.params as { id_player: string };
       const subscription = await repo.getsubscriptionbyplayer(Number(id_player));
@@ -602,7 +603,7 @@ async function requireCoach(
       return reply.status(500).send({ error: (err as Error).message });
     }
   });
-  web_server.get("/subscriptions/players", async (request: FastifyRequest, reply: FastifyReply) => {
+  web_server.get("/subscriptions/players", { preHandler: [requireAuth] }, async (request: FastifyRequest, reply: FastifyReply) => {
     try {
       const players = await repo.getplayerwithnosubscription();
       return reply.send(players);
@@ -610,7 +611,7 @@ async function requireCoach(
       return reply.status(500).send({ error: (err as Error).message });
     }
   });
-  web_server.get("/subscriptions", async (request: FastifyRequest, reply: FastifyReply) => {
+  web_server.get("/subscriptions", { preHandler: [requireAuth] }, async (request: FastifyRequest, reply: FastifyReply) => {
     try {
       const subscriptions = await repo.getallSubscriptions();
       return reply.send(subscriptions);
@@ -618,7 +619,7 @@ async function requireCoach(
       return reply.status(500).send({ error: (err as Error).message });
     }
   });
-  web_server.get("/statistics/:id_team", async (request: FastifyRequest, reply: FastifyReply) => {
+  web_server.get("/statistics/:id_team", { preHandler: [requireAuth] }, async (request: FastifyRequest, reply: FastifyReply) => {
     try {
       const { id_team } = request.params as { id_team: string };
       const stats = await repo.getstatisticsteam(Number(id_team));
@@ -627,7 +628,7 @@ async function requireCoach(
       return reply.status(500).send({ error: (err as Error).message });
     }
   });
-  web_server.get("/statistics/player/:id_player", async (request: FastifyRequest, reply: FastifyReply) => {
+  web_server.get("/statistics/player/:id_player", { preHandler: [requireAuth] }, async (request: FastifyRequest, reply: FastifyReply) => {
     try {
       const { id_player } = request.params as { id_player: string };
       const stats = await repo.statisticsplayer(Number(id_player));

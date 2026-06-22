@@ -111,7 +111,7 @@ function start_web_server(options) {
                 });
             });
         }
-        var web_server, repo, shouldListen, JWT_SECRET, COOKIE_SECRET, isProduction, port;
+        var web_server, repo, shouldListen, JWT_SECRET, COOKIE_SECRET, isProduction, createMatchHandler, port;
         var _this = this;
         var _a, _b;
         return __generator(this, function (_c) {
@@ -480,7 +480,7 @@ function start_web_server(options) {
                             }
                         });
                     }); });
-                    web_server.post("/matchs", { preHandler: [requireCoach] }, function (request, reply) { return __awaiter(_this, void 0, void 0, function () {
+                    createMatchHandler = function (request, reply) { return __awaiter(_this, void 0, void 0, function () {
                         var body, parsed, match, err_10;
                         return __generator(this, function (_a) {
                             switch (_a.label) {
@@ -491,14 +491,19 @@ function start_web_server(options) {
                                     return [4 /*yield*/, repo.createMatchSession(parsed)];
                                 case 1:
                                     match = _a.sent();
-                                    return [2 /*return*/, reply.send(match)];
+                                    return [2 /*return*/, reply.status(201).send(match)];
                                 case 2:
                                     err_10 = _a.sent();
+                                    if (err_10 instanceof zod_1.ZodError) {
+                                        return [2 /*return*/, reply.status(422).send({ errors: formatZodError(err_10) })];
+                                    }
                                     return [2 /*return*/, reply.status(500).send({ error: err_10.message })];
                                 case 3: return [2 /*return*/];
                             }
                         });
-                    }); });
+                    }); };
+                    web_server.post("/matchs", { preHandler: [requireCoach] }, createMatchHandler);
+                    web_server.post("/api/matchs", { preHandler: [requireCoach] }, createMatchHandler);
                     web_server.put("/matchs/:id_match/modify", { preHandler: [requireCoach] }, function (request, reply) { return __awaiter(_this, void 0, void 0, function () {
                         var body, match, err_11;
                         return __generator(this, function (_a) {
@@ -595,7 +600,7 @@ function start_web_server(options) {
                             }
                         });
                     }); });
-                    web_server.post("/teams", function (request, reply) { return __awaiter(_this, void 0, void 0, function () {
+                    web_server.post("/teams", { preHandler: [requireCoach] }, function (request, reply) { return __awaiter(_this, void 0, void 0, function () {
                         var body, team, err_16;
                         return __generator(this, function (_a) {
                             switch (_a.label) {
@@ -613,7 +618,7 @@ function start_web_server(options) {
                             }
                         });
                     }); });
-                    web_server.get("/teams", function (request, reply) { return __awaiter(_this, void 0, void 0, function () {
+                    web_server.get("/teams", { preHandler: [requireAuth] }, function (request, reply) { return __awaiter(_this, void 0, void 0, function () {
                         var teams, err_17;
                         return __generator(this, function (_a) {
                             switch (_a.label) {
@@ -630,7 +635,7 @@ function start_web_server(options) {
                             }
                         });
                     }); });
-                    web_server.put("/teams", function (request, reply) { return __awaiter(_this, void 0, void 0, function () {
+                    web_server.put("/teams", { preHandler: [requireCoach] }, function (request, reply) { return __awaiter(_this, void 0, void 0, function () {
                         var body, team, err_18;
                         return __generator(this, function (_a) {
                             switch (_a.label) {
@@ -648,7 +653,7 @@ function start_web_server(options) {
                             }
                         });
                     }); });
-                    web_server.delete("/teams/:id_team", function (request, reply) { return __awaiter(_this, void 0, void 0, function () {
+                    web_server.delete("/teams/:id_team", { preHandler: [requireCoach] }, function (request, reply) { return __awaiter(_this, void 0, void 0, function () {
                         var id_team, team, err_19;
                         return __generator(this, function (_a) {
                             switch (_a.label) {
@@ -666,7 +671,7 @@ function start_web_server(options) {
                             }
                         });
                     }); });
-                    web_server.get("/me", function (request, reply) { return __awaiter(_this, void 0, void 0, function () {
+                    web_server.get("/me", { preHandler: [requireAuth] }, function (request, reply) { return __awaiter(_this, void 0, void 0, function () {
                         var _a, id, userType, user, err_20;
                         return __generator(this, function (_b) {
                             switch (_b.label) {
@@ -697,7 +702,7 @@ function start_web_server(options) {
                             }
                         });
                     }); });
-                    web_server.get("/players", function (request, reply) { return __awaiter(_this, void 0, void 0, function () {
+                    web_server.get("/players", { preHandler: [requireAuth] }, function (request, reply) { return __awaiter(_this, void 0, void 0, function () {
                         var players, err_21;
                         return __generator(this, function (_a) {
                             switch (_a.label) {
@@ -714,7 +719,7 @@ function start_web_server(options) {
                             }
                         });
                     }); });
-                    web_server.put("/players/:id_player/modify", function (request, reply) { return __awaiter(_this, void 0, void 0, function () {
+                    web_server.put("/players/:id_player/modify", { preHandler: [requireCoach] }, function (request, reply) { return __awaiter(_this, void 0, void 0, function () {
                         var id_player, body, player, err_22;
                         return __generator(this, function (_a) {
                             switch (_a.label) {
@@ -733,7 +738,7 @@ function start_web_server(options) {
                             }
                         });
                     }); });
-                    web_server.get("/players/:id_player", function (request, reply) { return __awaiter(_this, void 0, void 0, function () {
+                    web_server.get("/players/:id_player", { preHandler: [requireAuth] }, function (request, reply) { return __awaiter(_this, void 0, void 0, function () {
                         var id_player, player, err_23;
                         return __generator(this, function (_a) {
                             switch (_a.label) {
@@ -751,7 +756,7 @@ function start_web_server(options) {
                             }
                         });
                     }); });
-                    web_server.get("/player-profile/:id_player", function (request, reply) { return __awaiter(_this, void 0, void 0, function () {
+                    web_server.get("/player-profile/:id_player", { preHandler: [requireAuth] }, function (request, reply) { return __awaiter(_this, void 0, void 0, function () {
                         var id_player, player, err_24;
                         return __generator(this, function (_a) {
                             switch (_a.label) {
@@ -769,7 +774,7 @@ function start_web_server(options) {
                             }
                         });
                     }); });
-                    web_server.get("/detailsplayer/:id_player", function (request, reply) { return __awaiter(_this, void 0, void 0, function () {
+                    web_server.get("/detailsplayer/:id_player", { preHandler: [requireAuth] }, function (request, reply) { return __awaiter(_this, void 0, void 0, function () {
                         var id_player, player, err_25;
                         return __generator(this, function (_a) {
                             switch (_a.label) {
@@ -787,7 +792,7 @@ function start_web_server(options) {
                             }
                         });
                     }); });
-                    web_server.get("/convocationstraining/:id_player", function (request, reply) { return __awaiter(_this, void 0, void 0, function () {
+                    web_server.get("/convocationstraining/:id_player", { preHandler: [requireAuth] }, function (request, reply) { return __awaiter(_this, void 0, void 0, function () {
                         var id_player, convocations, err_26;
                         return __generator(this, function (_a) {
                             switch (_a.label) {
@@ -805,7 +810,7 @@ function start_web_server(options) {
                             }
                         });
                     }); });
-                    web_server.get("/convocationsmatch/:id_player", function (request, reply) { return __awaiter(_this, void 0, void 0, function () {
+                    web_server.get("/convocationsmatch/:id_player", { preHandler: [requireAuth] }, function (request, reply) { return __awaiter(_this, void 0, void 0, function () {
                         var id_player, convocations, err_27;
                         return __generator(this, function (_a) {
                             switch (_a.label) {
@@ -823,7 +828,7 @@ function start_web_server(options) {
                             }
                         });
                     }); });
-                    web_server.put("/convocations/:id_convocation/status/:id_player", function (request, reply) { return __awaiter(_this, void 0, void 0, function () {
+                    web_server.put("/convocations/:id_convocation/status/:id_player", { preHandler: [requireAuth] }, function (request, reply) { return __awaiter(_this, void 0, void 0, function () {
                         var _a, id_convocation, id_player, body, convocation, err_28;
                         return __generator(this, function (_b) {
                             switch (_b.label) {
@@ -842,7 +847,7 @@ function start_web_server(options) {
                             }
                         });
                     }); });
-                    web_server.get("/convocationstraining/coach/:id_training", function (request, reply) { return __awaiter(_this, void 0, void 0, function () {
+                    web_server.get("/convocationstraining/coach/:id_training", { preHandler: [requireCoach] }, function (request, reply) { return __awaiter(_this, void 0, void 0, function () {
                         var id_training, convocations, err_29;
                         return __generator(this, function (_a) {
                             switch (_a.label) {
@@ -860,7 +865,7 @@ function start_web_server(options) {
                             }
                         });
                     }); });
-                    web_server.get("/convocationsmatch/coach/:id_match", function (request, reply) { return __awaiter(_this, void 0, void 0, function () {
+                    web_server.get("/convocationsmatch/coach/:id_match", { preHandler: [requireCoach] }, function (request, reply) { return __awaiter(_this, void 0, void 0, function () {
                         var id_match, convocations, err_30;
                         return __generator(this, function (_a) {
                             switch (_a.label) {
@@ -878,7 +883,7 @@ function start_web_server(options) {
                             }
                         });
                     }); });
-                    web_server.post("/subscription", function (request, reply) { return __awaiter(_this, void 0, void 0, function () {
+                    web_server.post("/subscription", { preHandler: [requireAuth] }, function (request, reply) { return __awaiter(_this, void 0, void 0, function () {
                         var body, subscription, err_31;
                         return __generator(this, function (_a) {
                             switch (_a.label) {
@@ -896,7 +901,7 @@ function start_web_server(options) {
                             }
                         });
                     }); });
-                    web_server.get("/subscriptions/:id_team", function (request, reply) { return __awaiter(_this, void 0, void 0, function () {
+                    web_server.get("/subscriptions/:id_team", { preHandler: [requireAuth] }, function (request, reply) { return __awaiter(_this, void 0, void 0, function () {
                         var id_team, subscriptions, err_32;
                         return __generator(this, function (_a) {
                             switch (_a.label) {
@@ -914,7 +919,7 @@ function start_web_server(options) {
                             }
                         });
                     }); });
-                    web_server.get("/subscriptions/player/:id_player", function (request, reply) { return __awaiter(_this, void 0, void 0, function () {
+                    web_server.get("/subscriptions/player/:id_player", { preHandler: [requireAuth] }, function (request, reply) { return __awaiter(_this, void 0, void 0, function () {
                         var id_player, subscription, err_33;
                         return __generator(this, function (_a) {
                             switch (_a.label) {
@@ -932,7 +937,7 @@ function start_web_server(options) {
                             }
                         });
                     }); });
-                    web_server.get("/subscriptions/players", function (request, reply) { return __awaiter(_this, void 0, void 0, function () {
+                    web_server.get("/subscriptions/players", { preHandler: [requireAuth] }, function (request, reply) { return __awaiter(_this, void 0, void 0, function () {
                         var players, err_34;
                         return __generator(this, function (_a) {
                             switch (_a.label) {
@@ -949,7 +954,7 @@ function start_web_server(options) {
                             }
                         });
                     }); });
-                    web_server.get("/subscriptions", function (request, reply) { return __awaiter(_this, void 0, void 0, function () {
+                    web_server.get("/subscriptions", { preHandler: [requireAuth] }, function (request, reply) { return __awaiter(_this, void 0, void 0, function () {
                         var subscriptions, err_35;
                         return __generator(this, function (_a) {
                             switch (_a.label) {
@@ -966,7 +971,7 @@ function start_web_server(options) {
                             }
                         });
                     }); });
-                    web_server.get("/statistics/:id_team", function (request, reply) { return __awaiter(_this, void 0, void 0, function () {
+                    web_server.get("/statistics/:id_team", { preHandler: [requireAuth] }, function (request, reply) { return __awaiter(_this, void 0, void 0, function () {
                         var id_team, stats, err_36;
                         return __generator(this, function (_a) {
                             switch (_a.label) {
@@ -984,7 +989,7 @@ function start_web_server(options) {
                             }
                         });
                     }); });
-                    web_server.get("/statistics/player/:id_player", function (request, reply) { return __awaiter(_this, void 0, void 0, function () {
+                    web_server.get("/statistics/player/:id_player", { preHandler: [requireAuth] }, function (request, reply) { return __awaiter(_this, void 0, void 0, function () {
                         var id_player, stats, err_37;
                         return __generator(this, function (_a) {
                             switch (_a.label) {
