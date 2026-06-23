@@ -25,70 +25,79 @@ import MentionsLegales from './components/MentionsLegales'
 import PolitiqueConfidentialite from './components/PolitiqueConfidentialite'
 import Contact from './components/Contact'
 import CookieConsent from './components/CookieConsent'
+import ProtectedRoute from './components/ProtectedRoute'
 
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import './App.css'
 
+function ProtectedLayout({ children }: { children: React.ReactNode }) {
+  return (
+    <ProtectedRoute>
+      <div className="min-h-screen flex flex-col">
+        <Header />
+        <div className="flex flex-1">
+          <Sidebar />
+          <main className="flex-1 bg-gray-100 p-4 overflow-y-auto">
+            {children}
+          </main>
+        </div>
+        <Footer />
+        <CookieConsent />
+      </div>
+    </ProtectedRoute>
+  );
+}
+
+function PublicLayout({ children }: { children: React.ReactNode }) {
+  return (
+    <div className="min-h-screen flex flex-col">
+      <Header />
+      <main className="flex-1 bg-gray-100 p-4 overflow-y-auto">
+        {children}
+      </main>
+      <Footer />
+      <CookieConsent />
+    </div>
+  );
+}
+
 function App() {
   return (
     <BrowserRouter>
+      <Routes>
+        {/* PUBLIC ROUTES */}
+        <Route path="/connexion" element={<PublicLayout><Connexion /></PublicLayout>} />
+        <Route path="/inscription" element={<PublicLayout><Inscription /></PublicLayout>} />
+        <Route path="/mentions-legales" element={<PublicLayout><MentionsLegales /></PublicLayout>} />
+        <Route path="/confidentialite" element={<PublicLayout><PolitiqueConfidentialite /></PublicLayout>} />
+        <Route path="/contact" element={<PublicLayout><Contact /></PublicLayout>} />
 
-      <div className="min-h-screen flex flex-col">
+        {/* PROTECTED ROUTES */}
+        <Route path="/" element={<ProtectedLayout><DashboardContent /></ProtectedLayout>} />
+        
+        <Route path="/entrainements" element={<ProtectedLayout><ListeEntrainements /></ProtectedLayout>} />
+        <Route path="/entrainements/creer" element={<ProtectedLayout><CreationEntrainement /></ProtectedLayout>} />
+        <Route path="/entrainements/modifier/:id_entrainement" element={<ProtectedLayout><ModifEntrainement /></ProtectedLayout>} />
 
-        {/* HEADER */}
-        <Header />
+        <Route path="/matchs" element={<ProtectedLayout><ListeMatchs /></ProtectedLayout>} />
+        <Route path="/matchs/creer" element={<ProtectedLayout><CreationMatch /></ProtectedLayout>} />
+        <Route path="/matchs/modifier/:id_match" element={<ProtectedLayout><ModifMatch /></ProtectedLayout>} />
+        <Route path="/matchs/cloturer/:id_match" element={<ProtectedLayout><ClotureMatch /></ProtectedLayout>} />
 
-        {/* LAYOUT PRINCIPAL */}
-        <div className="flex flex-1">
+        <Route path="/cotisations" element={<ProtectedLayout><GestionCotisations /></ProtectedLayout>} />
+        <Route path="/cotisations/ajouter" element={<ProtectedLayout><CreationCotisation /></ProtectedLayout>} />
 
-          {/* SIDEBAR */}
-          <Sidebar />
+        <Route path="/mes-cotisations" element={<ProtectedLayout><MesCotisations /></ProtectedLayout>} />
 
-          {/* CONTENU */}
-          <main className="flex-1 bg-gray-100 p-4 overflow-y-auto">
+        <Route path="/players" element={<ProtectedLayout><ListeJoueurs /></ProtectedLayout>} />
+        <Route path="/joueurs/modifier/:id_player" element={<ProtectedLayout><ModifPlayer /></ProtectedLayout>} />
+        <Route path="/joueurs/:id_player" element={<ProtectedLayout><DetailsPlayer /></ProtectedLayout>} />
 
-            <Routes>
-              <Route path="/" element={<DashboardContent />} />
-              <Route path="/connexion" element={<Connexion />} />
-              <Route path="/inscription" element={<Inscription />} />
-
-              <Route path="/entrainements" element={<ListeEntrainements />} />
-              <Route path="/entrainements/creer" element={<CreationEntrainement />} />
-              <Route path="/entrainements/modifier/:id_entrainement" element={<ModifEntrainement />} />
-
-              <Route path="/matchs" element={<ListeMatchs />} />
-              <Route path="/matchs/creer" element={<CreationMatch />} />
-              <Route path="/matchs/modifier/:id_match" element={<ModifMatch />} />
-              <Route path="/matchs/cloturer/:id_match" element={<ClotureMatch />} />
-
-              <Route path="/cotisations" element={<GestionCotisations />} />
-              <Route path="/cotisations/ajouter" element={<CreationCotisation />} />
-
-              <Route path="/mes-cotisations" element={<MesCotisations />} />
-
-              <Route path="/players" element={<ListeJoueurs />} />
-              <Route path="/joueurs/modifier/:id_player" element={<ModifPlayer />} />
-              <Route path="/joueurs/:id_player" element={<DetailsPlayer />} />
-
-              <Route path="/player-profile/:id_player" element={<ProfilePlayer />} />
-              <Route path="/convocations/:id_player" element={<ConvocationsPlayer />} />
-              <Route path="/convocations/training/:id_training" element={<ConvocationTrainingDetail />} />
-              <Route path="/convocations/match/:id_match" element={<ConvocationMatchDetail />} />
-              <Route path="/mentions-legales" element={<MentionsLegales />} />
-              <Route path="/confidentialite" element={<PolitiqueConfidentialite />} />
-              <Route path="/contact" element={<Contact />} />
-            </Routes>
-
-          </main>
-
-        </div>
-
-        {/* FOOTER */}
-        <Footer />
-        <CookieConsent />
-
-      </div>
-
+        <Route path="/player-profile/:id_player" element={<ProtectedLayout><ProfilePlayer /></ProtectedLayout>} />
+        <Route path="/convocations/:id_player" element={<ProtectedLayout><ConvocationsPlayer /></ProtectedLayout>} />
+        <Route path="/convocations/training/:id_training" element={<ProtectedLayout><ConvocationTrainingDetail /></ProtectedLayout>} />
+        <Route path="/convocations/match/:id_match" element={<ProtectedLayout><ConvocationMatchDetail /></ProtectedLayout>} />
+      </Routes>
     </BrowserRouter>
   )
 }
