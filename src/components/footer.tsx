@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 
 function Footer() {
   return (
@@ -10,9 +11,15 @@ function Footer() {
         </p>
 
         <div className="flex flex-wrap justify-center md:justify-end gap-4 text-sm">
-          <p className="font-[Arsenal] cursor-pointer hover:underline">Mentions légales</p>
-          <p className="font-[Arsenal] cursor-pointer hover:underline">Confidentialité</p>
-          <p className="font-[Arsenal] cursor-pointer hover:underline">Contact</p>
+          <Link to="/mentions-legales" className="font-[Arsenal] hover:underline">
+            Mentions légales
+          </Link>
+          <Link to="/confidentialite" className="font-[Arsenal] hover:underline">
+            Confidentialité
+          </Link>
+          <Link to="/contact" className="font-[Arsenal] hover:underline">
+            Contact
+          </Link>
         </div>
 
       </div>

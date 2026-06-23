@@ -48,7 +48,6 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.start_web_server = start_web_server;
-var dotenv_1 = require("dotenv");
 var fastify_1 = require("fastify");
 var jwt_1 = require("@fastify/jwt");
 var cookie_1 = require("@fastify/cookie");
@@ -118,7 +117,6 @@ function start_web_server(options) {
         return __generator(this, function (_c) {
             switch (_c.label) {
                 case 0:
-                    dotenv_1.default.config();
                     web_server = (0, fastify_1.default)({ logger: true });
                     repo = (_a = options === null || options === void 0 ? void 0 : options.repo) !== null && _a !== void 0 ? _a : new db_cjs_1.Repository();
                     shouldListen = (_b = options === null || options === void 0 ? void 0 : options.listen) !== null && _b !== void 0 ? _b : true;

@@ -21,6 +21,10 @@ import CreationCotisation from './components/CreationCotisation'
 import DetailsPlayer from './components/detailsPlayer'
 import ClotureMatch from './components/ClotureMatch'
 import MesCotisations from './components/MesCotisations'
+import MentionsLegales from './components/MentionsLegales'
+import PolitiqueConfidentialite from './components/PolitiqueConfidentialite'
+import Contact from './components/Contact'
+import CookieConsent from './components/CookieConsent'
 
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import './App.css'
@@ -70,6 +74,9 @@ function App() {
               <Route path="/convocations/:id_player" element={<ConvocationsPlayer />} />
               <Route path="/convocations/training/:id_training" element={<ConvocationTrainingDetail />} />
               <Route path="/convocations/match/:id_match" element={<ConvocationMatchDetail />} />
+              <Route path="/mentions-legales" element={<MentionsLegales />} />
+              <Route path="/confidentialite" element={<PolitiqueConfidentialite />} />
+              <Route path="/contact" element={<Contact />} />
             </Routes>
 
           </main>
@@ -78,6 +85,7 @@ function App() {
 
         {/* FOOTER */}
         <Footer />
+        <CookieConsent />
 
       </div>
 
